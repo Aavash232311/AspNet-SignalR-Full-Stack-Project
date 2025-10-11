@@ -1,0 +1,21 @@
+.error-user-admin {
+    top: 0;
+    width: 100%;
+    min-height: 50px;
+    max-height: auto;
+    justify-content: left;
+    text-align: left;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 90% 10%;
+}
+
+.cancel-x {
+    user-select: none;
+    display: flex;
+    justify-content: center;
+}
+
+.cancel-x:hover {
+    color: rgb(77, 76, 76);
+}

@@ -1,0 +1,6 @@
+#nav-grid {
+    display: grid;
+    grid-template-rows: auto 1fr; 
+    height: 100vh; 
+    box-sizing: border-box; /* Makes sizing consistent */
+}

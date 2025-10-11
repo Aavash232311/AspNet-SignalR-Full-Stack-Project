@@ -1,0 +1,132 @@
+#signin-page {
+    background-color: #f5f5f5;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #04487f 30%, #077e99 90%);
+    overflow: auto;
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+
+#signin-frame {
+    background-color: rgba(0, 0, 0, 0.6); 
+    border-radius: 12px; 
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3); 
+    width: 100%;
+    max-width: 450px;
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+    color: #ffffff; 
+    backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 450px;
+    min-height: 590px;
+    user-select: none;
+    height: auto;
+}
+
+
+#signin-frame input {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+    background-color: rgba(35, 33, 33, 0.8); 
+    color: #ffffff; 
+}
+#signin-frame input::placeholder {
+    color: rgba(255, 255, 255, 0.7); 
+}
+
+#signin-frame input:focus {
+    border-color: #21cbf3;
+    box-shadow: 0 0 0 2px rgba(33, 203, 243, 0.5);
+}
+
+#signin-frame button, .error-user-admin {
+    background-color: rgba(35, 33, 33, 0.8);
+    color: #000; 
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background-color 0.3s;
+    color: white;
+}
+
+#signin-frame button:hover {
+    background-color: rgba(28, 26, 26, 0.8);
+}
+
+#signin-frame .error-user-admin  {
+    background-color: rgba(144, 77, 77, 0.8);
+}
+
+
+#signin-frame a {
+    color: #21cbf3;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 16px;
+    display: inline-block;
+}
+
+#signin-frame a:hover {
+    text-decoration: underline;
+}
+
+
+.left-email-align {
+    text-align: left;
+    width: 100%;
+}
+
+.form-check-signup {
+    text-align: left;
+    display: grid;
+    grid-template-columns: 16px auto;
+    grid-gap: 5px;
+}
+
+@media screen and (max-width: 720px) {
+    #signin-frame, .form-group {
+        width: 100%;
+    }
+}
+
+.centered-icon {
+    display: grid;
+    grid-template-columns: 30% 80%;
+    grid-gap: 10px;
+    overflow: hidden;
+}
+
+.right-stick {
+    text-align: right;
+}
+
+@media screen and (max-width: 262px) {
+    #signin-frame {
+        height: 100vh;
+        width: 100%;
+    }
+    .button {
+        width: 100%;
+    }
+    .form-group {
+        width: 100vw;
+    }
+}

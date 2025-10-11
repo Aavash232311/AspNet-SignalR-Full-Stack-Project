@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+#theme-image-div {
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100%;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#default-centered-div {
+    width: 40%;
+    min-height: 250px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-weight: bolder;
+    user-select: none;
+    height: auto;
+}
+
+.full-width {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#get-started-div {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: auto;
+    grid-gap: 5px;
+}
