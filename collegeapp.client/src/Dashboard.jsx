@@ -112,8 +112,8 @@ export default class Dashboard extends Component {
             const { statusCode } = response;
             if (statusCode === 200) {
                 const { value } = response;
-                const { confessions, totalPages, totalConfession } = value;
-                this.setState({ confessions, totalPages, totalConfession });
+                const { data, totalPages, totalObjects } = value;
+                this.setState({ confessions: data, totalPages, totalConfession: totalObjects });
             }
         });
     }

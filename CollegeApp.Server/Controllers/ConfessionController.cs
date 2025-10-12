@@ -76,12 +76,7 @@ namespace CollegeApp.Server.Controllers
             var query = _context.Confessions.Where(x => x.UserId == userId);
             if (query.Any())
             {
-                var confessions = query.Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-                int totalConfession = query.Count();
-                int totalPages = (int)Math.Ceiling(totalConfession / (double)pageSize);
-                return new JsonResult(Ok(new { totalConfession , totalPages, confessions }));
+                return new JsonResult(Ok(helper.NormalPagination(pageSize, page, query)));
             }
             return new JsonResult(NotFound());
         }
@@ -145,10 +140,7 @@ namespace CollegeApp.Server.Controllers
             var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies);
 
             int pageSize = 5;
-            var confessionsComment = comments.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            int totalConfession = comments.Count();
-            int totalPages = (int)Math.Ceiling(totalConfession / (double)pageSize);
-            return new JsonResult(Ok(new { totalPages, confessionsComment, totalConfession }));
+            return new JsonResult(Ok(helper.NormalPagination(pageSize, page, comments)));
         }
 
         [Route("ReplyComment")]

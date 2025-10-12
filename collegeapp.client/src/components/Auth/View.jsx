@@ -5,13 +5,13 @@ import Services from '../../utils/utils';
 import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
-import { X } from '@mui/icons-material';
 
 class Comment extends Component {
     constructor(props) {
         super(props);
         this.addComment = this.addComment.bind(this);
         this.replyCommennt = this.replyCommennt.bind(this);
+        this.getCommentsChildren = this.getCommentsChildren.bind(this);
     }
 
     services = new Services();
@@ -52,6 +52,25 @@ class Comment extends Component {
         }).then((r) => r.json()).then((response) => {
             const { statusCode, value } = response;
             if (statusCode === 200) {
+                const { data, totalObjects, totalPages } = value;
+                this.setState({
+                    confessions: data,
+                    totalObjects,
+                    totalPages
+                });
+            }
+        })
+    }
+
+    getCommentsChildren() { // we need to fetch the comment associated with the parent compoenent
+        fetch(`Confession/GetComments?confessionId=${this.url.get("topic")}&page=${this.state.page}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+        }).then((r) => r.json()).then((response) => {
+            const { statusCode, value } = response;
+            if (statusCode === 200) {
                 const { confessionsComment, totalConfession, totalPages } = value;
                 this.setState({
                     confessions: confessionsComment,
@@ -59,39 +78,20 @@ class Comment extends Component {
                     totalPages
                 });
             }
-        })
+        });
+
+        
     }
 
     replyCommennt(parent, domEvent) {
-        /* Let's creare a JSX like in the reddit or facebook,
-        Based on the parent position we add blocks of white space in grid,
-        first let's find out the order of comment, if it's parent then order is 1,
-        if its first child then order is 2, and so on and so on, we can do this my traditional recursion.  */
-        const id = "CC8DE09E-952C-49DF-BB06-08DDE1A43358";
-        const { confessions } = this.state;
-        console.log(this.state);
+        /*
+            Here we want to render and be able to reply to others messages just like in anyother blog or post platoform.
+            Okay we first of all I guess we need to get list of comment associated with the parent comment. 
+            And, then we can render the comment box below.
 
-        const recursiveTravesal = (commentId, rootComment, depth = 0) => {
-            const findRoot = rootComment.find((x) => (x.id).toLowerCase() === commentId.toLowerCase());
-            if (findRoot) {
-                return depth; // top depth
-            }
-            for (const rep in rootComment) {
-                const replies = rootComment[rep].replies;
-                const findInReplies = replies.find((x) => x.id === commentId);
-                if (findInReplies === undefined) {
-                    recursiveTravesal(commentId, replies);
-                }
-            }
-            return depth + 1;
-        }
-        console.log(recursiveTravesal(id, confessions));
-
-        const customJSX = (
-            <>
-
-            </>
-        );
+            We need to use concept called recursive component. It's a component that calls itself.
+        */
+       console.log(parent.comments);
     }
 
     addComment(ev) {
@@ -168,6 +168,21 @@ class Comment extends Component {
         )
     }
 }
+
+
+class CommentRecurComponent extends Component { 
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return (
+            <>
+                Hello world
+            </>
+        )
+    }
+}
+
 
 export default class View extends Component {
     constructor(props) {
