@@ -20,7 +20,7 @@ class Comment extends Component {
     state = {
         page: 1,
         confessions: [],
-        totalPages: 1
+        totalPages: 1,
     }
 
     componentDidMount() {
@@ -80,7 +80,7 @@ class Comment extends Component {
             }
         });
 
-        
+
     }
 
     replyCommennt(parent, domEvent) {
@@ -90,8 +90,21 @@ class Comment extends Component {
             And, then we can render the comment box below.
 
             We need to use concept called recursive component. It's a component that calls itself.
+            Okay in the backend let's see how we get the data. Okay so the data is in nexted form.
+
         */
-       console.log(parent.comments);
+        // first thing we need to get the parent here, alr then we can render its children okay.
+        // And, then we can pass the parameter to the children component.
+        // In my expreience of making this like that, we need to do more things to first order stuff. 
+        const { replies, id } = parent;
+        const { confessions } = this.state;
+        console.log(this.state);
+
+        /* Okay so what will be the rendering flow and the API call look like then,
+        When we click on reply or view reply then it should render things,
+        If the reply is large then we need to render view reply
+        Else we must be able to expand all the reply 
+          */
     }
 
     addComment(ev) {
@@ -112,6 +125,8 @@ class Comment extends Component {
             }
         });
     }
+    /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
+    using css and later we can expand it.  */
 
     render() {
         return (
@@ -157,6 +172,7 @@ class Comment extends Component {
                                             </div>
                                         </div>
                                         <hr style={{ visibility: "hidden" }} />
+                                        {/* <CommentRecurComponent replies={i.replies} /> */}
                                     </React.Fragment>
                                 )
                             })}
@@ -170,14 +186,16 @@ class Comment extends Component {
 }
 
 
-class CommentRecurComponent extends Component { 
+class CommentRecurComponent extends Component { // this is recursive component, which is used to render comment and add comment options, this might be little confusing to make
+    // because our mind might go to recursive hell. 
     constructor(props) {
         super(props);
+        console.log(props);
     }
     render() {
         return (
             <>
-                Hello world
+
             </>
         )
     }

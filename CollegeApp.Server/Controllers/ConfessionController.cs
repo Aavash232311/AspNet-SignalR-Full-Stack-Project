@@ -138,9 +138,22 @@ namespace CollegeApp.Server.Controllers
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
             var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies);
-
+            /* From the prespective of runtime complexity, okay if we load all at once then its a nexted structure right,
+             * then we might end up with lots of user driven data like high resolution image and stuff. 
+             We need to load only whats needed so that we can make this endpoint effective we need to explicitely call the fetch api from
+            front-end for that.*/
             int pageSize = 5;
             return new JsonResult(Ok(helper.NormalPagination(pageSize, page, comments)));
+        }
+
+        [Route("get-children-comments")]
+        [HttpGet]
+        public async Task<IActionResult> GetReplyComments(Guid parentId)
+        {
+            var getParentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
+            if (getParentComment == null) return new JsonResult(NotFound(new { message = "Parent comment not found" }));
+
+            return new JsonResult(Ok(getParentComment)); // load everyting for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
         }
 
         [Route("ReplyComment")]
