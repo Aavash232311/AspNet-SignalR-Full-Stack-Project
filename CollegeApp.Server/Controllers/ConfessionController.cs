@@ -153,7 +153,7 @@ namespace CollegeApp.Server.Controllers
             var getParentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
             if (getParentComment == null) return new JsonResult(NotFound(new { message = "Parent comment not found" }));
 
-            return new JsonResult(Ok(getParentComment)); // load everyting for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
+            return new JsonResult(Ok(getParentComment.Replies)); // load everyting for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
         }
 
         [Route("ReplyComment")]

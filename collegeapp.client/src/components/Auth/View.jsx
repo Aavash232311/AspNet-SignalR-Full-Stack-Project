@@ -121,10 +121,32 @@ class Comment extends Component {
             }
         });
     }
+
+    /* I think somewhere in language like Node or ASP.NET, 
+    I had to work with this sort of nexted structures where there was build in method
+    who could get things. I worked with http requests and responses. */
+    recursiveTravesal = (commentId, rootComment) => {
+        const findRoot = rootComment.find((x) => (x.id).toLowerCase() === commentId.toLowerCase());
+        if (findRoot) findRoot; // we found the root comment
+        // if we can't find it in the first order object then we need to destructure replies and then we can work on it
+
+        // rootComment are the list of comments, we might want to go thorught all that
+        for (const rep in rootComment) {
+            const replies = rootComment[rep].replies; // this is list of replies associated with, the parent comment i.e every comment on the list
+            const findInReplies = replies.find((x) => x.id === commentId); // okay, here the reply is top compoenent now, okay so we could look at the replies of replies
+            if (findInReplies === undefined) {
+                recursiveTravesal(commentId, replies);
+            }else{
+                return findInReplies;
+            }
+        }
+    }
     /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */
 
     render() {
+        /* If we want to expand the reply box table we need to change the Higher Order Object
+        that we get from fetch API call so that we can re-render everything */
         return (
             <form onSubmit={this.addComment}>
                 <hr />
@@ -145,6 +167,7 @@ class Comment extends Component {
                                                 <a>load comments</a>
                                             </>
                                         )}
+                                        {/* If the current compoenent has like replies comment then we might want to render that */}
                                         <CommentRecurComponent replies={i.replies} />
                                     </React.Fragment>
                                 )
@@ -210,7 +233,8 @@ class CommentRecurComponent extends Component { // this is recursive component, 
     }
 
     state = {
-        replies: []
+        replies: [],
+        nextedReply: []
     }
 
     componentDidMount() {
@@ -218,29 +242,38 @@ class CommentRecurComponent extends Component { // this is recursive component, 
         // doing this to make it depend upon the state
     }
 
-    /* Now we need to re trigger that state, 
-    after adding in the object reply array by ourself */
+    /* In this method what we need to do is, check for the particular current parent comment 
+    and then based on that we can fetch the result. */
 
-    async loadReplyComments(currentCommentId) {
-        const request = await fetch(`Confession/get-children-comments?parentId=${currentCommentId}`, {
+    async loadReplyComments(currentParentComment) {
+        const request = await fetch(`Confession/get-children-comments?parentId=${currentParentComment.id}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${new Services().accessToken()}`,
             },
             method: "get",
         }); // ressolving this promise
-        const response = await request.json(); 
+        const response = await request.json();
         const { statusCode, value } = response;
         if (statusCode === 200) {
-            const valueChange = this.state.replies.find(
-                x => x.id === currentCommentId
-            ); // this is the element of which reply we just fetched
-            valueChange.replies = value; // updating the reply array of that object
-            console.log(value)
-            this.setState({ replies: this.state.replies }); // re rendering the component, thats why we made it depend upon the load component
+            const originalParentComment = this.props.replies.find((i) => i.id === "e32a1c21-90b3-496d-b693-08de0928184a");
+            originalParentComment.replies = value; // mutating the original parent comment
+            // I think we need to change the higer order object of that, to make it re render properly,
+            // And, yes that's the case
+            // We do not need to poke the state here as it would increase the compleixty of our code.
+            this.setState({nextedReply: originalParentComment.replies}, () => {
+                
+            }); // mutating the state directly
         }
     }
+
+
+
     render() {
+        /* Here what this code does it, it checks if we have reply which is greater than 0
+        if not then we can click to make a fetch api call to render more,
+        what are the props passed to this compoenent, it's the parent compoenent okay
+        if we have children then we render children. If not then we can ask to make a fetch call, */
         return (
             <>
                 <div className='recur-comment-frame'>
@@ -249,12 +282,18 @@ class CommentRecurComponent extends Component { // this is recursive component, 
                             {this.state.replies.map((i, j) => {
                                 return (
                                     <React.Fragment key={j}>
+                                        {/* This compoenet is used to render the comment frame like all the wrappers and stuff */}
                                         <CommentRenderCompoenent obj={i} />
                                         {i.replies.length == 0 && (
                                             <>
                                                 <a onClick={() => {
-                                                    this.loadReplyComments(i.id);
+                                                    this.loadReplyComments(i);
                                                 }} className='load-comments-anchors'>load comments</a>
+                                            </>
+                                        )}
+                                        {this.state.nextedReply.length > 0 && (
+                                            <>
+                                                <CommentRecurComponent replies={this.state.nextedReply} />
                                             </>
                                         )}
                                     </React.Fragment>
