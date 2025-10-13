@@ -206,6 +206,16 @@ class CommentRecurComponent extends Component { // this is recursive component, 
     constructor(props) {
         super(props);
         this.loadReplyComments = this.loadReplyComments.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+    }
+
+    state = {
+        replies: []
+    }
+
+    componentDidMount() {
+        this.setState({ replies: this.props.replies });
+        // doing this to make it depend upon the state
     }
 
     /* Now we need to re trigger that state, 
@@ -222,16 +232,21 @@ class CommentRecurComponent extends Component { // this is recursive component, 
         const response = await request.json(); 
         const { statusCode, value } = response;
         if (statusCode === 200) {
-            console.log(value);
+            const valueChange = this.state.replies.find(
+                x => x.id === currentCommentId
+            ); // this is the element of which reply we just fetched
+            valueChange.replies = value; // updating the reply array of that object
+            console.log(value)
+            this.setState({ replies: this.state.replies }); // re rendering the component, thats why we made it depend upon the load component
         }
     }
     render() {
         return (
             <>
                 <div className='recur-comment-frame'>
-                    {this.props.replies.length > 0 && (
+                    {this.state.replies.length > 0 && (
                         <>
-                            {this.props.replies.map((i, j) => {
+                            {this.state.replies.map((i, j) => {
                                 return (
                                     <React.Fragment key={j}>
                                         <CommentRenderCompoenent obj={i} />
