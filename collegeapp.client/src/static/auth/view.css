@@ -55,3 +55,11 @@
     height: 325px;
     overflow: auto;
 }
+
+.recur-comment-frame {
+    margin-left: 20px;
+    border-left: 2px solid #e0e0e0;
+    padding-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

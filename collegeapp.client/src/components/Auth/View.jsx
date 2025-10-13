@@ -93,18 +93,14 @@ class Comment extends Component {
             Okay in the backend let's see how we get the data. Okay so the data is in nexted form.
 
         */
-        // first thing we need to get the parent here, alr then we can render its children okay.
-        // And, then we can pass the parameter to the children component.
-        // In my expreience of making this like that, we need to do more things to first order stuff. 
         const { replies, id } = parent;
         const { confessions } = this.state;
-        console.log(this.state);
-
-        /* Okay so what will be the rendering flow and the API call look like then,
-        When we click on reply or view reply then it should render things,
-        If the reply is large then we need to render view reply
-        Else we must be able to expand all the reply 
-          */
+        /*
+            Here we can use the concept of recursive component to render the children comment.
+            Firstly we can expand the children to some depth, by default.
+            We want to render depth = 1; which the default api in backend gives the result in depth one
+        */
+        // console.log(this.state);
     }
 
     addComment(ev) {
@@ -142,37 +138,9 @@ class Comment extends Component {
                             {this.state.confessions.map((i, j) => {
                                 return (
                                     <React.Fragment key={j}>
-                                        <div className='comment-frames'>
-                                            <div className='profile-and-name'>
-                                                <div style={{ backgroundColor: i.profileColor, color: "white" }} id='profile-circle'>
-                                                    A
-                                                </div>
-                                                <div style={{ textAlign: "left" }} className='anonymous-user-label'>
-                                                    Anonymous participant {(i.id).substring((i.id).length - 5, (i.id).length)  /* Giving the id of the last number of the GUID since they have fixed number of length */}
-                                                </div>
-                                            </div>
-                                            <div className='commenct-frame'>
-                                                {i.comments}
-                                            </div>
-                                            <div id='manipulate-comment'>
-                                                <div className='center-flex-grid'>
-                                                    <FaRegComment onClick={(ev) => { this.replyCommennt(i, ev) }} />
-                                                </div>
-                                                <div className='center-flex-grid'>
-                                                    <FaChevronUp />
-                                                </div>
-                                                <div className='center-flex-grid'>0</div>
-                                                <div>
-                                                    <FaChevronDown />
-                                                </div>
-                                                <div className='center-flex-grid'>0</div>
-                                                <div className='center-flex-grid'>
-                                                    <FaShare />
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <CommentRenderCompoenent obj={i} />
                                         <hr style={{ visibility: "hidden" }} />
-                                        {/* <CommentRecurComponent replies={i.replies} /> */}
+                                        <CommentRecurComponent replies={i.replies} />
                                     </React.Fragment>
                                 )
                             })}
@@ -185,17 +153,71 @@ class Comment extends Component {
     }
 }
 
+class CommentRenderCompoenent extends Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const i = this.props.obj;
+        return (
+            <React.Fragment>
+                <div className='comment-frames'>
+                    <div className='profile-and-name'>
+                        <div style={{ backgroundColor: i.profileColor, color: "white" }} id='profile-circle'>
+                            A
+                        </div>
+                        <div style={{ textAlign: "left" }} className='anonymous-user-label'>
+                            Anonymous participant {(i.id).substring((i.id).length - 5, (i.id).length)}
+                        </div>
+                    </div>
+                    <div className='commenct-frame'>
+                        {i.comments}
+                    </div>
+                    <div id='manipulate-comment'>
+                        <div className='center-flex-grid'>
+                            <FaRegComment onClick={(ev) => { this.replyCommennt(i, ev) }} />
+                        </div>
+                        <div className='center-flex-grid'>
+                            <FaChevronUp />
+                        </div>
+                        <div className='center-flex-grid'>0</div>
+                        <div>
+                            <FaChevronDown />
+                        </div>
+                        <div className='center-flex-grid'>0</div>
+                        <div className='center-flex-grid'>
+                            <FaShare />
+                        </div>
+                    </div>
+                </div>
+            </React.Fragment>
+        )
+    }
+}
+
 
 class CommentRecurComponent extends Component { // this is recursive component, which is used to render comment and add comment options, this might be little confusing to make
     // because our mind might go to recursive hell. 
     constructor(props) {
         super(props);
-        console.log(props);
+        console.log(props.replies);
     }
     render() {
         return (
             <>
-
+                <div className='recur-comment-frame'>
+                    {this.props.replies.length > 0 && (
+                        <>
+                            {this.props.replies.map((i, j) => {
+                                return (
+                                    <React.Fragment key={j}>
+                                        <CommentRenderCompoenent obj={i} />
+                                    </React.Fragment>
+                                )
+                            })}
+                        </>
+                    )}
+                </div>
             </>
         )
     }
