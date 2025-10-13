@@ -140,6 +140,11 @@ class Comment extends Component {
                                     <React.Fragment key={j}>
                                         <CommentRenderCompoenent obj={i} />
                                         <hr style={{ visibility: "hidden" }} />
+                                        {i.replies.length == 0 && (
+                                            <>
+                                                <a>load comments</a>
+                                            </>
+                                        )}
                                         <CommentRecurComponent replies={i.replies} />
                                     </React.Fragment>
                                 )
@@ -200,7 +205,25 @@ class CommentRecurComponent extends Component { // this is recursive component, 
     // because our mind might go to recursive hell. 
     constructor(props) {
         super(props);
-        console.log(props.replies);
+        this.loadReplyComments = this.loadReplyComments.bind(this);
+    }
+
+    /* Now we need to re trigger that state, 
+    after adding in the object reply array by ourself */
+
+    async loadReplyComments(currentCommentId) {
+        const request = await fetch(`Confession/get-children-comments?parentId=${currentCommentId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${new Services().accessToken()}`,
+            },
+            method: "get",
+        }); // ressolving this promise
+        const response = await request.json(); 
+        const { statusCode, value } = response;
+        if (statusCode === 200) {
+            console.log(value);
+        }
     }
     render() {
         return (
@@ -212,6 +235,13 @@ class CommentRecurComponent extends Component { // this is recursive component, 
                                 return (
                                     <React.Fragment key={j}>
                                         <CommentRenderCompoenent obj={i} />
+                                        {i.replies.length == 0 && (
+                                            <>
+                                                <a onClick={() => {
+                                                    this.loadReplyComments(i.id);
+                                                }} className='load-comments-anchors'>load comments</a>
+                                            </>
+                                        )}
                                     </React.Fragment>
                                 )
                             })}

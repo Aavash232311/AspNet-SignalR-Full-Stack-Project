@@ -63,3 +63,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.load-comments-anchors {
+    text-decoration: underline;
+    color: lightblue;
+}
