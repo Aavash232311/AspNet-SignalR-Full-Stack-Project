@@ -122,25 +122,6 @@ class Comment extends Component {
         });
     }
 
-    /* I think somewhere in language like Node or ASP.NET, 
-    I had to work with this sort of nexted structures where there was build in method
-    who could get things. I worked with http requests and responses. */
-    recursiveTravesal = (commentId, rootComment) => {
-        const findRoot = rootComment.find((x) => (x.id).toLowerCase() === commentId.toLowerCase());
-        if (findRoot) findRoot; // we found the root comment
-        // if we can't find it in the first order object then we need to destructure replies and then we can work on it
-
-        // rootComment are the list of comments, we might want to go thorught all that
-        for (const rep in rootComment) {
-            const replies = rootComment[rep].replies; // this is list of replies associated with, the parent comment i.e every comment on the list
-            const findInReplies = replies.find((x) => x.id === commentId); // okay, here the reply is top compoenent now, okay so we could look at the replies of replies
-            if (findInReplies === undefined) {
-                recursiveTravesal(commentId, replies);
-            }else{
-                return findInReplies;
-            }
-        }
-    }
     /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */
 
