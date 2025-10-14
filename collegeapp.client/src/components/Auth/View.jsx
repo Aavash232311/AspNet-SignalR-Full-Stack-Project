@@ -237,13 +237,13 @@ class CommentRecurComponent extends Component { // this is recursive component, 
         const response = await request.json();
         const { statusCode, value } = response;
         if (statusCode === 200) {
-            const originalParentComment = this.props.replies.find((i) => i.id === "e32a1c21-90b3-496d-b693-08de0928184a");
+            const originalParentComment = this.props.replies.find((i) => i.id === currentParentComment.id);
             originalParentComment.replies = value; // mutating the original parent comment
             // I think we need to change the higer order object of that, to make it re render properly,
             // And, yes that's the case
             // We do not need to poke the state here as it would increase the compleixty of our code.
             this.setState({nextedReply: originalParentComment.replies}, () => {
-                
+             
             }); // mutating the state directly
         }
     }
