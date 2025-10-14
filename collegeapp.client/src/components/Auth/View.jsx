@@ -5,6 +5,8 @@ import Services from '../../utils/utils';
 import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
+import { PiPaperPlaneTiltThin } from "react-icons/pi";
+
 
 class Comment extends Component {
     constructor(props) {
@@ -82,6 +84,9 @@ class Comment extends Component {
 
 
     }
+
+    // todo: Real problem is we need to retrigger this chat with the websocket,
+    // and make sure its not hard coded and componenets can be re-used later on.
 
     replyCommennt(parent, domEvent) {
         /*
@@ -198,6 +203,12 @@ class CommentRenderCompoenent extends Component {
                             <FaShare />
                         </div>
                     </div>
+                    <div className='comment-placeholder-wrapper'>
+                        <input height="200" placeholder='write a comment' className='reply-input-field'></input>
+                        <button className='btn btn-outline-primary btn-sm'>
+                            <PiPaperPlaneTiltThin />
+                        </button>
+                    </div>
                 </div>
             </React.Fragment>
         )
@@ -242,8 +253,8 @@ class CommentRecurComponent extends Component { // this is recursive component, 
             // I think we need to change the higer order object of that, to make it re render properly,
             // And, yes that's the case
             // We do not need to poke the state here as it would increase the compleixty of our code.
-            this.setState({nextedReply: originalParentComment.replies}, () => {
-             
+            this.setState({ nextedReply: originalParentComment.replies }, () => {
+
             }); // mutating the state directly
         }
     }

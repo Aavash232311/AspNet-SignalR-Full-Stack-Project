@@ -1,15 +1,15 @@
 .nav-button-dashboard-layout {
-    border: none;
-    background-color: transparent;
-    outline-width: 0;
-    font-size: 18px;
-    border-right: 1px solid rgba(0, 0, 0, 0.2);
-    border-left: 1px solid rgba(0, 0, 0, 0.2);
+  border: none;
+  background-color: transparent;
+  outline-width: 0;
+  font-size: 18px;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .nav-button-dashboard-layout:hover {
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .button-5 {
@@ -23,7 +23,7 @@
   color: #fff;
   cursor: pointer;
   display: inline-flex;
-  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: 600;
   justify-content: center;
@@ -75,7 +75,7 @@
   border: 0px;
   font-weight: 700;
   box-shadow: 0px 0px 14px -7px #f09819;
-  background-image: linear-gradient(45deg, #FF512F 0%, #F09819  51%, #FF512F  100%);
+  background-image: linear-gradient(45deg, #FF512F 0%, #F09819 51%, #FF512F 100%);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -108,15 +108,15 @@
   margin-top: 20px;
 }
 
-.submit-confession-button{
+.submit-confession-button {
   text-align: left;
   align-items: last baseline;
   width: 80px;
 }
 
 #add-confession-note {
-   text-wrap: wrap;
-   font-weight: lighter;
+  text-wrap: wrap;
+  font-weight: lighter;
 }
 
 #add-confession-label-and-back {
@@ -130,4 +130,29 @@
   align-items: center;
   min-height: 20px;
   height: auto;
+}
+
+.reply-input-field {
+
+  font-size: 13px;
+  border-radius: 4px;
+  line-height: 1.5;
+  padding: 5px 10px;
+  transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
+  border: 2px solid #dee1e2;
+  color: rgb(14, 14, 16);
+  background: #dee1e2;
+  display: block;
+  height: 30px;
+  outline-width: 0;
+
+  :hover {
+    border-color: #ccc;
+  }
+
+  :focus {
+    border-color: #9147ff;
+    background: #fff;
+  }
+
 }

@@ -68,3 +68,11 @@
     text-decoration: underline;
     color: lightblue;
 }
+
+.comment-placeholder-wrapper {
+    width: 240px;
+    margin-left: 15px;
+    display: grid;
+    grid-template-columns: 200px 30px;
+    grid-gap: 5px;
+}
