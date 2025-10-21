@@ -146,6 +146,8 @@ class Comment extends Component {
                     {this.state.confessions.length > 0 && (
                         <>
                             {this.state.confessions.map((i, j) => {
+                                // Okay here the current model that we are iterating is the parent model,
+                                // And, we need to check if all the replies that we have parent Id as current 
                                 return (
                                     <React.Fragment key={j}>
                                         <CommentRenderCompoenent obj={i} />
@@ -156,6 +158,7 @@ class Comment extends Component {
                                             </>
                                         )}
                                         {/* If the current compoenent has like replies comment then we might want to render that */}
+                          
                                         <CommentRecurComponent replies={i.replies} />
                                     </React.Fragment>
                                 )
@@ -255,7 +258,16 @@ class CommentRecurComponent extends Component { // this is recursive component, 
     }
 
     componentDidMount() {
-        this.setState({ replies: this.props.replies });
+        // here filter reply only if that exists in the parent
+        const parentId = this.props.parentId;
+        const replies = this.props.replies;
+        let filteredList = replies.filter((i) => i.parentId === parentId);
+        if (parentId === undefined) {
+            filteredList = this.props.replies; // for first order parent we need to have an expection
+        }
+        if (filteredList.length > 0) { 
+            this.setState({ replies: filteredList });
+        }
         // doing this to make it depend upon the state
     }
 
@@ -272,6 +284,7 @@ class CommentRecurComponent extends Component { // this is recursive component, 
         }); // ressolving this promise
         const response = await request.json();
         const { statusCode, value } = response;
+        // we have glitch in the react code, not the response given by our asp.net server.
         if (statusCode === 200) {
             const originalParentComment = this.props.replies.find((i) => i.id === currentParentComment.id);
             originalParentComment.replies = value; // mutating the original parent comment
@@ -310,7 +323,7 @@ class CommentRecurComponent extends Component { // this is recursive component, 
                                         )}
                                         {this.state.nextedReply.length > 0 && (
                                             <>
-                                                <CommentRecurComponent replies={this.state.nextedReply} />
+                                                <CommentRecurComponent replies={this.state.nextedReply} parentId={i.id} />
                                             </>
                                         )}
                                     </React.Fragment>
