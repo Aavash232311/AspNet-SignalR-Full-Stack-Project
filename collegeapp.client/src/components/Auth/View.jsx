@@ -134,12 +134,14 @@ class Comment extends Component {
         /* If we want to expand the reply box table we need to change the Higher Order Object
         that we get from fetch API call so that we can re-render everything */
         return (
-            <form onSubmit={this.addComment}>
+            <div>
                 <hr />
-                <textarea name="comment" className='form-control' placeholder='add comment' id=""></textarea>
-                <br />
-                <button type='submit' className='btn btn-primary btn-sm'>Add</button>
-                <hr style={{ visibility: "hidden" }} />
+                <form onSubmit={this.addComment}>
+                    <textarea name="comment" className='form-control' placeholder='add comment' id=""></textarea>
+                    <br />
+                    <button type='submit' className='btn btn-primary btn-sm'>Add</button>
+                    <hr style={{ visibility: "hidden" }} />
+                </form>
                 <div id='chat-fourm-frame'>
                     {this.state.confessions.length > 0 && (
                         <>
@@ -162,7 +164,7 @@ class Comment extends Component {
                     )}
                 </div>
                 <hr style={{ visibility: "hidden" }} />
-            </form>
+            </div>
         )
     }
 }
@@ -170,7 +172,30 @@ class Comment extends Component {
 class CommentRenderCompoenent extends Component {
     constructor(props) {
         super(props);
+        this.replyCommentUpload = this.replyCommentUpload.bind(this);
     }
+    url = new URLSearchParams(window.location.search);
+    services = new Services();
+    replyCommentUpload(ev, parentId) {
+        ev.preventDefault();
+        const data = new FormData(ev.target);
+        const comment = data.get("comment");
+
+        fetch(`Confession/ReplyComment?comment=${comment}&confessionId=${this.url.get('topic')}&parentId=${parentId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "post"
+        }).then((r) => r.json()).then((response) => {
+            const { statusCode } = response;
+            if (statusCode === 200) {
+                ev.target.reset();
+                return;
+            }
+        });
+    }
+
     render() {
         const i = this.props.obj;
         return (
@@ -203,12 +228,12 @@ class CommentRenderCompoenent extends Component {
                             <FaShare />
                         </div>
                     </div>
-                    <div className='comment-placeholder-wrapper'>
-                        <input height="200" placeholder='write a comment' className='reply-input-field'></input>
-                        <button className='btn btn-outline-primary btn-sm'>
+                    <form onSubmit={(ev) => { this.replyCommentUpload(ev, i.id) }} className='comment-placeholder-wrapper'>
+                        <input autoComplete='off' height="200" name='comment' placeholder='write a comment' className='reply-input-field'></input>
+                        <button type='submit' className='btn btn-outline-primary btn-sm'>
                             <PiPaperPlaneTiltThin />
                         </button>
-                    </div>
+                    </form>
                 </div>
             </React.Fragment>
         )
