@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import "../../static/auth/signin.css";
-import { GoogleIcon, FacebookIcon } from './CusomIcons/Icons';
+import { GoogleIcon, FacebookIcon } from './CustomIcons/Icons';
 import { NavItem, NavLink } from "reactstrap";
 import AuthContext from '../../auth/auth';
 import { BasicError } from './useable/ErrorRender';

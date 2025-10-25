@@ -5,6 +5,8 @@ import SideNavPost from './components/Auth/useable/SideNavPost';
 import "./static/auth/add-confession.css";
 import Services from './utils/utils';
 import { IoChevronBackOutline } from "react-icons/io5";
+import Textarea from '@mui/joy/Textarea';
+
 
 export default class Confessions extends Component {
     constructor(props) {
@@ -137,6 +139,7 @@ export default class Confessions extends Component {
                                         Add Confession
                                     </div>
                                     <div>
+
                                         <textarea defaultValue={this.state.editConfession !== null ? this.state.editConfession.description : ""} required autoComplete='off' className='form-control' name="Description" placeholder='Confessions' id=""></textarea>
                                     </div>
                                 </div>

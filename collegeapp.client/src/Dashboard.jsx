@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import "./static/auth/dashboard.css";
 import "./static/auth/dashboard_nav.css";
-import { IoFilter } from "react-icons/io5";
-import { FaRegBell } from "react-icons/fa";
 import { NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 import Services from './utils/utils';
@@ -12,6 +10,10 @@ import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';
 import { CiHeart } from "react-icons/ci";
 import SideNavPost from './components/Auth/useable/SideNavPost';
+import { Card, CardContent, CardActions, IconButton, Typography, Box } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 
 export default class Dashboard extends Component {
@@ -118,12 +120,18 @@ export default class Dashboard extends Component {
                                                                             <div className='confession-cards'>
                                                                                 <div className='confession-card-content'>
                                                                                     <div>
-                                                                                        <h6>{i.topic}</h6>
+                                                                                        <h6>
+                                                                                            <b>{i.topic}</b>
+                                                                                        </h6>
                                                                                     </div>
                                                                                     <div>
                                                                                         <div>
                                                                                             <div className='confession-des'>
-                                                                                                {this.services.substring(i.description, 90)}
+                                                                                                <p>
+                                                                                                    <em>
+                                                                                                        {this.services.substring(i.description, 90)}
+                                                                                                    </em>
+                                                                                                </p>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
