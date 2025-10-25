@@ -5,7 +5,6 @@ import SideNavPost from './components/Auth/useable/SideNavPost';
 import "./static/auth/add-confession.css";
 import Services from './utils/utils';
 import { IoChevronBackOutline } from "react-icons/io5";
-import Textarea from '@mui/joy/Textarea';
 
 
 export default class Confessions extends Component {
@@ -20,7 +19,7 @@ export default class Confessions extends Component {
     services = new Services();
     state = {
         added: false,
-        editConfession: null
+        editConfession: null,
     }
 
     getConfession(id) {
@@ -93,6 +92,7 @@ export default class Confessions extends Component {
     }
 
     render() {
+
         return (
             <React.Fragment>
                 <SideNavPost>
@@ -139,7 +139,6 @@ export default class Confessions extends Component {
                                         Add Confession
                                     </div>
                                     <div>
-
                                         <textarea defaultValue={this.state.editConfession !== null ? this.state.editConfession.description : ""} required autoComplete='off' className='form-control' name="Description" placeholder='Confessions' id=""></textarea>
                                     </div>
                                 </div>

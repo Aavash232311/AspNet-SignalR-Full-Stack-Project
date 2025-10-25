@@ -6,6 +6,7 @@ import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from './useable/SideNavPost';
 import { PiPaperPlaneTiltThin } from "react-icons/pi";
+import TextField from '@mui/material/TextField';
 
 
 class Comment extends Component {
@@ -234,11 +235,18 @@ class CommentRenderCompoenent extends Component {
                             <FaShare />
                         </div>
                     </div>
-                    <form onSubmit={(ev) => { this.replyCommentUpload(ev, i.id) }} className='comment-placeholder-wrapper'>
-                        <input autoComplete='off' height="200" name='comment' placeholder='write a comment' className='reply-input-field'></input>
-                        <button type='submit' className='btn btn-outline-primary btn-sm'>
-                            <PiPaperPlaneTiltThin />
-                        </button>
+                    <form onSubmit={(ev) => { this.replyCommentUpload(ev, i.id) }} >
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                className="input"
+                                placeholder="write a comment!"
+                                autoComplete="off"
+                                name="comment"
+                            />
+                            <input className="button--submit" defaultValue="Subscribe" type="submit" />
+                        </div>
+
                     </form>
                 </div>
             </React.Fragment>

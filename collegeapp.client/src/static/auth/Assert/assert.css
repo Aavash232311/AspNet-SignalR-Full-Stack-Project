@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 .nav-button-dashboard-layout {
   border: none;
   background-color: transparent;
@@ -155,4 +157,43 @@
     background: #fff;
   }
 
+}
+
+/* For reply commnet button */
+/* From Uiverse.io by alexruix */
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  height: 35px;
+  padding: 0 1rem;
+  color: #000000;
+  font-size: 15px;
+  border: 1px solid #5e4dcd;
+  border-radius: 6px 0 0 6px;
+  background-color: transparent;
+}
+
+.button--submit {
+  height: 35px;
+  padding: .5em 1em;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  background-color: #5e4dcd;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color .3s ease-in-out;
+}
+
+.button--submit:hover {
+  background-color: #5e5dcd;
+}
+
+.input:focus,
+.input:focus-visible {
+  border-color: #3898EC;
+  outline: none;
 }
