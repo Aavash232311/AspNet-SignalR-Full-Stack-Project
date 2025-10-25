@@ -33,8 +33,8 @@ namespace CollegeApp.Server.Models
 
 // https://learn.microsoft.com/en-us/ef/core/modeling/relationships/one-to-many
 
-/* 
+/*
  Learned this using two different ways, first used AI, it couldn't figure out
 second read the docs got the answer.
- 
+
  */

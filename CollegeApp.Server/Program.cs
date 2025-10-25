@@ -11,8 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 /* Connecting database server  */
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("dbs"))
-);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 /* Auth 0 configuration */

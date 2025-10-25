@@ -139,7 +139,7 @@ namespace CollegeApp.Server.Controllers
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
             var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies);
             /* From the prespective of runtime complexity, okay if we load all at once then its a nexted structure right,
-             * then we might end up with lots of user driven data like high resolution image and stuff. 
+             * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only whats needed so that we can make this endpoint effective we need to explicitely call the fetch api from
             front-end for that.*/
             int pageSize = 5;
