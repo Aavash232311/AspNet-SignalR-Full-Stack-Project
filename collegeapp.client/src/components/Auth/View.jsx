@@ -152,6 +152,9 @@ class Comment extends Component {
                                     <React.Fragment key={j}>
                                         <CommentRenderCompoenent obj={i} />
                                         <hr style={{ visibility: "hidden" }} />
+                                        {/* Here we have a problem once, we load
+                                        replies of the parent having children id this one get's hidden
+                                        we need to figure out how that happened */}
                                         {i.replies.length == 0 && (
                                             <>
                                                 <a>load comments</a>
@@ -264,10 +267,12 @@ class CommentRecurComponent extends Component { // this is recursive component, 
         let filteredList = replies.filter((i) => i.parentId === parentId);
         if (parentId === undefined) {
             filteredList = this.props.replies; // for first order parent we need to have an expection
+            this.setState({ replies: filteredList });
+            return;
         }
         if (filteredList.length > 0) { 
             this.setState({ replies: filteredList });
-        }
+        } 
         // doing this to make it depend upon the state
     }
 
@@ -291,6 +296,7 @@ class CommentRecurComponent extends Component { // this is recursive component, 
             // I think we need to change the higer order object of that, to make it re render properly,
             // And, yes that's the case
             // We do not need to poke the state here as it would increase the compleixty of our code.
+            if (value.length === 0) return;
             this.setState({ nextedReply: originalParentComment.replies }, () => {
 
             }); // mutating the state directly
