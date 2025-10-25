@@ -12,6 +12,7 @@ import { MdModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';
 import { CiHeart } from "react-icons/ci";
+import SideNavPost from './components/Auth/useable/SideNavPost';
 
 export class DashboardNav extends Component {
     constructor(props) {
@@ -36,6 +37,11 @@ export class DashboardNav extends Component {
                 link: "/"
             },
         ]
+        return (
+            <>
+            <SideNavPost />
+            </>
+        )
         return (
             <>
                 <div id="dashboard-nav-grid">
