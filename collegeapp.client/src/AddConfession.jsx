@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
-import { DashboardNav } from './Dashboard';
+import SideNavPost from './components/Auth/useable/SideNavPost';
 import "./static/auth/add-confession.css";
 import Services from './utils/utils';
 import { IoChevronBackOutline } from "react-icons/io5";
@@ -93,7 +93,7 @@ export default class Confessions extends Component {
     render() {
         return (
             <React.Fragment>
-                <DashboardNav>
+                <SideNavPost>
                     <center>
                         {this.state.added && (
                             <>
@@ -164,7 +164,7 @@ export default class Confessions extends Component {
                             </div>
                         </div>
                     </center>
-                </DashboardNav>
+                </SideNavPost>
             </React.Fragment>
         )
     }

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { DashboardNav } from '../../Dashboard';
 import "../../static/auth/view.css";
 import Services from '../../utils/utils';
 import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
+import SideNavPost from './useable/SideNavPost';
 import { PiPaperPlaneTiltThin } from "react-icons/pi";
 
 
@@ -161,7 +161,7 @@ class Comment extends Component {
                                             </>
                                         )}
                                         {/* If the current compoenent has like replies comment then we might want to render that */}
-                          
+
                                         <CommentRecurComponent replies={i.replies} />
                                     </React.Fragment>
                                 )
@@ -270,9 +270,9 @@ class CommentRecurComponent extends Component { // this is recursive component, 
             this.setState({ replies: filteredList });
             return;
         }
-        if (filteredList.length > 0) { 
+        if (filteredList.length > 0) {
             this.setState({ replies: filteredList });
-        } 
+        }
         // doing this to make it depend upon the state
     }
 
@@ -372,7 +372,7 @@ export default class View extends Component {
 
     render() {
         return (
-            <DashboardNav>
+            <SideNavPost>
                 <center>
                     <div id="view-frame">
                         {this.state.confession !== null ? (
@@ -393,7 +393,7 @@ export default class View extends Component {
                         ) : null}
                     </div>
                 </center>
-            </DashboardNav>
+            </SideNavPost>
         )
     }
 }

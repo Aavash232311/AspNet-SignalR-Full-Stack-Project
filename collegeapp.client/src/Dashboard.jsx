@@ -3,7 +3,6 @@ import "./static/auth/dashboard.css";
 import "./static/auth/dashboard_nav.css";
 import { IoFilter } from "react-icons/io5";
 import { FaRegBell } from "react-icons/fa";
-import { GiHamburgerMenu } from "react-icons/gi";
 import { NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 import Services from './utils/utils';
@@ -13,85 +12,6 @@ import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';
 import { CiHeart } from "react-icons/ci";
 import SideNavPost from './components/Auth/useable/SideNavPost';
-
-export class DashboardNav extends Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        const navContent = [
-            {
-                label: "Confessions",
-                link: "/dashboard"
-            },
-            {
-                label: "Notification",
-                link: "/"
-            },
-            {
-                label: "Favourite",
-                link: "/"
-            },
-            {
-                label: "Profile",
-                link: "/"
-            },
-        ]
-        return (
-            <>
-            <SideNavPost />
-            </>
-        )
-        return (
-            <>
-                <div id="dashboard-nav-grid">
-                    <div id="dashboard-side-nav">
-                        <div id="side-nav-profile-cart">
-                            <div id="profile-circle">
-                                A
-                            </div>
-                            <div id="username-greetings">
-                                <div>
-                                    <b>
-                                        <small>
-                                            Aavash Lamichhane
-                                        </small>
-                                    </b>
-                                </div>
-                                <div>
-                                    <GiHamburgerMenu />
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <center>
-                                {navContent.map((i, j) => {
-                                    return (
-                                        <React.Fragment key={j}>
-                                            <NavItem style={{ listStyle: "none" }}>
-                                                <NavLink
-                                                    tag={Link}
-                                                    to={i.link}
-                                                >
-                                                    <div className="dashboard-nav-link-frame">
-                                                        {i.label}
-                                                    </div>
-                                                </NavLink>
-                                            </NavItem>
-                                        </React.Fragment>
-                                    )
-                                })}
-                            </center>
-                        </div>
-                    </div>
-                    <div id="dashboard-content">
-                        {this.props.children}
-                    </div>
-                </div>
-            </>
-        )
-    }
-}
 
 
 export default class Dashboard extends Component {
@@ -154,28 +74,7 @@ export default class Dashboard extends Component {
             <AuthContext.Consumer>
                 {(authFunctions) => {
                     return (
-                        <DashboardNav>
-                            <center>
-                                <div id="dashboard-nav">
-                                    <div id='dashboard-search-and-filter-frame'>
-                                        <div>
-                                            <input placeholder='Search' type="text" id="search-confession" />
-                                        </div>
-                                        <div style={{ textAlign: "right" }}>
-                                            <IoFilter style={{ fontSize: "24px" }} />
-                                        </div>
-                                    </div>
-
-                                    <div id="confession-right-nav-items">
-                                        <div>
-                                            <FaRegBell style={{ fontSize: "24px" }} />
-                                        </div>
-                                        <div>
-                                            <button onClick={() => { authFunctions.logout() }} className='btn btn-dark'>Logout</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </center>
+                        <SideNavPost>
                             <center>
                                 <div id="confession-content">
                                     <center>
@@ -252,7 +151,7 @@ export default class Dashboard extends Component {
                                     </center>
                                 </div>
                             </center>
-                        </DashboardNav>
+                        </SideNavPost>
                     )
                 }}
             </AuthContext.Consumer>

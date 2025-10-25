@@ -138,7 +138,7 @@ const customTheme = createTheme({
 });
 
 
-export default function SideNavPost() {
+export default function SideNavPost(props) {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
 
@@ -226,9 +226,7 @@ export default function SideNavPost() {
                 </Drawer>
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                     <DrawerHeader />
-                    <Typography paragraph>
-                        Hello world
-                    </Typography>
+                    {props.children}
                 </Box>
             </Box>
         </ThemeProvider>
