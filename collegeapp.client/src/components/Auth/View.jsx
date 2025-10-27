@@ -5,9 +5,6 @@ import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from './useable/SideNavPost';
-import { PiPaperPlaneTiltThin } from "react-icons/pi";
-import TextField from '@mui/material/TextField';
-
 
 class Comment extends Component {
     constructor(props) {
@@ -34,6 +31,8 @@ class Comment extends Component {
 
         connection.on("ReceiveMessage", function (comment) {
             this.setState((prevState) => ({
+                /* Here when the data comes via web socket it's not structured correctly we need
+                * to fix that, and if necessary we need to write more logic to fix it */
                 confessions: [comment, ...prevState.confessions]
             }));
         }.bind(this));
