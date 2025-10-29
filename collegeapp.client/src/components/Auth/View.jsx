@@ -6,38 +6,37 @@ import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from "./useable/SideNavPost";
 
-// here comment is the child comment
-export const recursiveTraversal = (comment, rootComment) => {
-  const { id } = comment;
-  const findRoot = rootComment.find(
-    (x) => x.id.toLowerCase() === commentId.toLowerCase()
-  );
-  if (findRoot) findRoot; // we found the root comment
-  // if we can't find it in the first order object then we need to destructure replies and then we can work on it
+// this is the reuseable recursive method for setting up in the hierarchial data tree,
+// I think some languages that I have used in the past comes with built in method like this
+// I had to heal with Response object and http header but this will do that job in our case.
 
-  // rootComment are the list of comments, we might want to go thorught all that
-  for (const rep in rootComment) {
-    const replies = rootComment[rep].replies; // this is list of replies associated with, the parent comment i.e every comment on the list
-    const findInReplies = replies.find((x) => x.id === commentId); // okay, here the reply is top compoenent now, okay so we could look at the replies of replies
-    if (findInReplies === undefined) {
-      recursiveTravesal(commentId, replies);
-    } else {
-      const check_if_already_exist = findInReplies.replies.find(
-        (x) => x.id === id
-      );
-      if (check_if_already_exist === undefined) {
-        findInReplies.replies.push(comment);
-      }
-      return rootComment; // return the root comment and we will change the state
+// as a developer, if your recursion failed in client side, at wrost,
+// all it can do is crash client's browser, but if it failed in server,it will break everything
+export const setParentCommentValue = (rootNode, parentNode, value) => {
+  const parentId = parentNode.id; // we need to find this "id" there and set it
+
+  // search for parent
+  const parent = rootNode.find((u) => u.id === parentId);
+
+  if (parent === undefined) {
+    // in not found case
+    // we need to search its child, since it can multiple child we need to loop over;
+    for (let i in rootNode) {
+      const currentNode = rootNode[i];
+      const { replies } = currentNode;
+      return setParentCommentValue(replies, parentNode, value);
     }
   }
+  parent.replies = value;
+  return parent;
 };
+
 class Comment extends Component {
   constructor(props) {
     super(props);
     this.addComment = this.addComment.bind(this);
     this.replyCommennt = this.replyCommennt.bind(this);
-    this.getCommentsChildren = this.getCommentsChildren.bind(this);
+    this.getChildrenValue = this.getChildrenValue.bind(this);
   }
 
   services = new Services();
@@ -64,6 +63,7 @@ class Comment extends Component {
         /* Here once the data arrives we need to put where it belongs.  */
         const parent = recursiveTraversal(comment, this.state.confessions);
         console.log("This should be root comment", parent);
+        // everytime this socket get's triggred we need to make the data sync
         this.setState((prevState) => ({
           /* Here when the data comes via web socket it's not structured correctly we need
            * to fix that, and if necessary we need to write more logic to fix it */
@@ -100,33 +100,6 @@ class Comment extends Component {
           this.setState({
             confessions: data,
             totalObjects,
-            totalPages,
-          });
-        }
-      });
-  }
-
-  getCommentsChildren() {
-    // we need to fetch the comment associated with the parent compoenent
-    fetch(
-      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${
-        this.state.page
-      }`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.services.accessToken()}`,
-        },
-      }
-    )
-      .then((r) => r.json())
-      .then((response) => {
-        const { statusCode, value } = response;
-        if (statusCode === 200) {
-          const { confessionsComment, totalConfession, totalPages } = value;
-          this.setState({
-            confessions: confessionsComment,
-            totalConfession,
             totalPages,
           });
         }
@@ -181,6 +154,15 @@ class Comment extends Component {
         }
       });
   }
+  // can't call it recursion now
+  getChildrenValue(getUpdatedValue) {
+    const { parent, value } = getUpdatedValue; // this is the value that we need to update
+    const { confessions } = this.state;
+
+    // years of development in this language but still things I learn later
+    setParentCommentValue(confessions, parent, value);
+    this.setState({ confessions }); // based on this update the state should re trigger and work, so that we can make synchronized data flow
+  }
 
   /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */
@@ -188,7 +170,6 @@ class Comment extends Component {
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
         that we get from fetch API call so that we can re-render everything */
-
     return (
       <div>
         <hr />
@@ -224,7 +205,11 @@ class Comment extends Component {
                       </>
                     )}
                     {/* If the current compoenent has like replies comment then we might want to render that */}
-                    <CommentRecurComponent replies={i.replies} />
+
+                    <CommentRecurComponent
+                      onValueChange={this.getChildrenValue}
+                      children={i.replies}
+                    />
                   </React.Fragment>
                 );
               })}
@@ -338,170 +323,118 @@ class CommentRenderCompoenent extends Component {
 /* It's not "Web Dev" that people think it is, it's a complicated stuff here, 
 You are managing a web socket's, making things re useable, you need to check the data structure
 and make sure it works both from web socket and logcal data, rendering happens smoothly, it's problem solving,
-make it clear and consise in future if you were to debug it you will have problem yourself. */
+make it clear and consise in future if you were to debug it you will have problem yourself. 
+And, who cares c# is in the backend with a database */
 
 class CommentRecurComponent extends Component {
   // this is recursive component, which is used to render comment and add comment options, this might be little confusing to make
   // because our mind might go to recursive hell.
   constructor(props) {
     super(props);
-    this.loadReplyComments = this.loadReplyComments.bind(this);
-    this.componentDidMount = this.componentDidMount.bind(this);
-    this.componentDidUpdate = this.componentDidUpdate.bind(this);
+    this.loadCommentsOnDemand.bind(this);
   }
+
+  // Loading data on demand because, in a complex chat system there are lot's of user driven data, that might load our server,
+  // like images and videos.
 
   state = {
-    replies: [], // this is the parent reply that get's loaded there in the state
-    nextedReply: [],
-    parentId: "",
+    children: [],
   };
 
-  // Problem this runs, one per compoenent instance, for first instant of a compoenent render "root node"
+  services = new Services();
 
+  // this get's called in one instance of class, we need to make this rely on single node
+  // every time we pass that particular node, the compoenent should update
+  // since it's a recursive compoenent
   componentDidMount() {
-    // here filter reply only if that exists in the parent
-    const parentId = this.props.parentId;
-    const replies = this.props.replies;
-    let filteredList = replies.filter((i) => i.parentId === parentId);
-    if (parentId === undefined) {
-      filteredList = this.props.replies; // for first order parent we need to have an expection
-      this.setState({ replies: filteredList });
-      return;
+    // simple it's get loaded for first order "node"
+    if (this.props.children !== undefined) {
+      const { children } = this.props;
+      this.setState(
+        {
+          children,
+        },
+        () => {}
+      );
     }
-    if (filteredList.length > 0) {
-      this.setState({ replies: filteredList });
-    }
-    // doing this to make it depend upon the state
   }
 
-  /* The way we are using recursion here is making this
-    compoenentDidUpdate() superset of compoenentDidMount(),
-    we need to figure out the way in the case where the did mount does not get called we can track the changes here
-  */
   componentDidUpdate(prevProps, prevState) {
     if (prevState.nextedReply !== this.state.nextedReply) {
-      // we need to know on which invoke this componenet is called to render, else we will have a problem
-      const { nextedReply, parentId } = this.state;
-      const filterCurrentChildren = nextedReply.filter(
-        (i) => i.parentId === parentId
-      );
-      // here things have gone little complicated we can't just do hit and trial
-      const { replies } = this.state; // this replies has parent and children where it's only suppose to have chidren
-      /* If the instance of compoenent didmount() did not get called then, if we could figure out a way am I hard coading it */
-
-      console.log("What's suppose to be a reply: ", nextedReply, "Actual Reply: ", replies);
-      //   this.setState({ replies: filterCurrentChildren });
     }
   }
 
-  /* In this method what we need to do is, check for the particular current parent comment 
-    and then based on that we can fetch the result. */
-
-  async loadReplyComments(currentParentComment) {
-    const request = await fetch(
-      `Confession/get-children-comments?parentId=${currentParentComment.id}`,
+  async loadCommentsOnDemand(parent) {
+    // this is a promise alr, let get this data to the top, so that we could make it sync on web socket data as well
+    const response = await fetch(
+      `Confession/get-children-comments?parentId=${parent.id}`,
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${new Services().accessToken()}`,
+          Authorization: `Bearer ${this.services.accessToken()}`,
         },
         method: "get",
       }
-    ); // ressolving this promise
-    const response = await request.json();
-    const { statusCode, value } = response;
-    // we have glitch in the react code, not the response given by our asp.net server.
+    );
+    const data = await response.json();
+    const { value, statusCode } = data;
     if (statusCode === 200) {
-      const originalParentComment = this.props.replies.find(
-        (i) => i.id === currentParentComment.id
-      );
-      originalParentComment.replies = value; // mutating the original parent comment
-      // I think we need to change the higer order object of that, to make it re render properly,
-      // And, yes that's the case
-      // We do not need to poke the state here as it would increase the compleixty of our code.
-      if (value.length === 0) return;
-      /* We have a problem,
-              Report: the compoenent does not get rendered properly. When we click back and forth between one parent having multiple
-              children even though  we can clearly see the values if we log in here.
-              
-              OKay so I tried doing 
-                      this.setState({ nextedReply: [] }, () => {
-                this.setState({nextedReply: originalParentComment.replies});
-            }); // mutating the state directly
-
-            It solved the problem for a while then, it make the other compoenent hide. You know what could be the problem,
-            They way we are modifing the actual "parent state" we need to fix that.
-
-            Problem is really depth, it lies in the heart of how these react state work.
-            */
-
-      this.setState({
-        nextedReply: originalParentComment.replies,
-        parentId: currentParentComment.id,
+      this.props.onValueChange({
+        parent,
+        value,
       });
-      // console.log(
-      //   this.props.replies,
-      //   "Showing for parent: ",
-      //   originalParentComment.comments,
-      //   "Replies:",
-      //   originalParentComment.replies
-      // );
-
-      // mutating the state directly
+      return;
     }
   }
+  /* Here we need to make things to work such that everything depnds dupon the parent,
+    compoenent, so that we can make the data sync between the data incomming from the websocket
+    and the data that comes locally, and data that comes through fetch api, 
+    In order to make something like that what we need to do is make this compoenent, 
+    send the fetched data to parent compoenet and this data compoenent get's called again. */
 
   render() {
     /* Here what this code does it, it checks if we have reply which is greater than 0
         if not then we can click to make a fetch api call to render more,
         what are the props passed to this compoenent, it's the parent compoenent okay
-        if we have children then we render children. If not then we can ask to make a fetch call, */
+        if we have children then we render children. If not then we can ask to make a fetch call,
 
-    // this occours in recursion so let's label and logs things into console and check
-    if (this.state.replies.length <= 0) return <></>;
-    const testArr = [];
-    for (let i in this.state.replies) {
-      testArr.push(this.state.replies[i].comments);
+
+        root comment = {
+        children_comment: [{
+            children_Comment: [{
+            }]
+        }]; /// this is same data that comes from fetch() call websocket() and local data()
+        
     }
-    // console.log(
-    //   "Parent: ",
-    //   testArr.join(),
-    //   "Replies List: ",
-    //   this.state.nextedReply
-    // );
+        */
+
+    const { children } = this.state;
+
     return (
       <>
         <div className="recur-comment-frame">
-          <>
-            {this.state.replies.map((i, j) => {
-              return (
-                <React.Fragment key={j}>
-                  {/* This compoenet is used to render the comment frame like all the wrappers and stuff */}
-                  <CommentRenderCompoenent obj={i} />
-                  {
+          {children.length > 0
+            ? children.map((i, j) => {
+                const { replies } = i;
+                return (
+                  <React.Fragment key={j}>
+                    <CommentRenderCompoenent obj={i} />
+                    <hr style={{ visibility: "hidden" }} />
+
                     <>
                       <a
                         onClick={() => {
-                          this.loadReplyComments(i);
+                          this.loadCommentsOnDemand(i);
                         }}
-                        className="load-comments-anchors"
                       >
                         load comments
                       </a>
+                      {replies.length > 0 && console.log(replies)}
                     </>
-                  }
-                  {this.state.nextedReply.length > 0 && (
-                    <>
-                      <CommentRecurComponent
-                        replies={this.state.nextedReply}
-                        parentId={i.id}
-                      />
-                    </>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </>
+                  </React.Fragment>
+                );
+              })
+            : null}
         </div>
       </>
     );
