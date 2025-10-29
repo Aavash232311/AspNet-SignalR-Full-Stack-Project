@@ -5,6 +5,7 @@ import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from "./useable/SideNavPost";
+import { IoMdPaperPlane } from "react-icons/io";
 
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
@@ -36,7 +37,7 @@ class Comment extends Component {
     super(props);
     this.addComment = this.addComment.bind(this);
     this.replyCommennt = this.replyCommennt.bind(this);
-    this.getChildrenValue = this.getChildrenValue.bind(this);
+    this.dataOnRoot.bind(this);
   }
 
   services = new Services();
@@ -62,7 +63,6 @@ class Comment extends Component {
 
         /* Here once the data arrives we need to put where it belongs.  */
         const parent = recursiveTraversal(comment, this.state.confessions);
-        console.log("This should be root comment", parent);
         // everytime this socket get's triggred we need to make the data sync
         this.setState((prevState) => ({
           /* Here when the data comes via web socket it's not structured correctly we need
@@ -154,18 +154,30 @@ class Comment extends Component {
         }
       });
   }
-  // can't call it recursion now
-  getChildrenValue(getUpdatedValue) {
-    const { parent, value } = getUpdatedValue; // this is the value that we need to update
-    const { confessions } = this.state;
-
-    // years of development in this language but still things I learn later
-    setParentCommentValue(confessions, parent, value);
-    this.setState({ confessions }); // based on this update the state should re trigger and work, so that we can make synchronized data flow
-  }
 
   /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */
+
+  dataOnRoot = (parent) => { // here we might have binding issues, I came to know that arrow function automatically binds stuff
+    const services = new Services();
+    fetch(`Confession/get-children-comments?parentId=${parent.id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${services.accessToken()}`,
+      },
+      method: "get",
+    })
+      .then((r) => r.json())
+      .then((response) => {
+        const { value, statusCode } = response;
+        const { confessions } = this.state;
+        if (statusCode === 200) {
+          setParentCommentValue(confessions, parent, value);
+          this.setState({confessions});
+          return;
+        }
+      });
+  }
 
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
@@ -207,7 +219,7 @@ class Comment extends Component {
                     {/* If the current compoenent has like replies comment then we might want to render that */}
 
                     <CommentRecurComponent
-                      onValueChange={this.getChildrenValue}
+                      load={this.dataOnRoot}
                       children={i.replies}
                     />
                   </React.Fragment>
@@ -307,11 +319,13 @@ class CommentRenderCompoenent extends Component {
                 autoComplete="off"
                 name="comment"
               />
-              <input
+              <button
                 className="button--submit"
                 defaultValue="Subscribe"
                 type="submit"
-              />
+              >
+                <IoMdPaperPlane />
+              </button>
             </div>
           </form>
         </div>
@@ -331,7 +345,7 @@ class CommentRecurComponent extends Component {
   // because our mind might go to recursive hell.
   constructor(props) {
     super(props);
-    this.loadCommentsOnDemand.bind(this);
+    this.changeDemand.bind(this);
   }
 
   // Loading data on demand because, in a complex chat system there are lot's of user driven data, that might load our server,
@@ -364,28 +378,20 @@ class CommentRecurComponent extends Component {
     }
   }
 
-  async loadCommentsOnDemand(parent) {
-    // this is a promise alr, let get this data to the top, so that we could make it sync on web socket data as well
-    const response = await fetch(
-      `Confession/get-children-comments?parentId=${parent.id}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.services.accessToken()}`,
-        },
-        method: "get",
-      }
-    );
-    const data = await response.json();
-    const { value, statusCode } = data;
-    if (statusCode === 200) {
-      this.props.onValueChange({
-        parent,
-        value,
-      });
-      return;
-    }
+  /* Here lies to mind blowing complixity of application,
+      Recursion happens in two phases, first time this "compoenet" is called from parent compoenent,
+      Second and "n" times this compoenent is called from this compoenent itself,
+      Since we want to make data sync from web-sockets and fetch call. We want this all thing to render once the "root" node is changed, using "DSA"terminilogy
+
+      For the first phase we could bing this, and invoke the method in parent componenet,
+      For the second phase parent itself is the current child compoenent that's how recursion works in computer.
+
+      Question is how do we bind in sucha way that things work out?
+  */
+  changeDemand = (obj) => {
+    this.props.load(obj);
   }
+
   /* Here we need to make things to work such that everything depnds dupon the parent,
     compoenent, so that we can make the data sync between the data incomming from the websocket
     and the data that comes locally, and data that comes through fetch api, 
@@ -409,7 +415,7 @@ class CommentRecurComponent extends Component {
         */
 
     const { children } = this.state;
-
+    const { load } = this.props; // OH WOW, DESTRUCTURING HERE WORKS, NOT IN THE PARAMTER OF THE COMPOENENT THERE IS A DIFFERENCE
     return (
       <>
         <div className="recur-comment-frame">
@@ -424,12 +430,19 @@ class CommentRecurComponent extends Component {
                     <>
                       <a
                         onClick={() => {
-                          this.loadCommentsOnDemand(i);
+                          this.changeDemand(i);
                         }}
                       >
                         load comments
                       </a>
-                      {replies.length > 0 && console.log(replies)}
+                      {replies.length > 0 && (
+                        <>
+                          <CommentRecurComponent
+                            children={i.replies}
+                            load={load}
+                          />
+                        </>
+                      )}
                     </>
                   </React.Fragment>
                 );
