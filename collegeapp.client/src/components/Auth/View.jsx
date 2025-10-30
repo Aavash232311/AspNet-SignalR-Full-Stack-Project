@@ -36,7 +36,6 @@ class Comment extends Component {
   constructor(props) {
     super(props);
     this.addComment = this.addComment.bind(this);
-    this.replyCommennt = this.replyCommennt.bind(this);
     this.dataOnRoot.bind(this);
   }
 
@@ -106,29 +105,6 @@ class Comment extends Component {
       });
   }
 
-  // todo: Real problem is we need to retrigger this chat with the websocket,
-  // and make sure its not hard coded and componenets can be re-used later on.
-
-  replyCommennt(parent, domEvent) {
-    /*
-            Here we want to render and be able to reply to others messages just like in anyother blog or post platoform.
-            Okay we first of all I guess we need to get list of comment associated with the parent comment. 
-            And, then we can render the comment box below.
-
-            We need to use concept called recursive component. It's a component that calls itself.
-            Okay in the backend let's see how we get the data. Okay so the data is in nexted form.
-
-        */
-    const { replies, id } = parent;
-    const { confessions } = this.state;
-    /*
-            Here we can use the concept of recursive component to render the children comment.
-            Firstly we can expand the children to some depth, by default.
-            We want to render depth = 1; which the default api in backend gives the result in depth one
-        */
-    // console.log(this.state);
-  }
-
   addComment(ev) {
     ev.preventDefault();
     const formData = new FormData(ev.target);
@@ -158,7 +134,8 @@ class Comment extends Component {
   /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */
 
-  dataOnRoot = (parent) => { // here we might have binding issues, I came to know that arrow function automatically binds stuff
+  dataOnRoot = (parent) => {
+    // here we might have binding issues, I came to know that arrow function automatically binds stuff
     const services = new Services();
     fetch(`Confession/get-children-comments?parentId=${parent.id}`, {
       headers: {
@@ -173,11 +150,11 @@ class Comment extends Component {
         const { confessions } = this.state;
         if (statusCode === 200) {
           setParentCommentValue(confessions, parent, value);
-          this.setState({confessions});
+          this.setState({ confessions });
           return;
         }
       });
-  }
+  };
 
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
@@ -240,6 +217,9 @@ class CommentRenderCompoenent extends Component {
     this.replyCommentUpload = this.replyCommentUpload.bind(this);
   }
   url = new URLSearchParams(window.location.search);
+  state = {
+    showReplyThread: false,
+  };
   services = new Services();
   replyCommentUpload(ev, parentId) {
     ev.preventDefault();
@@ -289,8 +269,10 @@ class CommentRenderCompoenent extends Component {
           <div id="manipulate-comment">
             <div className="center-flex-grid">
               <FaRegComment
-                onClick={(ev) => {
-                  this.replyCommennt(i, ev);
+                onClick={() => {
+                  this.state.showReplyThread === true
+                    ? this.setState({ showReplyThread: false })
+                    : this.setState({ showReplyThread: true });
                 }}
               />
             </div>
@@ -306,28 +288,32 @@ class CommentRenderCompoenent extends Component {
               <FaShare />
             </div>
           </div>
-          <form
-            onSubmit={(ev) => {
-              this.replyCommentUpload(ev, i.id);
-            }}
-          >
-            <div className="input-group">
-              <input
-                type="text"
-                className="input"
-                placeholder="write a comment!"
-                autoComplete="off"
-                name="comment"
-              />
-              <button
-                className="button--submit"
-                defaultValue="Subscribe"
-                type="submit"
+          {this.state.showReplyThread === true && (
+            <>
+              <form
+                onSubmit={(ev) => {
+                  this.replyCommentUpload(ev, i.id);
+                }}
               >
-                <IoMdPaperPlane />
-              </button>
-            </div>
-          </form>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="write a comment!"
+                    autoComplete="off"
+                    name="comment"
+                  />
+                  <button
+                    className="button--submit"
+                    defaultValue="Subscribe"
+                    type="submit"
+                  >
+                    <IoMdPaperPlane />
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </div>
       </React.Fragment>
     );
@@ -390,7 +376,7 @@ class CommentRecurComponent extends Component {
   */
   changeDemand = (obj) => {
     this.props.load(obj);
-  }
+  };
 
   /* Here we need to make things to work such that everything depnds dupon the parent,
     compoenent, so that we can make the data sync between the data incomming from the websocket
@@ -426,7 +412,6 @@ class CommentRecurComponent extends Component {
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
                     <hr style={{ visibility: "hidden" }} />
-
                     <>
                       <a
                         onClick={() => {
