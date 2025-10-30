@@ -6,7 +6,7 @@ import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from "./useable/SideNavPost";
 import { IoMdPaperPlane } from "react-icons/io";
-
+import { AiOutlinePlusCircle } from "react-icons/ai";
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
 // I had to heal with Response object and http header but this will do that job in our case.
@@ -147,8 +147,10 @@ class Comment extends Component {
       .then((r) => r.json())
       .then((response) => {
         const { value, statusCode } = response;
+        if (value.length === 0) return;
         const { confessions } = this.state;
         if (statusCode === 200) {
+          
           setParentCommentValue(confessions, parent, value);
           this.setState({ confessions });
           return;
@@ -181,6 +183,7 @@ class Comment extends Component {
               {this.state.confessions.map((i, j) => {
                 // Okay here the current model that we are iterating is the parent model,
                 // And, we need to check if all the replies that we have parent Id as current
+
                 return (
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
@@ -188,11 +191,6 @@ class Comment extends Component {
                     {/* Here we have a problem once, we load
                                         replies of the parent having children id this one get's hidden
                                         we need to figure out how that happened */}
-                    {i.replies.length == 0 && (
-                      <>
-                        <a>load comments</a>
-                      </>
-                    )}
                     {/* If the current compoenent has like replies comment then we might want to render that */}
 
                     <CommentRecurComponent
@@ -402,26 +400,27 @@ class CommentRecurComponent extends Component {
 
     const { children } = this.state;
     const { load } = this.props; // OH WOW, DESTRUCTURING HERE WORKS, NOT IN THE PARAMTER OF THE COMPOENENT THERE IS A DIFFERENCE
+
     return (
       <>
         <div className="recur-comment-frame">
           {children.length > 0
             ? children.map((i, j) => {
-                const { replies } = i;
+                const { replies, replyCount } = i;
                 return (
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
-                    <hr style={{ visibility: "hidden" }} />
                     <>
                       <a
                         onClick={() => {
                           this.changeDemand(i);
                         }}
                       >
-                        load comments
+                      thread {replyCount !== undefined ? replyCount : null} <AiOutlinePlusCircle />
                       </a>
                       {replies.length > 0 && (
                         <>
+                        
                           <CommentRecurComponent
                             children={i.replies}
                             load={load}
