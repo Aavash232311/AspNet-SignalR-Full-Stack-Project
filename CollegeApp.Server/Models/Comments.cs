@@ -11,8 +11,8 @@ namespace CollegeApp.Server.Models
         [MaxLength(500)]
         public string comments { get; set; } = string.Empty;
         public int likes { get; set; } = 0;
-        public DateTime Added { get; set; } = DateTime.Now;
-        public DateTime LastModified { get; set; } = DateTime.Now;
+        public DateTime Added { get; set; } = DateTime.UtcNow;
+        public DateTime LastModified { get; set; } = DateTime.UtcNow;
         public string UserId { get; set; } = string.Empty; // UserId of the user who made the comment from auth0
         public Guid? ConfessionId { get; set; } // required foregin key property according to microsoft
         [JsonIgnore] // why well because,

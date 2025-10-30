@@ -65,7 +65,7 @@ namespace CollegeApp.Server.Controllers
             //    token_type = "Bearer"
             //};
             // We need to store tokens in http only cookie, and we can send id token as a json response
-            return new JsonResult(new { status = 200, data = new { data.id_token, data.scope, data.expires_in, data.token_type, data.access_token, data.refresh_token } });
+            return new JsonResult(new { status = 200, data = new { data.id_token, data.scope, data.expires_in, data.token_type, data.access_token, data.refresh_token} });
         }
 
         [Route("refresh-token")]

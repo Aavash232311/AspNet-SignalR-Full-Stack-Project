@@ -6,10 +6,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace CollegeApp.Server.Controllers
 {
+    public class CommentProfiles : Profile
+    {
+        public CommentProfiles()
+        {
+            CreateMap<Comments, CommentWithReplyCount>()
+                .ForMember(dest => dest.ReplyCount,
+                    opt => opt.MapFrom(src => src.Replies.Count));
+        }
+    }
 
+    public class CommentWithReplyCount: Comments
+    {
+        public int ReplyCount { get; set; } = 0;
+        public List<Comments> Replies { get; set; } = new List<Comments>(); // Because we have lazy loading on the client side
+    }
     [Route("[controller]")]
     [ApiController]
     public class ConfessionController : ControllerBase
@@ -18,12 +34,14 @@ namespace CollegeApp.Server.Controllers
         public Auth0 _userManager;
         private readonly IHubContext<ChatHub> _hubContext;
         public Helper helper;
-        public ConfessionController(ApplicationDbContext context, Auth0 _userManager, IHubContext<ChatHub> _hubContext, Helper helper)
+        private readonly IMapper _mapper;
+        public ConfessionController(ApplicationDbContext context, Auth0 _userManager, IHubContext<ChatHub> _hubContext, Helper helper, IMapper mapper)
         {
             this._context = context;
             this._userManager = _userManager;   
             this._hubContext = _hubContext;
             this.helper = helper;
+            _mapper = mapper; 
         }
 
         [Route("AddConfession")]
@@ -57,7 +75,7 @@ namespace CollegeApp.Server.Controllers
             var confession = _context.Confessions.FirstOrDefault(x => x.Id == editUserId && x.UserId == userId); // can only confession which belong to them
             if (confession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 
-            confession.LastModified = DateTime.Now;
+            confession.LastModified = DateTime.UtcNow;
             confession.Description = newConfession.Description;
             confession.Topic = newConfession.Topic;
             await _context.SaveChangesAsync();
@@ -114,7 +132,7 @@ namespace CollegeApp.Server.Controllers
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
             // in comment for the default cascade behaviour to work
-            // we need need to specify foregin key
+            // we need to specify foregin key
             Comments newComment = new Comments()
             {
                 comments = comments,
@@ -125,12 +143,14 @@ namespace CollegeApp.Server.Controllers
             };
             _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
+            // this socket is sending message to a particular group
             await _hubContext.Clients.Group((getConfessions.Id).ToString()).SendAsync("ReceiveMessage", newComment);
             return new JsonResult(Ok(newComment));
         }
 
 
         [Route("GetComments")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetComments(Guid confessionId, int page)
         {
@@ -138,22 +158,24 @@ namespace CollegeApp.Server.Controllers
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
             var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies);
-            /* From the prespective of runtime complexity, okay if we load all at once then its a nexted structure right,
+            /* From the prespective of runtime complexity, okay if we load all at once then it's a nexted structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
-             We need to load only whats needed so that we can make this endpoint effective we need to explicitely call the fetch api from
+             We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from
             front-end for that.*/
             int pageSize = 5;
-            return new JsonResult(Ok(helper.NormalPagination(pageSize, page, comments)));
-        }
 
+            var pagination = helper.NormalPagination(pageSize, page, comments);
+            // Here since pagination is used, the time complexity for iterating over time is not that much so we can do that
+
+            return new JsonResult(Ok(pagination));
+        }
         [Route("get-children-comments")]
         [HttpGet]
         public async Task<IActionResult> GetReplyComments(Guid parentId)
         {
-            var getParentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
-            if (getParentComment == null) return new JsonResult(NotFound(new { message = "Parent comment not found" }));
-
-            return new JsonResult(Ok(getParentComment.Replies)); // load everyting for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
+            // this is replies, to one depth, we are using auto mapper here
+            var getParentComments = _context.Comments.Where(x => x.ParentId == parentId).ProjectTo<CommentWithReplyCount>(_mapper.ConfigurationProvider).ToList();
+            return new JsonResult(Ok(getParentComments)); // load everything for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
         }
 
         [Route("ReplyComment")]
@@ -164,7 +186,7 @@ namespace CollegeApp.Server.Controllers
             var parentComment = _context.Comments.FirstOrDefault(x => x.Id == parentId);
             if (parentComment == null) return new JsonResult(BadRequest(new {message = "No parent found."}));
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authoprize to get to this point, i get annoyed by that underline
+            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authorize to get to this point, i get annoyed by that underline
             var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 

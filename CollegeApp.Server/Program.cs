@@ -8,8 +8,8 @@ using CollegeApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-/* Connecting database server  */
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+/* Connecting database server, Local SQL  */
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -40,6 +40,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 builder.Services.AddSingleton<Helper>();
 builder.Services.AddHttpClient<Auth0>(); // for custon auth0 service dependency injection
+builder.Services.AddAutoMapper(typeof(Program)); 
 
 builder.Services.AddSignalR();
 
