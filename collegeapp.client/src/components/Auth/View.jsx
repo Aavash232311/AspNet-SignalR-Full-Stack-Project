@@ -28,10 +28,11 @@ export const setParentCommentValue = (rootNode, parentNode, value) => {
 
       return setParentCommentValue(replies, parentNode, value);
     }
-  }
+  }else {
   const newArr = [...parent.replies, ...value];
   parent.replies = newArr; // we are combing array because we might have a problem, when making the data sync with web sockets
   return parent;
+  }
 };
 
 class Comment extends Component {
@@ -68,9 +69,8 @@ class Comment extends Component {
         /* Here is a bug it's because how we assign "reply" to the parent by simply
         equaling we need to comple the array, so passing values as iterable */
         setParentCommentValue(confessions, parent, [value]);
-        console.log(confessions, value.comments);
         this.setState({ confessions }, () => {
-    
+
         });
       }.bind(this)
     );
@@ -152,7 +152,6 @@ class Comment extends Component {
         if (value.length === 0) return;
         const { confessions } = this.state;
         if (statusCode === 200) {
-
           setParentCommentValue(confessions, parent, value);
           this.setState({ confessions });
           return;
@@ -205,7 +204,7 @@ class Comment extends Component {
             </>
           )}
         </div>
-        <hr style={{ visibility: "hidden" }} />
+        <hr style={{ visibility: "hidden", height: "20px" }} />
       </div>
     );
   }
@@ -403,6 +402,8 @@ class CommentRecurComponent extends Component {
     const { children } = this.state;
     const { load } = this.props; // OH WOW, DESTRUCTURING HERE WORKS, NOT IN THE PARAMTER OF THE COMPOENENT THERE IS A DIFFERENCE
 
+    /* Okay Good we have a problem here I shouldn't be thinking this is hard, even though 
+    for someone new it is, I will find it */
     return (
       <>
         <div className="recur-comment-frame">
@@ -420,6 +421,7 @@ class CommentRecurComponent extends Component {
                     >
                       thread {replyCount !== undefined ? replyCount : null} <AiOutlinePlusCircle />
                     </a>
+                    <hr style={{ visibility: "hidden" }} />
                     {replies.length > 0 && (
                       <>
 
