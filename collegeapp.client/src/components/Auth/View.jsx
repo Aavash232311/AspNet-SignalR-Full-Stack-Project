@@ -25,10 +25,12 @@ export const setParentCommentValue = (rootNode, parentNode, value) => {
     for (let i in rootNode) {
       const currentNode = rootNode[i];
       const { replies } = currentNode;
+
       return setParentCommentValue(replies, parentNode, value);
     }
   }
-  parent.replies = value;
+  const newArr = [...parent.replies, ...value];
+  parent.replies = newArr; // we are combing array because we might have a problem, when making the data sync with web sockets
   return parent;
 };
 
@@ -48,7 +50,8 @@ class Comment extends Component {
     totalPages: 1,
   };
 
-  componentDidMount() {
+  // again using like arrow function automatically binds it
+  componentDidMount = () => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("/chatHub")
       .withAutomaticReconnect()
@@ -56,19 +59,19 @@ class Comment extends Component {
 
     connection.on(
       "ReceiveMessage",
-      function (comment) {
-        // here we are adding things in the parent state, we need to
-        // get the parent and append to it's child
-
-        /* Here once the data arrives we need to put where it belongs.  */
-        const parent = recursiveTraversal(comment, this.state.confessions);
-        // everytime this socket get's triggred we need to make the data sync
-        this.setState((prevState) => ({
-          /* Here when the data comes via web socket it's not structured correctly we need
-           * to fix that, and if necessary we need to write more logic to fix it */
-          // so once the data arrives here we need to check and the structure of the data to check it.
-          // confessions: [comment, ...prevState.confessions]
-        }));
+      function (valueFromSocket) {
+        /* Here we receive message from web socket, and data should be sync because,
+        we made it depend upon this compoenent after complex recursive compoenent binding */
+        const { confessions } = this.state;
+        const { value, parent } = valueFromSocket;
+        // confession parent value
+        /* Here is a bug it's because how we assign "reply" to the parent by simply
+        equaling we need to comple the array, so passing values as iterable */
+        setParentCommentValue(confessions, parent, [value]);
+        console.log(confessions, value.comments);
+        this.setState({ confessions }, () => {
+    
+        });
       }.bind(this)
     );
 
@@ -80,8 +83,7 @@ class Comment extends Component {
       .catch((err) => console.error("Connection failed: ", err));
 
     fetch(
-      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${
-        this.state.page
+      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${this.state.page
       }`,
       {
         headers: {
@@ -150,7 +152,7 @@ class Comment extends Component {
         if (value.length === 0) return;
         const { confessions } = this.state;
         if (statusCode === 200) {
-          
+
           setParentCommentValue(confessions, parent, value);
           this.setState({ confessions });
           return;
@@ -352,7 +354,7 @@ class CommentRecurComponent extends Component {
         {
           children,
         },
-        () => {}
+        () => { }
       );
     }
   }
@@ -406,31 +408,31 @@ class CommentRecurComponent extends Component {
         <div className="recur-comment-frame">
           {children.length > 0
             ? children.map((i, j) => {
-                const { replies, replyCount } = i;
-                return (
-                  <React.Fragment key={j}>
-                    <CommentRenderCompoenent obj={i} />
-                    <>
-                      <a
-                        onClick={() => {
-                          this.changeDemand(i);
-                        }}
-                      >
+              const { replies, replyCount } = i;
+              return (
+                <React.Fragment key={j}>
+                  <CommentRenderCompoenent obj={i} />
+                  <>
+                    <a
+                      onClick={() => {
+                        this.changeDemand(i);
+                      }}
+                    >
                       thread {replyCount !== undefined ? replyCount : null} <AiOutlinePlusCircle />
-                      </a>
-                      {replies.length > 0 && (
-                        <>
-                        
-                          <CommentRecurComponent
-                            children={i.replies}
-                            load={load}
-                          />
-                        </>
-                      )}
-                    </>
-                  </React.Fragment>
-                );
-              })
+                    </a>
+                    {replies.length > 0 && (
+                      <>
+
+                        <CommentRecurComponent
+                          children={i.replies}
+                          load={load}
+                        />
+                      </>
+                    )}
+                  </>
+                </React.Fragment>
+              );
+            })
             : null}
         </div>
       </>

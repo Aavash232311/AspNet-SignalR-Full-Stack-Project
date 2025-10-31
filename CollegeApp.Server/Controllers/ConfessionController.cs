@@ -13,7 +13,7 @@ namespace CollegeApp.Server.Controllers
 {
     public class CommentProfiles : Profile
     {
-        public CommentProfiles()
+        public CommentProfiles() // when we use Select() in asp.net then it's hard to select everything so we are using a mapper 
         {
             CreateMap<Comments, CommentWithReplyCount>()
                 .ForMember(dest => dest.ReplyCount,
@@ -206,7 +206,7 @@ namespace CollegeApp.Server.Controllers
             _context.Comments.Add(newComment); // adding that to the databse
 
             // sending the reply comment to the websocket
-            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", newComment);
+            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = newComment, parent = parentComment });
             await _context.SaveChangesAsync(); // saving the changes
             return new JsonResult(Ok());
         }
