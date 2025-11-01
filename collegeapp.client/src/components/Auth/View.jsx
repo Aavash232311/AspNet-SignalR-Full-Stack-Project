@@ -28,10 +28,24 @@ export const setParentCommentValue = (rootNode, parentNode, value) => {
 
       return setParentCommentValue(replies, parentNode, value);
     }
-  }else {
-  const newArr = [...parent.replies, ...value];
-  parent.replies = newArr; // we are combing array because we might have a problem, when making the data sync with web sockets
-  return parent;
+  } else {
+    const { replies } = parent;
+    // here check for dublicates
+    if (!(Array.isArray(value))) {
+      const checkInParent = replies.find((x) => x.id === value.id);
+      if (checkInParent === undefined) {
+        parent.replies.push(value);
+      }
+      return parent;
+    } else {
+      // if it's an array then we need to do things in different way
+      // why don't iterate over value and append it? think about run time complexity
+      for (let currValue in value) {
+        const currentValue = value[currValue];
+        parent.replies.push(currentValue);
+      }
+      return parent;
+    }
   }
 };
 
@@ -67,10 +81,11 @@ class Comment extends Component {
         const { value, parent } = valueFromSocket;
         // confession parent value
         /* Here is a bug it's because how we assign "reply" to the parent by simply
-        equaling we need to comple the array, so passing values as iterable */
+        equaling we need to comple the array, so passing values as iterable,
+        the bug might lie in the way we are assigning the [value] */
         setParentCommentValue(confessions, parent, [value]);
         this.setState({ confessions }, () => {
-
+          
         });
       }.bind(this)
     );
@@ -152,7 +167,7 @@ class Comment extends Component {
         if (value.length === 0) return;
         const { confessions } = this.state;
         if (statusCode === 200) {
-          setParentCommentValue(confessions, parent, value);
+          setParentCommentValue(confessions, parent, value); // there is nth wrong with this function
           this.setState({ confessions });
           return;
         }
@@ -179,12 +194,11 @@ class Comment extends Component {
           <hr style={{ visibility: "hidden" }} />
         </form>
         <div id="chat-fourm-frame">
-          {this.state.confessions.length > 0 && (
+          {this.state.confessions && (
             <>
               {this.state.confessions.map((i, j) => {
                 // Okay here the current model that we are iterating is the parent model,
                 // And, we need to check if all the replies that we have parent Id as current
-
                 return (
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
@@ -204,7 +218,7 @@ class Comment extends Component {
             </>
           )}
         </div>
-        <hr style={{ visibility: "hidden", height: "20px" }} />
+
       </div>
     );
   }
@@ -360,6 +374,7 @@ class CommentRecurComponent extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.nextedReply !== this.state.nextedReply) {
+
     }
   }
 
