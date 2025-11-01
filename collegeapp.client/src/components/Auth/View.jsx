@@ -42,7 +42,10 @@ export const setParentCommentValue = (rootNode, parentNode, value) => {
       // why don't iterate over value and append it? think about run time complexity
       for (let currValue in value) {
         const currentValue = value[currValue];
-        parent.replies.push(currentValue);
+        const checkInParent = replies.find((x) => x.id === currentValue.id);
+        if (checkInParent === undefined) { // we could make this better I will leave it as it is for now
+          parent.replies.push(currentValue);
+        }
       }
       return parent;
     }
@@ -83,9 +86,10 @@ class Comment extends Component {
         /* Here is a bug it's because how we assign "reply" to the parent by simply
         equaling we need to comple the array, so passing values as iterable,
         the bug might lie in the way we are assigning the [value] */
-        setParentCommentValue(confessions, parent, [value]);
+        setParentCommentValue(confessions, parent, value);
+        console.log(value);
         this.setState({ confessions }, () => {
-          
+
         });
       }.bind(this)
     );
@@ -147,6 +151,9 @@ class Comment extends Component {
         }
       });
   }
+
+  /* Another issue, is when simply replying to a thread, what are facing is
+  only the reply being rendered we need to fix that by fetching everything. */
 
   /* What we need to do is okay, we need to render the chuldren comment associated with everything we may hide it
     using css and later we can expand it.  */

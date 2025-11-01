@@ -1,7 +1,8 @@
 #view-frame {
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     width: 95%;
-    height: 90vh;
+    min-height: 90vh;
+    height: auto;
 }
 
 #confession-topic {
@@ -9,7 +10,7 @@
     padding-left: 15px;
     user-select: none;
     width: 95%;
-
+    height: auto;
 }
 
 .comment-frames {
@@ -47,7 +48,6 @@
 }
 
 #chat-fourm-frame {
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     background-color: white;
     padding: 10px;
     border-radius: 5px;

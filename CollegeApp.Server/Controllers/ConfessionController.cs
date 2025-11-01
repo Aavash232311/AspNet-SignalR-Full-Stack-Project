@@ -183,7 +183,7 @@ namespace CollegeApp.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> ReplyComment(string comment, Guid parentId, Guid confessionId)
         {
-            var parentComment = _context.Comments.FirstOrDefault(x => x.Id == parentId);
+            var parentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
             if (parentComment == null) return new JsonResult(BadRequest(new {message = "No parent found."}));
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authorize to get to this point, i get annoyed by that underline
@@ -203,10 +203,10 @@ namespace CollegeApp.Server.Controllers
             };
 
             parentComment.Replies.Add(newComment); // adding the new comment to the parent comment's children list for easy navigation 
-            _context.Comments.Add(newComment); // adding that to the databse
+            var updatedParent = _context.Comments.Add(newComment); // adding that to the databse
 
             // sending the reply comment to the websocket
-            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = newComment, parent = parentComment });
+            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = parentComment.Replies, parent = parentComment });
             await _context.SaveChangesAsync(); // saving the changes
             return new JsonResult(Ok());
         }
