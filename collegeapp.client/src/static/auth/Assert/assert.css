@@ -91,6 +91,10 @@
   text-decoration: none;
 }
 
+.text-align-left {
+  text-align: left;
+}
+
 .button-87:active {
   transform: scale(0.95);
 }
@@ -159,12 +163,6 @@
 
 }
 
-/* For reply commnet button */
-/* From Uiverse.io by alexruix */
-.input-group {
-  display: flex;
-  align-items: center;
-}
 
 .input {
   height: 35px;

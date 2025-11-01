@@ -87,7 +87,6 @@ class Comment extends Component {
         equaling we need to comple the array, so passing values as iterable,
         the bug might lie in the way we are assigning the [value] */
         setParentCommentValue(confessions, parent, value);
-        console.log(value);
         this.setState({ confessions }, () => {
 
         });
@@ -281,14 +280,21 @@ class CommentRenderCompoenent extends Component {
               A
             </div>
             <div style={{ textAlign: "left" }} className="anonymous-user-label">
-              Anonymous participant{" "}
-              {i.id.substring(i.id.length - 5, i.id.length)}
+              <div>
+                <b>Anonymous participant{" "}
+                  {i.id.substring(i.id.length - 5, i.id.length)}
+                </b>
+              </div>
+              <small className="date-font-small">
+                {this.services.normalizeASPDate(i.added)}
+              </small>
             </div>
           </div>
           <div className="commenct-frame">{i.comments}</div>
           <div id="manipulate-comment">
             <div className="center-flex-grid">
               <FaRegComment
+                className="comment-icons hover-effect"
                 onClick={() => {
                   this.state.showReplyThread === true
                     ? this.setState({ showReplyThread: false })
@@ -296,16 +302,18 @@ class CommentRenderCompoenent extends Component {
                 }}
               />
             </div>
-            <div className="center-flex-grid">
-              <FaChevronUp />
+            <div className="center-flex-grid hover-effect">
+              <FaChevronUp className="comment-icons center-flex-grid" /> {"  "}
+              <small>Reply</small>
             </div>
             <div className="center-flex-grid">0</div>
-            <div>
-              <FaChevronDown />
+            <div className="hover-effect">
+              <FaChevronDown className="comment-icons" />
             </div>
             <div className="center-flex-grid">0</div>
-            <div className="center-flex-grid">
-              <FaShare />
+            <div className="center-flex-grid hover-effect">
+              <FaShare className="comment-icons center-flex-grid" /> {" "}
+              <small>Share</small>
             </div>
           </div>
           {this.state.showReplyThread === true && (
@@ -315,21 +323,22 @@ class CommentRenderCompoenent extends Component {
                   this.replyCommentUpload(ev, i.id);
                 }}
               >
-                <div className="input-group">
-                  <input
+                <div className="reply-thread-wrapper">
+                  <textarea
                     type="text"
-                    className="input"
                     placeholder="write a comment!"
                     autoComplete="off"
                     name="comment"
+                    className="form-control reply-thread-comment"
                   />
+                  <br />
                   <button
-                    className="button--submit"
-                    defaultValue="Subscribe"
                     type="submit"
+                    className="comment-button"
                   >
-                    <IoMdPaperPlane />
+                    Comment
                   </button>
+                  <br /> <br />
                 </div>
               </form>
             </>

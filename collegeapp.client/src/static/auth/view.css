@@ -1,5 +1,4 @@
 #view-frame {
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     width: 95%;
     min-height: 90vh;
     height: auto;
@@ -11,6 +10,26 @@
     user-select: none;
     width: 95%;
     height: auto;
+}
+
+.thread-reply {
+    width: 100%;
+}
+
+.reply-thread-wrapper {
+    grid-template-columns: 50% 50%;
+    grid-gap: 50px;
+}
+.comment-button {
+    background-color: rgb(136,33,38);
+    outline-width: 0;
+    border: #622427;
+    color: white;
+    border-radius: 2px;
+}
+
+.comment-button:hover {
+    background-color: #bb484e;
 }
 
 .comment-frames {
@@ -28,23 +47,50 @@
     width: auto;
 }
 
-.anonymous-user-label {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: small;
-}
-
 .commenct-frame {
     padding: 10px;
 }
 
+.comment-icons {
+    font-size: 16px;
+    color: rgb(42, 42, 42)
+}
+
+.reply-thread-comment {
+    width: 350px;
+}
+
+.date-font-small {
+    font-size: 12px;
+}
+
+.hover-effect {
+    position: relative; /* ESSENTIAL: Establishes a stacking context */
+    border-radius: 10px;
+    overflow: hidden; 
+    /* This transition is for the content (icons/text) if they have hover effects */
+    transition: background-color 0.3s ease;
+}
+
+.hover-effect:hover {
+    /* This will now transition smoothly over 0.3 seconds */
+    background-color: rgb(179, 179, 179);
+}
+
 #manipulate-comment {
     display: grid;
-    grid-template-columns: repeat(7, 20px);
+    grid-template-columns: repeat(7, minmax(20px, auto));
     font-size: small;
     padding: 10px;
     grid-gap: 5px;
+    width: 250px;
+}
+
+
+.center-flex-grid {
+    display: flex;
+    align-items: center;
+    gap: 5px; 
 }
 
 #chat-fourm-frame {
