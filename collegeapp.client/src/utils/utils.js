@@ -1,7 +1,9 @@
+export const stdPaingationSize = 5;
 export default class Services {
     formatString = (str, values) => { return str.replace(/%d/g, () => values.shift()); };
     refreshToken = () => localStorage.getItem("refresh_token");
     accessToken = () => localStorage.getItem("access_token");
+    
     /* asp.net returns default error in little different which does not align with how our error compoenet work,
     errors can be
     {key: [list of problems]} or [ {key1: [list of problems] }, {key2: [list of problems]} ]   */

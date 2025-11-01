@@ -121,6 +121,7 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok());
         }
 
+        /* This api is for adding top level comments, not replying to threads */
         [Route("AddComment")]
         [Authorize]
         [HttpPost]
@@ -141,10 +142,14 @@ namespace CollegeApp.Server.Controllers
                 Confessions = getConfessions,
                 profileColor = helper.RandomRGB()
             };
-            _context.Comments.Add(newComment);
+            var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
             // this socket is sending message to a particular group
-            await _hubContext.Clients.Group((getConfessions.Id).ToString()).SendAsync("ReceiveMessage", newComment);
+            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new {
+                value = new List<Comments>() { newComment },
+                parent = newComment,
+                order = "top-level"
+            });
             return new JsonResult(Ok(newComment));
         }
 
@@ -157,7 +162,7 @@ namespace CollegeApp.Server.Controllers
             if (page == 0) return new JsonResult(BadRequest(new { message = "Page number cannot be zero" }));
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
-            var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies);
+            var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies).OrderByDescending(d => d.Added);
             /* From the prespective of runtime complexity, okay if we load all at once then it's a nexted structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from
@@ -206,7 +211,7 @@ namespace CollegeApp.Server.Controllers
             var updatedParent = _context.Comments.Add(newComment); // adding that to the databse
 
             // sending the reply comment to the websocket
-            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = parentComment.Replies, parent = parentComment });
+            await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = parentComment.Replies, parent = parentComment, order = "thread" });
             await _context.SaveChangesAsync(); // saving the changes
             return new JsonResult(Ok());
         }

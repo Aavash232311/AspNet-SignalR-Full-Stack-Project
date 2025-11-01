@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import "../../static/auth/view.css";
-import Services from "../../utils/utils";
+import Services, { stdPaingationSize } from "../../utils/utils";
 import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from "./useable/SideNavPost";
-import { IoMdPaperPlane } from "react-icons/io";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
@@ -81,15 +80,26 @@ class Comment extends Component {
         /* Here we receive message from web socket, and data should be sync because,
         we made it depend upon this compoenent after complex recursive compoenent binding */
         const { confessions } = this.state;
-        const { value, parent } = valueFromSocket;
+        const { value, parent, order } = valueFromSocket;
+
+        // we need to hande the case where this is not a reply
+
         // confession parent value
         /* Here is a bug it's because how we assign "reply" to the parent by simply
         equaling we need to comple the array, so passing values as iterable,
         the bug might lie in the way we are assigning the [value] */
-        setParentCommentValue(confessions, parent, value);
-        this.setState({ confessions }, () => {
-
-        });
+        if (order === "thread") {
+          setParentCommentValue(confessions, parent, value);
+          this.setState({ confessions });
+        } else if (order === "top-level" && confessions.length <= stdPaingationSize) {
+          // then we need to directly add into that confession array;
+          this.setState(prevState => ({
+            confessions: [
+              ...prevState.confessions,
+              parent
+            ]
+          }), () => {  });
+        }
       }.bind(this)
     );
 
@@ -262,6 +272,7 @@ class CommentRenderCompoenent extends Component {
         const { statusCode } = response;
         if (statusCode === 200) {
           ev.target.reset();
+          this.setState({showReplyThread: false});
           return;
         }
       });
