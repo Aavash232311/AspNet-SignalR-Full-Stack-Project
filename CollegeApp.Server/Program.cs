@@ -28,14 +28,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SchoolAdmin", policy =>
-    {
-        policy.Requirements.Add(new HasScopeRequirement("read:create_student_profile", domain));
-        policy.Requirements.Add(new HasScopeRequirement("read:create_student_profile", domain));
-    });
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("https://localhost:49986/claims/roles", "Superuser"));
 });
+
 
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 builder.Services.AddSingleton<Helper>();

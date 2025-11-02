@@ -1,0 +1,56 @@
+/* General dark background */
+.notfound-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #121212;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+/* Content box */
+.notfound-content {
+  max-width: 500px;
+  padding: 40px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Big 404 */
+.notfound-content h1 {
+  font-size: 8rem;
+  margin: 0;
+  color: #ff4c60;
+}
+
+/* Subtitle */
+.notfound-content h2 {
+  font-size: 2rem;
+  margin: 20px 0 10px;
+  color: #ff7f50;
+}
+
+/* Description */
+.notfound-content p {
+  font-size: 1rem;
+  color: #ccc;
+  margin-bottom: 30px;
+}
+
+/* Link */
+.home-link {
+  text-decoration: none;
+  padding: 12px 25px;
+  background: #ff4c60;
+  color: #fff;
+  border-radius: 6px;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.home-link:hover {
+  background: #ff7f50;
+  transform: translateY(-3px);
+}

@@ -220,7 +220,7 @@ class Comment extends Component {
                 return (
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
-                    <hr style={{ visibility: "hidden" }} />
+                    <br />
                     <a
                       onClick={() => {
                         this.dataOnRoot(i);
@@ -228,6 +228,7 @@ class Comment extends Component {
                     >
                       thread  <AiOutlinePlusCircle />
                     </a>
+                    <br />
                     <CommentRecurComponent
                       load={this.dataOnRoot}
                       children={i.replies}

@@ -16,17 +16,28 @@
     width: 100%;
 }
 
+.anonymous-user-label {
+    font-family: "Noto Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.4;
+    color: #222222;
+}
+
 .reply-thread-wrapper {
     grid-template-columns: 50% 50%;
     grid-gap: 50px;
 }
+
 .comment-button {
-    background-color: rgb(136,33,38);
+    background-color: rgb(136, 33, 38);
     outline-width: 0;
     border: #622427;
     color: white;
     border-radius: 2px;
 }
+
+
 
 .comment-button:hover {
     background-color: #bb484e;
@@ -49,6 +60,10 @@
 
 .commenct-frame {
     padding: 10px;
+    font-family: "Noto Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1a1a1b;
 }
 
 .comment-icons {
@@ -62,12 +77,15 @@
 
 .date-font-small {
     font-size: 12px;
+    font-family: "Noto Sans", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: lighter;
 }
 
 .hover-effect {
-    position: relative; /* ESSENTIAL: Establishes a stacking context */
+    position: relative;
+    /* ESSENTIAL: Establishes a stacking context */
     border-radius: 10px;
-    overflow: hidden; 
+    overflow: hidden;
     /* This transition is for the content (icons/text) if they have hover effects */
     transition: background-color 0.3s ease;
 }
@@ -90,7 +108,7 @@
 .center-flex-grid {
     display: flex;
     align-items: center;
-    gap: 5px; 
+    gap: 5px;
 }
 
 #chat-fourm-frame {

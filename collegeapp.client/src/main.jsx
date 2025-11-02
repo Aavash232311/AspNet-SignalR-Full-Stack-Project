@@ -9,6 +9,9 @@ import Dashboard from './Dashboard.jsx';
 import Confessions from './AddConfession.jsx';
 import 'bootstrap/dist/css/bootstrap.css';
 import View from './components/Auth/View.jsx';
+import { ProtectedRoute } from './auth/auth.jsx';
+import Admin from './Admin/Admin.jsx';
+import { ROLES } from './auth/auth.jsx';
 
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
@@ -21,6 +24,13 @@ createRoot(document.getElementById('root')).render(
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-confession" element={<Confessions />} />
           <Route path="/view" element={<View />} />
+
+          <Route path="/su-route-root" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <Admin />
+            </ProtectedRoute>
+          } />
+
         </Routes>
       </Auth0ProviderWithHistory>
     </BrowserRouter>

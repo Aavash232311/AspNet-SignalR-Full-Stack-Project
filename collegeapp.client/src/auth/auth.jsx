@@ -1,8 +1,38 @@
 import React, { createContext, useContext, useEffect } from "react";
+import NotFound from "../components/Auth/useable/404";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(undefined);
 
 export const useAuth = () => useContext(AuthContext);
+
+export const ROLES = {
+    ADMIN: 'Superuser',
+};
+
+export const PERMISSIONS = {
+    VIEW_DASHBOARD: [ROLES.ADMIN],
+};
+
+export const ProtectedRoute = ({ children, allowedRoles }) => {
+    // allowedRoles the roles which are allowed to vew the wrapped up content,
+
+    const token = localStorage.getItem('access_token'); // or wherever you store it
+
+    if (!token) {
+        return <NotFound />;
+    }
+    const decoded = jwtDecode(token);
+    const getRoles = decoded["roles/roles"];
+
+    // we require we need to have atleast one role to grand access
+    const check = getRoles.some((r) => r.includes(allowedRoles));
+    if (check) {
+        return <>{children}</>
+    }
+    return <NotFound />;
+};
+
 
 export const AuthProvider = ({ children }) => {
     const domain = "dev-3gfo42id.us.auth0.com";
@@ -105,7 +135,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const refreshTokenFetch = () => {
-        
+
     }
 
     const methods = {
