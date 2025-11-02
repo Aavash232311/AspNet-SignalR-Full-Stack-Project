@@ -1,0 +1,74 @@
+/* Base container */
+.admin {
+  display: flex;
+  height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Dark theme */
+.admin.dark {
+  background-color: #121212;
+  color: #fff;
+}
+
+/* Light theme */
+.admin.light {
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+/* AppBar */
+.admin-appbar {
+  z-index: 1201; /* Make sure it's above the drawer */
+}
+
+/* Drawer styling */
+.admin-drawer {
+  width: 240px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.admin-drawer .MuiDrawer-paper {
+  width: 240px;
+  background-color: inherit; /* Match dark/light mode */
+  color: inherit;            /* Icons inherit text color */
+}
+
+/* ListItem text and icon inherit color */
+.admin-drawer .MuiListItemText-root,
+.admin-drawer .MuiListItemIcon-root {
+  color: inherit;
+}
+
+/* Main content */
+.admin-content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 240px; /* Width of the drawer */
+}
+
+/* Optional hover effect for ListItems */
+.admin-drawer .MuiListItem-root:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s;
+}
+
+/* Dark theme AppBar */
+.admin.dark .admin-appbar {
+  background: linear-gradient(90deg, #1f1f1f, #333);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Light theme AppBar */
+.admin.light .admin-appbar {
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* AppBar transition */
+.admin-appbar {
+  transition: background 0.3s, color 0.3s;
+}
