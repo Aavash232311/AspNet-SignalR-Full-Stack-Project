@@ -63,6 +63,7 @@ class Comment extends Component {
   state = {
     page: 1,
     confessions: [],
+    confessionsCopy: [],
     totalPages: 1,
   };
 
@@ -94,10 +95,12 @@ class Comment extends Component {
           // then we need to directly add into that confession array;
           this.setState(prevState => ({
             confessions: [
+              parent,
               ...prevState.confessions,
-              parent
             ]
-          }), () => {  });
+          }), () => {
+
+          });
         }
       }.bind(this)
     );
@@ -183,9 +186,7 @@ class Comment extends Component {
         const { confessions } = this.state;
         if (statusCode === 200) {
           setParentCommentValue(confessions, parent, value); // there is nth wrong with this function
-          this.setState({ confessions }, () => {
-         
-          });
+          this.setState({ confessions });
           return;
         }
       });
@@ -220,11 +221,13 @@ class Comment extends Component {
                   <React.Fragment key={j}>
                     <CommentRenderCompoenent obj={i} />
                     <hr style={{ visibility: "hidden" }} />
-                    {/* Here we have a problem once, we load
-                                        replies of the parent having children id this one get's hidden
-                                        we need to figure out how that happened */}
-                    {/* If the current compoenent has like replies comment then we might want to render that */}
-
+                    <a
+                      onClick={() => {
+                        this.dataOnRoot(i);
+                      }}
+                    >
+                      thread  <AiOutlinePlusCircle />
+                    </a>
                     <CommentRecurComponent
                       load={this.dataOnRoot}
                       children={i.replies}
@@ -273,7 +276,7 @@ class CommentRenderCompoenent extends Component {
         const { statusCode } = response;
         if (statusCode === 200) {
           ev.target.reset();
-          this.setState({showReplyThread: false});
+          this.setState({ showReplyThread: false });
           return;
         }
       });

@@ -153,7 +153,7 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok(newComment));
         }
 
-
+        /* If web socket load is success we are calling this API */
         [Route("GetComments")]
         [AllowAnonymous]
         [HttpGet]
@@ -162,7 +162,7 @@ namespace CollegeApp.Server.Controllers
             if (page == 0) return new JsonResult(BadRequest(new { message = "Page number cannot be zero" }));
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
-            var comments = _context.Comments.Where(b => b.Parent == null).Include(r => r.Replies).OrderByDescending(d => d.Added);
+            var comments = _context.Comments.Where(b => b.Parent == null).OrderByDescending(d => d.Added);
             /* From the prespective of runtime complexity, okay if we load all at once then it's a nexted structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from
