@@ -12,9 +12,8 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 
 // as a developer, if your recursion failed in client side, at wrost,
 // all it can do is crash client's browser, but if it failed in server,it will break everything
-export const setParentCommentValue = (rootNode, parentNode, value) => {
+export const setParentCommentValue = (rootNode, parentNode, value) => { // we have a problem here
   const parentId = parentNode.id; // we need to find this "id" there and set it
-
   // search for parent
   const parent = rootNode.find((u) => u.id === parentId);
 
@@ -25,7 +24,7 @@ export const setParentCommentValue = (rootNode, parentNode, value) => {
       const currentNode = rootNode[i];
       const { replies } = currentNode;
 
-      return setParentCommentValue(replies, parentNode, value);
+      setParentCommentValue(replies, parentNode, value);
     }
   } else {
     const { replies } = parent;
@@ -184,7 +183,9 @@ class Comment extends Component {
         const { confessions } = this.state;
         if (statusCode === 200) {
           setParentCommentValue(confessions, parent, value); // there is nth wrong with this function
-          this.setState({ confessions });
+          this.setState({ confessions }, () => {
+         
+          });
           return;
         }
       });
