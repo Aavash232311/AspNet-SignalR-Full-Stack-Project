@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
     const clientId = "iauvQygsniC9PMR9MbtICPc1vg9Cy1QW";
     const [loggedIn, setLoggedIn] = React.useState(undefined);
     const [user, setUser] = React.useState(null);
+    const [roles, setRoles] = React.useState([]);
 
     /* we don't need to worry much about signup since all public credentials are passed to thrid party api */
     const signup = async (name, email, password, conformPassword) => {
@@ -132,6 +133,11 @@ export const AuthProvider = ({ children }) => {
             setLoggedIn(r.isAuthenticated); // its like waterfall if we write logic under this promise because the execution of a function below depends upon the expecution of the function above
         });
         refreshTokenFetch();
+        // if autheticated let's decode JWT for roles
+        const token = localStorage.getItem('access_token');
+        const decoded = jwtDecode(token);
+        const getRoles = decoded["roles/roles"];
+        setRoles(getRoles);
     }, []);
 
     const refreshTokenFetch = () => {
@@ -144,7 +150,8 @@ export const AuthProvider = ({ children }) => {
         loggedIn,
         isUserAuthenticated,
         user,
-        logout
+        logout,
+        roles
     };
     /* Refresh token logic auth0, we need to refrresh our access token based on the refresh token */
 

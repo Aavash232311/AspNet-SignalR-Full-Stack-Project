@@ -11,40 +11,19 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import TryIcon from '@mui/icons-material/Try';
 
-export default class Admin extends Component {
+export class Admin extends Component {
     state = {
         darkMode: true,
         drawerOpen: true,
-        greeting: "",
         openConfessions: false,
+        openSettings: false
     };
     toggleConfessions = () => {
         this.setState((prevState) => ({ openConfessions: !prevState.openConfessions }));
     };
-
-    componentDidMount() {
-        const token = localStorage.getItem('id_token'); // or wherever you store it
-
-        if (!token) {
-            window.location.href = "/not-found";
-            return;
-        }
-        const decoded = jwtDecode(token);
-        const { nickname } = decoded;
-
-        const currentHour = new Date().getHours();
-
-        let greeting;
-        if (currentHour >= 5 && currentHour < 12) {
-            greeting = "Good morning";
-        } else if (currentHour >= 12 && currentHour < 17) {
-            greeting = "Good afternoon";
-        } else {
-            greeting = "Good evening";
-        }
-        greeting = `${greeting} ${nickname}`;
-        this.setState({ greeting });
-    }
+    toggleSettings = () => {
+        this.setState((prevState) => ({ openSettings: !prevState.openSettings }));
+    };
 
     toggleDarkMode = () => {
         this.setState({ darkMode: !this.state.darkMode });
@@ -55,11 +34,9 @@ export default class Admin extends Component {
         this.setState({ drawerOpen: !this.state.drawerOpen });
     };
 
-
-
     render() {
         const { darkMode } = this.state;
-        const { openConfessions } = this.state;
+        const { openConfessions, openSettings } = this.state;
         return (
             <div className={darkMode ? 'admin dark' : 'admin light'}>
                 <CssBaseline />
@@ -92,7 +69,7 @@ export default class Admin extends Component {
                             <Toolbar />
                             <List>
                                 {/* Dropdown Trigger */}
-                                <ListItem button onClick={this.toggleConfessions}>
+                                <ListItem button="true" onClick={this.toggleConfessions}>
                                     <ListItemIcon>
                                         <ListAlt />
                                     </ListItemIcon>
@@ -103,21 +80,34 @@ export default class Admin extends Component {
                                 {/* Dropdown Content */}
                                 <Collapse in={openConfessions} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        <ListItem button sx={{ pl: 4 }}>
+                                        <ListItem button="true" sx={{ pl: 4 }}>
                                             <ListItemIcon><ShowChartIcon /></ListItemIcon>
                                             <ListItemText primary="Analytics" />
                                         </ListItem>
-                                        <ListItem button sx={{ pl: 4 }}>
+                                        <ListItem button="true" sx={{ pl: 4 }}>
                                             <ListItemIcon><TryIcon /></ListItemIcon>
                                             <ListItemText primary="Confessions" />
                                         </ListItem>
                                     </List>
                                 </Collapse>
 
-                                <ListItem>
+                                {/* Dropdown Trigger Settings */}
+                                <ListItem button="true" onClick={this.toggleSettings}>
                                     <ListItemIcon><Settings /></ListItemIcon>
                                     <ListItemText primary="Site Settings" />
+                                    {openSettings ? <ExpandLess /> : <ExpandMore />}
                                 </ListItem>
+
+                                {/* Dropdown Content */}
+                                <Collapse in={openSettings} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                            <ListItemIcon><Settings /></ListItemIcon>
+                                            <ListItemText primary="Settings" />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
+
 
                                 <ListItem>
                                     <ListItemIcon><History /></ListItemIcon>
@@ -140,11 +130,51 @@ export default class Admin extends Component {
 
                 {/* Main Content */}
                 <main className="admin-content">
-                    <Toolbar />
-                    <Typography variant="h4">{this.state.greeting}</Typography>
-                    <p>Here you can manage site settings, view confessions, and check logs.</p>
+                    {this.props.children}
                 </main>
             </div>
         );
+    }
+}
+
+export default class AdminMessage extends Component {
+
+    componentDidMount = () => {
+        const token = localStorage.getItem('id_token'); // or wherever you store it
+
+        if (!token) {
+            window.location.href = "/not-found";
+            return;
+        }
+        const decoded = jwtDecode(token);
+        const { nickname } = decoded;
+
+        const currentHour = new Date().getHours();
+
+        let greeting;
+        if (currentHour >= 5 && currentHour < 12) {
+            greeting = "Good morning";
+        } else if (currentHour >= 12 && currentHour < 17) {
+            greeting = "Good afternoon";
+        } else {
+            greeting = "Good evening";
+        }
+        greeting = `${greeting} ${nickname}`;
+        this.setState({ greeting });
+    }
+
+    state = {
+        greeting: "",
+    }
+    render() {
+        return (
+            <>
+                <Admin>
+                    <Toolbar />
+                    <Typography variant="h4">{this.state.greeting}</Typography>
+                    <p>Here you can manage site settings, view confessions, and check logs.</p>
+                </Admin>
+            </>
+        )
     }
 }

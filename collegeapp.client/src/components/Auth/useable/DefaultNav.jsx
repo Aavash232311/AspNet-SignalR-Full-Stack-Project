@@ -25,6 +25,9 @@ export default class NavBarDefault extends React.Component {
                     if (!(authService.loggedIn === undefined)) {
                         loggedIn = authService.loggedIn;
                     }
+                    const { roles } = authService;
+                    const checkForSuperuser = roles.find((x) => x === "Superuser");
+
                     return (
                         <>
                             <div id='nav-grid'>
@@ -48,6 +51,19 @@ export default class NavBarDefault extends React.Component {
                                                 </Typography>
                                                 {loggedIn && (
                                                     <>
+                                                        {checkForSuperuser !== undefined && (
+                                                            <>
+                                                                <NavItem style={{ listStyle: "none" }}>
+                                                                    <NavLink
+                                                                        tag={Link}
+                                                                        to={"/su-route-root"}
+                                                                    >
+                                                                        <Button color="inherit">Admin</Button>
+                                                                    </NavLink>
+                                                                </NavItem>
+                                                            </>
+                                                        )}
+
                                                         <NavItem style={{ listStyle: "none" }}>
                                                             <NavLink
                                                                 tag={Link}
@@ -60,11 +76,11 @@ export default class NavBarDefault extends React.Component {
                                                         <NavItem style={{ listStyle: "none" }}>
                                                             <NavLink
                                                                 tag={Link}
-                                                                onClick={() => {authService.logout()}}
+                                                                onClick={() => { authService.logout() }}
                                                             >
                                                                 <Button color="inherit">Logout</Button>
                                                             </NavLink>
-                                                        </NavItem>                                                        
+                                                        </NavItem>
                                                     </>
                                                 )}
                                                 {!loggedIn && (

@@ -27,6 +27,7 @@
   width: 240px;
   flex-shrink: 0;
   cursor: pointer;
+  user-select: none;
 }
 
 .admin-drawer .MuiDrawer-paper {
