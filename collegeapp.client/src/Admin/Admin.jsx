@@ -13,7 +13,7 @@ import TryIcon from '@mui/icons-material/Try';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 
-export const AdminContext = createContext(undefined);
+export const AdminContext = createContext();
 const useAdmin = () => useContext(AdminContext);
 
 
@@ -30,7 +30,6 @@ export const AdminProvider = ({ children }) => {
 
 export class Admin extends Component {
     state = {
-        darkMode: true,
         drawerOpen: true,
         openConfessions: false,
         openSettings: false
@@ -42,22 +41,23 @@ export class Admin extends Component {
         this.setState((prevState) => ({ openSettings: !prevState.openSettings }));
     };
 
-    toggleDarkMode = () => {
-        this.setState({ darkMode: !this.state.darkMode });
-    };
-
-
     toggleMenu = () => {
         this.setState({ drawerOpen: !this.state.drawerOpen });
     };
 
+    static contextType = AdminContext;
+
     render() {
-        const { darkMode } = this.state;
         const { openConfessions, openSettings } = this.state;
         return (
             <AdminProvider>
                 <AdminContext.Consumer>
                     {(adminProperties) => {
+                        const { dark } = adminProperties;
+                        let darkMode = dark;
+                        // this dark theme cannot work from context because we have,
+                        // called a differnent URL inorder to fix and make it a global we need to make use of local storage
+                        
                         return (
                             <div className={darkMode ? 'admin dark' : 'admin light'}>
                                 <CssBaseline />
@@ -74,7 +74,9 @@ export class Admin extends Component {
                                             <MenuIcon />
                                         </IconButton>
 
-                                        <IconButton color="inherit" onClick={this.toggleDarkMode}>
+                                        <IconButton color="inherit" onClick={() => {
+                                            (dark === true ? adminProperties.setDark(false) : adminProperties.setDark(true));
+                                        }}>
                                             {darkMode ? <Brightness7 /> : <Brightness4 />}
                                         </IconButton>
                                     </Toolbar>

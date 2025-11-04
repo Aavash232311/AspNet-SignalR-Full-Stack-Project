@@ -168,7 +168,6 @@ export default class Thread extends Component {
                 <AdminContext.Consumer>
                     {(adminProperties) => {
                         const { dark } = adminProperties;
-                        console.log(dark);
                         return (
                             <>
                                 <Toolbar />
