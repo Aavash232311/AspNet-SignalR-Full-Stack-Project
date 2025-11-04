@@ -51,15 +51,16 @@ export default defineConfig({
                 target,
                 secure: false
             },
-            '^/schoolForm': {
-                target,
-                secure: false
-            },
             '^/Confession': {
                 target,
                 secure: false
             },
             '^/chatHub': {
+                target,
+                secure: false,
+                ws: true
+            },
+            '^/Admin': {
                 target,
                 secure: false,
                 ws: true

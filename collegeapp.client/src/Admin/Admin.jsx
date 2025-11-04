@@ -1,15 +1,16 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import "../static/auth/Admin/admin.css";
 import { CssBaseline, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton, Collapse } from '@mui/material';
 import { Brightness4, Brightness7, Settings, ListAlt, History } from '@mui/icons-material';
 import WebIcon from '@mui/icons-material/Web';
 import { jwtDecode } from "jwt-decode";
-import { NavItem, NavLink } from "reactstrap";
+import { NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 import MenuIcon from '@mui/icons-material/Menu';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import TryIcon from '@mui/icons-material/Try';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 export class Admin extends Component {
     state = {
@@ -84,10 +85,24 @@ export class Admin extends Component {
                                             <ListItemIcon><ShowChartIcon /></ListItemIcon>
                                             <ListItemText primary="Analytics" />
                                         </ListItem>
-                                        <ListItem button="true" sx={{ pl: 4 }}>
-                                            <ListItemIcon><TryIcon /></ListItemIcon>
-                                            <ListItemText primary="Confessions" />
-                                        </ListItem>
+                                        <NavLink
+                                            tag={Link}
+                                            to={"/su-route-root/confession"}
+                                        >
+                                            <ListItem button="true" sx={{ pl: 4 }}>
+                                                <ListItemIcon><TryIcon /></ListItemIcon>
+                                                <ListItemText primary="Confessions" />
+                                            </ListItem>
+                                        </NavLink>
+                                        <NavLink
+                                            tag={Link}
+                                            to={"/su-route-root/theads"}
+                                        >
+                                            <ListItem button="true" sx={{ pl: 4 }}>
+                                                <ListItemIcon><ChatBubbleOutlineIcon /></ListItemIcon>
+                                                <ListItemText primary="Threads" />
+                                            </ListItem>
+                                        </NavLink>
                                     </List>
                                 </Collapse>
 

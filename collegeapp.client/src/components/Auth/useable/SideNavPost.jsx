@@ -18,7 +18,6 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ForumIcon from '@mui/icons-material/Forum';
 import FeedIcon from '@mui/icons-material/Feed';
-import { NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';

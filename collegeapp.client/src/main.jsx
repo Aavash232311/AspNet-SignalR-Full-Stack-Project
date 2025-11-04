@@ -13,6 +13,8 @@ import { ProtectedRoute } from './auth/auth.jsx';
 import { ROLES } from './auth/auth.jsx';
 import NotFound from './components/Auth/useable/404.jsx';
 import AdminMessage from './Admin/Admin.jsx';
+import AdminConfession from './Admin/Confession.jsx';
+import Thread from './Admin/Thread.jsx';
 
 createRoot(document.getElementById('root')).render(
   <AuthProvider>
@@ -30,6 +32,19 @@ createRoot(document.getElementById('root')).render(
           <Route path="/su-route-root" element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
               <AdminMessage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/su-route-root/confession" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminConfession />
+            </ProtectedRoute>
+          } />
+
+          
+          <Route path="/su-route-root/theads" element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <Thread />
             </ProtectedRoute>
           } />
 
