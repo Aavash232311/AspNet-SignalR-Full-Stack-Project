@@ -144,7 +144,7 @@ export class Admin extends Component {
                 )}
 
                 {/* Main Content */}
-                <main className="admin-content">
+                <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
                     {this.props.children}
                 </main>
             </div>

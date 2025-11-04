@@ -26,7 +26,10 @@ export default class NavBarDefault extends React.Component {
                         loggedIn = authService.loggedIn;
                     }
                     const { roles } = authService;
-                    const checkForSuperuser = roles.find((x) => x === "Superuser");
+                    let checkForSuperuser = false;
+                    if (roles !== undefined) {
+                        checkForSuperuser = roles.find((x) => x === "Superuser");
+                    }
 
                     return (
                         <>

@@ -24,7 +24,7 @@
 
 /* Drawer styling */
 .admin-drawer {
-  width: 240px;
+  width: 80px;
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
@@ -72,4 +72,30 @@
 /* AppBar transition */
 .admin-appbar {
   transition: background 0.3s, color 0.3s;
+}
+
+.admin-content {
+  margin-left: 250px; /* same as drawer width + small gap */
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+.admin.dark {
+  background-color: #121212;
+  color: #fff;
+}
+
+.admin.light {
+  background-color: #fafafa;
+  color: #000;
+}
+
+/* When drawer is closed, shift it back */
+.admin-content.drawer-closed {
+  margin-left: 20px; /* just a small padding from left */
+}
+
+
+.thread-admin-table {
+  user-select: none;
 }
