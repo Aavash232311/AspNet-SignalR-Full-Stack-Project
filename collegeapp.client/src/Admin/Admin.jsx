@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component, createContext, useContext } from "react";
 import "../static/auth/Admin/admin.css";
 import { CssBaseline, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton, Collapse } from '@mui/material';
 import { Brightness4, Brightness7, Settings, ListAlt, History } from '@mui/icons-material';
@@ -11,6 +11,22 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import TryIcon from '@mui/icons-material/Try';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+
+
+export const AdminContext = createContext(undefined);
+const useAdmin = () => useContext(AdminContext);
+
+
+export const AdminProvider = ({ children }) => {
+    const [dark, setDark] = React.useState(true);
+    const methods = {
+        setDark,
+        dark
+    }
+    return (
+        <AdminContext.Provider value={methods}>{children}</AdminContext.Provider>
+    )
+}
 
 export class Admin extends Component {
     state = {
@@ -39,115 +55,123 @@ export class Admin extends Component {
         const { darkMode } = this.state;
         const { openConfessions, openSettings } = this.state;
         return (
-            <div className={darkMode ? 'admin dark' : 'admin light'}>
-                <CssBaseline />
+            <AdminProvider>
+                <AdminContext.Consumer>
+                    {(adminProperties) => {
+                        return (
+                            <div className={darkMode ? 'admin dark' : 'admin light'}>
+                                <CssBaseline />
 
-                {/* AppBar */}
-                <AppBar position="fixed" className="admin-appbar">
-                    <Toolbar>
+                                {/* AppBar */}
+                                <AppBar position="fixed" className="admin-appbar">
+                                    <Toolbar>
 
-                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                            Admin Panel
-                        </Typography>
+                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
+                                            Admin Panel
+                                        </Typography>
 
-                        <IconButton color="inherit" onClick={this.toggleMenu} >
-                            <MenuIcon />
-                        </IconButton>
+                                        <IconButton color="inherit" onClick={this.toggleMenu} >
+                                            <MenuIcon />
+                                        </IconButton>
 
-                        <IconButton color="inherit" onClick={this.toggleDarkMode}>
-                            {darkMode ? <Brightness7 /> : <Brightness4 />}
-                        </IconButton>
-                    </Toolbar>
-                </AppBar>
+                                        <IconButton color="inherit" onClick={this.toggleDarkMode}>
+                                            {darkMode ? <Brightness7 /> : <Brightness4 />}
+                                        </IconButton>
+                                    </Toolbar>
+                                </AppBar>
 
-                {/* Side Drawer, instead of closing that it's not render it */}
-                {this.state.drawerOpen && (
-                    <>
-                        <Drawer
-                            variant="permanent"
-                            className="admin-drawer"
-                        >
-                            <Toolbar />
-                            <List>
-                                {/* Dropdown Trigger */}
-                                <ListItem button="true" onClick={this.toggleConfessions}>
-                                    <ListItemIcon>
-                                        <ListAlt />
-                                    </ListItemIcon>
-                                    <ListItemText primary="See Confessions" />
-                                    {openConfessions ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
-
-                                {/* Dropdown Content */}
-                                <Collapse in={openConfessions} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button="true" sx={{ pl: 4 }}>
-                                            <ListItemIcon><ShowChartIcon /></ListItemIcon>
-                                            <ListItemText primary="Analytics" />
-                                        </ListItem>
-                                        <NavLink
-                                            tag={Link}
-                                            to={"/su-route-root/confession"}
+                                {/* Side Drawer, instead of closing that it's not render it */}
+                                {this.state.drawerOpen && (
+                                    <>
+                                        <Drawer
+                                            variant="permanent"
+                                            className="admin-drawer"
                                         >
-                                            <ListItem button="true" sx={{ pl: 4 }}>
-                                                <ListItemIcon><TryIcon /></ListItemIcon>
-                                                <ListItemText primary="Confessions" />
-                                            </ListItem>
-                                        </NavLink>
-                                        <NavLink
-                                            tag={Link}
-                                            to={"/su-route-root/theads"}
-                                        >
-                                            <ListItem button="true" sx={{ pl: 4 }}>
-                                                <ListItemIcon><ChatBubbleOutlineIcon /></ListItemIcon>
-                                                <ListItemText primary="Threads" />
-                                            </ListItem>
-                                        </NavLink>
-                                    </List>
-                                </Collapse>
+                                            <Toolbar />
+                                            <List>
+                                                {/* Dropdown Trigger */}
+                                                <ListItem button="true" onClick={this.toggleConfessions}>
+                                                    <ListItemIcon>
+                                                        <ListAlt />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary="See Confessions" />
+                                                    {openConfessions ? <ExpandLess /> : <ExpandMore />}
+                                                </ListItem>
 
-                                {/* Dropdown Trigger Settings */}
-                                <ListItem button="true" onClick={this.toggleSettings}>
-                                    <ListItemIcon><Settings /></ListItemIcon>
-                                    <ListItemText primary="Site Settings" />
-                                    {openSettings ? <ExpandLess /> : <ExpandMore />}
-                                </ListItem>
+                                                {/* Dropdown Content */}
+                                                <Collapse in={openConfessions} timeout="auto" unmountOnExit>
+                                                    <List component="div" disablePadding>
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><ShowChartIcon /></ListItemIcon>
+                                                            <ListItemText primary="Analytics" />
+                                                        </ListItem>
+                                                        <NavLink
+                                                            tag={Link}
+                                                            to={"/su-route-root/confession"}
+                                                        >
+                                                            <ListItem button="true" sx={{ pl: 4 }}>
+                                                                <ListItemIcon><TryIcon /></ListItemIcon>
+                                                                <ListItemText primary="Confessions" />
+                                                            </ListItem>
+                                                        </NavLink>
+                                                        <NavLink
+                                                            tag={Link}
+                                                            to={"/su-route-root/theads"}
+                                                        >
+                                                            <ListItem button="true" sx={{ pl: 4 }}>
+                                                                <ListItemIcon><ChatBubbleOutlineIcon /></ListItemIcon>
+                                                                <ListItemText primary="Threads" />
+                                                            </ListItem>
+                                                        </NavLink>
+                                                    </List>
+                                                </Collapse>
 
-                                {/* Dropdown Content */}
-                                <Collapse in={openSettings} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        <ListItem button="true" sx={{ pl: 4 }}>
-                                            <ListItemIcon><Settings /></ListItemIcon>
-                                            <ListItemText primary="Settings" />
-                                        </ListItem>
-                                    </List>
-                                </Collapse>
+                                                {/* Dropdown Trigger Settings */}
+                                                <ListItem button="true" onClick={this.toggleSettings}>
+                                                    <ListItemIcon><Settings /></ListItemIcon>
+                                                    <ListItemText primary="Site Settings" />
+                                                    {openSettings ? <ExpandLess /> : <ExpandMore />}
+                                                </ListItem>
+
+                                                {/* Dropdown Content */}
+                                                <Collapse in={openSettings} timeout="auto" unmountOnExit>
+                                                    <List component="div" disablePadding>
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><Settings /></ListItemIcon>
+                                                            <ListItemText primary="Settings" />
+                                                        </ListItem>
+                                                    </List>
+                                                </Collapse>
 
 
-                                <ListItem>
-                                    <ListItemIcon><History /></ListItemIcon>
-                                    <ListItemText primary="Site Logs" />
-                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemIcon><History /></ListItemIcon>
+                                                    <ListItemText primary="Site Logs" />
+                                                </ListItem>
 
-                                <ListItem>
-                                    <ListItemIcon><WebIcon /></ListItemIcon>
-                                    <NavLink
-                                        tag={Link}
-                                        to={"/"}
-                                    >
-                                        <ListItemText primary="Site visit" />
-                                    </NavLink>
-                                </ListItem>
-                            </List>
-                        </Drawer>
-                    </>
-                )}
+                                                <ListItem>
+                                                    <ListItemIcon><WebIcon /></ListItemIcon>
+                                                    <NavLink
+                                                        tag={Link}
+                                                        to={"/"}
+                                                    >
+                                                        <ListItemText primary="Site visit" />
+                                                    </NavLink>
+                                                </ListItem>
+                                            </List>
+                                        </Drawer>
+                                    </>
+                                )}
 
-                {/* Main Content */}
-                <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
-                    {this.props.children}
-                </main>
-            </div>
+                                {/* Main Content */}
+                                <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
+                                    {this.props.children}
+                                </main>
+                            </div>
+                        )
+                    }}
+                </AdminContext.Consumer>
+            </AdminProvider>
         );
     }
 }
