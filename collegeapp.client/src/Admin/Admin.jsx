@@ -20,9 +20,21 @@ const useAdmin = () => useContext(AdminContext);
 export const AdminProvider = ({ children }) => {
     // Although we make it rely on broswer storage, to make the componenet render accordingly triggering state here
     const [dark, setDark] = React.useState(false);
+    // we can manage state of drawer here, which makes it ideal 
+    // Very professional of me 😋
+    const [openConfessions, setOpenConfessions] = React.useState(false);
+    const [openSettings, setOpenSettings] = React.useState(false);
+    const [drawerOpen, setDrawerOpen] = React.useState(true);
+
     const methods = {
         dark,
-        setDark
+        setDark,
+        openConfessions,
+        setOpenConfessions,
+        openSettings,
+        setOpenSettings,
+        drawerOpen,
+        setDrawerOpen
     }
     return (
         <AdminContext.Provider value={methods}>{children}</AdminContext.Provider>
@@ -30,11 +42,7 @@ export const AdminProvider = ({ children }) => {
 }
 
 export class Admin extends Component {
-    state = {
-        drawerOpen: true,
-        openConfessions: false,
-        openSettings: false,
-    };
+
     constructor(props) {
         super(props);
     }
@@ -50,27 +58,32 @@ export class Admin extends Component {
     }
 
     toggleConfessions = () => {
-        this.setState((prevState) => ({ openConfessions: !prevState.openConfessions }));
+        const adminData = this.context;
+        const { openConfessions, setOpenConfessions } = adminData;
+        (openConfessions === true ? setOpenConfessions(false) : setOpenConfessions(true));
     };
     toggleSettings = () => {
-        this.setState((prevState) => ({ openSettings: !prevState.openSettings }));
+        const adminData = this.context;
+        const { openSettings, setOpenSettings } = adminData;
+        (openSettings === true ? setOpenSettings(false) : setOpenSettings(true));
     };
 
     toggleMenu = () => {
-        this.setState({ drawerOpen: !this.state.drawerOpen });
+        const adminData = this.context;
+        const { drawerOpen, setDrawerOpen } = adminData;
+        (drawerOpen === true ? setDrawerOpen(false) : setDrawerOpen(true));
     };
 
     static contextType = AdminContext;
 
     render() {
-        const { openConfessions, openSettings } = this.state;
         return (
             <AdminContext.Consumer>
                 {(adminProperties) => {
 
                     // this dark theme cannot work from context because we have,
                     // called a differnent URL inorder to fix and make it a global we need to make use of local storage
-                    const { dark, setDark } = adminProperties;
+                    const { dark, setDark, drawerOpen, openSettings, openConfessions } = adminProperties;
                     let darkMode = dark;
                     return (
                         <div className={darkMode ? 'admin dark' : 'admin light'}>
@@ -89,7 +102,6 @@ export class Admin extends Component {
                                     </IconButton>
 
                                     <IconButton color="inherit" onClick={() => {
-                                        let bool = true; // stay positive :)
                                         if (darkMode === true) {
                                             setDark(false);
                                             localStorage.setItem("theme-dark", JSON.stringify(false));
@@ -104,7 +116,7 @@ export class Admin extends Component {
                             </AppBar>
 
                             {/* Side Drawer, instead of closing that it's not render it */}
-                            {this.state.drawerOpen && (
+                            {drawerOpen && (
                                 <>
                                     <Drawer
                                         variant="permanent"
@@ -187,7 +199,7 @@ export class Admin extends Component {
                             )}
 
                             {/* Main Content */}
-                            <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
+                            <main className={`admin-content ${!drawerOpen ? 'drawer-closed' : ''}`}>
                                 {this.props.children}
                             </main>
                         </div>
