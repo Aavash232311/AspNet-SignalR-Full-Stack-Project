@@ -18,10 +18,8 @@ const useAdmin = () => useContext(AdminContext);
 
 
 export const AdminProvider = ({ children }) => {
-    const [dark, setDark] = React.useState(true);
     const methods = {
-        setDark,
-        dark
+
     }
     return (
         <AdminContext.Provider value={methods}>{children}</AdminContext.Provider>
@@ -32,8 +30,21 @@ export class Admin extends Component {
     state = {
         drawerOpen: true,
         openConfessions: false,
-        openSettings: false
+        openSettings: false,
+        darkMode: false
     };
+    constructor(props) {
+        super(props);
+    }
+
+    componentDidMount() {
+        let getTheme = localStorage.getItem('theme-dark')
+        if (getTheme !== undefined) { // setting the default theme
+            getTheme = JSON.parse(getTheme);
+            this.setState({ darkMode: getTheme })
+        }
+    }
+
     toggleConfessions = () => {
         this.setState((prevState) => ({ openConfessions: !prevState.openConfessions }));
     };
@@ -53,11 +64,9 @@ export class Admin extends Component {
             <AdminProvider>
                 <AdminContext.Consumer>
                     {(adminProperties) => {
-                        const { dark } = adminProperties;
-                        let darkMode = dark;
                         // this dark theme cannot work from context because we have,
                         // called a differnent URL inorder to fix and make it a global we need to make use of local storage
-                        
+                        const { darkMode } = this.state; // the default theme is dark
                         return (
                             <div className={darkMode ? 'admin dark' : 'admin light'}>
                                 <CssBaseline />
@@ -75,7 +84,13 @@ export class Admin extends Component {
                                         </IconButton>
 
                                         <IconButton color="inherit" onClick={() => {
-                                            (dark === true ? adminProperties.setDark(false) : adminProperties.setDark(true));
+                                            let bool = true; // stay positive :)
+                                            if (darkMode === true) {
+                                                this.setState({ darkMode: false }, () => { localStorage.setItem("theme-dark", JSON.stringify(false)); });
+                                            } else {
+                                                this.setState({ darkMode: true }, () => { localStorage.setItem("theme-dark", JSON.stringify(true)); }); // just to scare people 😋
+                                            }
+                                            console.log(darkMode, this.state.darkMode);
                                         }}>
                                             {darkMode ? <Brightness7 /> : <Brightness4 />}
                                         </IconButton>
