@@ -15,42 +15,45 @@ import NotFound from './components/Auth/useable/404.jsx';
 import AdminMessage from './Admin/Admin.jsx';
 import AdminConfession from './Admin/Confession.jsx';
 import Thread from './Admin/Thread.jsx';
+import { AdminProvider } from './Admin/Admin.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <AuthProvider>
-    <BrowserRouter>
-      <Auth0ProviderWithHistory>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/add-confession" element={<Confessions />} />
-          <Route path="/view" element={<View />} />
-          <Route path="/not-found" element={<NotFound />} />
+  <AdminProvider>
+    <AuthProvider>
+      <BrowserRouter>
+        <Auth0ProviderWithHistory>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/add-confession" element={<Confessions />} />
+            <Route path="/view" element={<View />} />
+            <Route path="/not-found" element={<NotFound />} />
 
-          <Route path="/su-route-root" element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminMessage />
-            </ProtectedRoute>
-          } />
+            <Route path="/su-route-root" element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminMessage />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/su-route-root/confession" element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminConfession />
-            </ProtectedRoute>
-          } />
+            <Route path="/su-route-root/confession" element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminConfession />
+              </ProtectedRoute>
+            } />
 
-          
-          <Route path="/su-route-root/theads" element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <Thread />
-            </ProtectedRoute>
-          } />
 
-        </Routes>
-      </Auth0ProviderWithHistory>
-    </BrowserRouter>
-  </AuthProvider>,
+            <Route path="/su-route-root/theads" element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <Thread />
+              </ProtectedRoute>
+            } />
+
+          </Routes>
+        </Auth0ProviderWithHistory>
+      </BrowserRouter>
+    </AuthProvider>
+  </AdminProvider>
 );
 

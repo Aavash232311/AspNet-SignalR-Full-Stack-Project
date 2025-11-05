@@ -38,12 +38,14 @@ export class Admin extends Component {
     constructor(props) {
         super(props);
     }
-
+    static contextType = AdminContext;
     componentDidMount() {
+        const adminData = this.context;
+        const { setDark } = adminData;
         let getTheme = localStorage.getItem('theme-dark')
         if (getTheme !== undefined) { // setting the default theme
             getTheme = JSON.parse(getTheme);
-            this.setState({ darkMode: getTheme })
+            setDark(getTheme);
         }
     }
 
@@ -63,137 +65,135 @@ export class Admin extends Component {
     render() {
         const { openConfessions, openSettings } = this.state;
         return (
-            <AdminProvider>
-                <AdminContext.Consumer>
-                    {(adminProperties) => {
+            <AdminContext.Consumer>
+                {(adminProperties) => {
 
-                        // this dark theme cannot work from context because we have,
-                        // called a differnent URL inorder to fix and make it a global we need to make use of local storage
-                        const { dark, setDark } = adminProperties;
-                        let darkMode = dark;
-                        return (
-                            <div className={darkMode ? 'admin dark' : 'admin light'}>
-                                <CssBaseline />
+                    // this dark theme cannot work from context because we have,
+                    // called a differnent URL inorder to fix and make it a global we need to make use of local storage
+                    const { dark, setDark } = adminProperties;
+                    let darkMode = dark;
+                    return (
+                        <div className={darkMode ? 'admin dark' : 'admin light'}>
+                            <CssBaseline />
 
-                                {/* AppBar */}
-                                <AppBar position="fixed" className="admin-appbar">
-                                    <Toolbar>
+                            {/* AppBar */}
+                            <AppBar position="fixed" className="admin-appbar">
+                                <Toolbar>
 
-                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                                            Admin Panel
-                                        </Typography>
+                                    <Typography variant="h6" style={{ flexGrow: 1 }}>
+                                        Admin Panel
+                                    </Typography>
 
-                                        <IconButton color="inherit" onClick={this.toggleMenu} >
-                                            <MenuIcon />
-                                        </IconButton>
+                                    <IconButton color="inherit" onClick={this.toggleMenu} >
+                                        <MenuIcon />
+                                    </IconButton>
 
-                                        <IconButton color="inherit" onClick={() => {
-                                            let bool = true; // stay positive :)
-                                            if (darkMode === true) {
-                                                setDark(false);
-                                                localStorage.setItem("theme-dark", JSON.stringify(false));
-                                            } else {
-                                                setDark(true);
-                                                localStorage.setItem("theme-dark", JSON.stringify(true)); // just to scare people 😋
-                                            }
-                                        }}>
-                                            {darkMode ? <Brightness7 /> : <Brightness4 />}
-                                        </IconButton>
-                                    </Toolbar>
-                                </AppBar>
+                                    <IconButton color="inherit" onClick={() => {
+                                        let bool = true; // stay positive :)
+                                        if (darkMode === true) {
+                                            setDark(false);
+                                            localStorage.setItem("theme-dark", JSON.stringify(false));
+                                        } else {
+                                            setDark(true);
+                                            localStorage.setItem("theme-dark", JSON.stringify(true)); // just to scare people 😋
+                                        }
+                                    }}>
+                                        {darkMode ? <Brightness7 /> : <Brightness4 />}
+                                    </IconButton>
+                                </Toolbar>
+                            </AppBar>
 
-                                {/* Side Drawer, instead of closing that it's not render it */}
-                                {this.state.drawerOpen && (
-                                    <>
-                                        <Drawer
-                                            variant="permanent"
-                                            className="admin-drawer"
-                                        >
-                                            <Toolbar />
-                                            <List>
-                                                {/* Dropdown Trigger */}
-                                                <ListItem button="true" onClick={this.toggleConfessions}>
-                                                    <ListItemIcon>
-                                                        <ListAlt />
-                                                    </ListItemIcon>
-                                                    <ListItemText primary="See Confessions" />
-                                                    {openConfessions ? <ExpandLess /> : <ExpandMore />}
-                                                </ListItem>
+                            {/* Side Drawer, instead of closing that it's not render it */}
+                            {this.state.drawerOpen && (
+                                <>
+                                    <Drawer
+                                        variant="permanent"
+                                        className="admin-drawer"
+                                    >
+                                        <Toolbar />
+                                        <List>
+                                            {/* Dropdown Trigger */}
+                                            <ListItem button="true" onClick={this.toggleConfessions}>
+                                                <ListItemIcon>
+                                                    <ListAlt />
+                                                </ListItemIcon>
+                                                <ListItemText primary="See Confessions" />
+                                                {openConfessions ? <ExpandLess /> : <ExpandMore />}
+                                            </ListItem>
 
-                                                {/* Dropdown Content */}
-                                                <Collapse in={openConfessions} timeout="auto" unmountOnExit>
-                                                    <List component="div" disablePadding>
-                                                        <ListItem button="true" sx={{ pl: 4 }}>
-                                                            <ListItemIcon><ShowChartIcon /></ListItemIcon>
-                                                            <ListItemText primary="Analytics" />
-                                                        </ListItem>
-                                                        <NavLink
-                                                            tag={Link}
-                                                            to={"/su-route-root/confession"}
-                                                        >
-                                                            <ListItem button="true" sx={{ pl: 4 }}>
-                                                                <ListItemIcon><TryIcon /></ListItemIcon>
-                                                                <ListItemText primary="Confessions" />
-                                                            </ListItem>
-                                                        </NavLink>
-                                                        <NavLink
-                                                            tag={Link}
-                                                            to={"/su-route-root/theads"}
-                                                        >
-                                                            <ListItem button="true" sx={{ pl: 4 }}>
-                                                                <ListItemIcon><ChatBubbleOutlineIcon /></ListItemIcon>
-                                                                <ListItemText primary="Threads" />
-                                                            </ListItem>
-                                                        </NavLink>
-                                                    </List>
-                                                </Collapse>
-
-                                                {/* Dropdown Trigger Settings */}
-                                                <ListItem button="true" onClick={this.toggleSettings}>
-                                                    <ListItemIcon><Settings /></ListItemIcon>
-                                                    <ListItemText primary="Site Settings" />
-                                                    {openSettings ? <ExpandLess /> : <ExpandMore />}
-                                                </ListItem>
-
-                                                {/* Dropdown Content */}
-                                                <Collapse in={openSettings} timeout="auto" unmountOnExit>
-                                                    <List component="div" disablePadding>
-                                                        <ListItem button="true" sx={{ pl: 4 }}>
-                                                            <ListItemIcon><Settings /></ListItemIcon>
-                                                            <ListItemText primary="Settings" />
-                                                        </ListItem>
-                                                    </List>
-                                                </Collapse>
-
-
-                                                <ListItem>
-                                                    <ListItemIcon><History /></ListItemIcon>
-                                                    <ListItemText primary="Site Logs" />
-                                                </ListItem>
-
-                                                <ListItem>
-                                                    <ListItemIcon><WebIcon /></ListItemIcon>
+                                            {/* Dropdown Content */}
+                                            <Collapse in={openConfessions} timeout="auto" unmountOnExit>
+                                                <List component="div" disablePadding>
+                                                    <ListItem button="true" sx={{ pl: 4 }}>
+                                                        <ListItemIcon><ShowChartIcon /></ListItemIcon>
+                                                        <ListItemText primary="Analytics" />
+                                                    </ListItem>
                                                     <NavLink
                                                         tag={Link}
-                                                        to={"/"}
+                                                        to={"/su-route-root/confession"}
                                                     >
-                                                        <ListItemText primary="Site visit" />
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><TryIcon /></ListItemIcon>
+                                                            <ListItemText primary="Confessions" />
+                                                        </ListItem>
                                                     </NavLink>
-                                                </ListItem>
-                                            </List>
-                                        </Drawer>
-                                    </>
-                                )}
+                                                    <NavLink
+                                                        tag={Link}
+                                                        to={"/su-route-root/theads"}
+                                                    >
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><ChatBubbleOutlineIcon /></ListItemIcon>
+                                                            <ListItemText primary="Threads" />
+                                                        </ListItem>
+                                                    </NavLink>
+                                                </List>
+                                            </Collapse>
 
-                                {/* Main Content */}
-                                <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
-                                    {this.props.children}
-                                </main>
-                            </div>
-                        )
-                    }}
-                </AdminContext.Consumer>
-            </AdminProvider>
+                                            {/* Dropdown Trigger Settings */}
+                                            <ListItem button="true" onClick={this.toggleSettings}>
+                                                <ListItemIcon><Settings /></ListItemIcon>
+                                                <ListItemText primary="Site Settings" />
+                                                {openSettings ? <ExpandLess /> : <ExpandMore />}
+                                            </ListItem>
+
+                                            {/* Dropdown Content */}
+                                            <Collapse in={openSettings} timeout="auto" unmountOnExit>
+                                                <List component="div" disablePadding>
+                                                    <ListItem button="true" sx={{ pl: 4 }}>
+                                                        <ListItemIcon><Settings /></ListItemIcon>
+                                                        <ListItemText primary="Settings" />
+                                                    </ListItem>
+                                                </List>
+                                            </Collapse>
+
+
+                                            <ListItem>
+                                                <ListItemIcon><History /></ListItemIcon>
+                                                <ListItemText primary="Site Logs" />
+                                            </ListItem>
+
+                                            <ListItem>
+                                                <ListItemIcon><WebIcon /></ListItemIcon>
+                                                <NavLink
+                                                    tag={Link}
+                                                    to={"/"}
+                                                >
+                                                    <ListItemText primary="Site visit" />
+                                                </NavLink>
+                                            </ListItem>
+                                        </List>
+                                    </Drawer>
+                                </>
+                            )}
+
+                            {/* Main Content */}
+                            <main className={`admin-content ${!this.state.drawerOpen ? 'drawer-closed' : ''}`}>
+                                {this.props.children}
+                            </main>
+                        </div>
+                    )
+                }}
+            </AdminContext.Consumer>
         );
     }
 }
