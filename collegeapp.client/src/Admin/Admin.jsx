@@ -18,8 +18,11 @@ const useAdmin = () => useContext(AdminContext);
 
 
 export const AdminProvider = ({ children }) => {
+    // Although we make it rely on broswer storage, to make the componenet render accordingly triggering state here
+    const [dark, setDark] = React.useState(false);
     const methods = {
-
+        dark,
+        setDark
     }
     return (
         <AdminContext.Provider value={methods}>{children}</AdminContext.Provider>
@@ -31,7 +34,6 @@ export class Admin extends Component {
         drawerOpen: true,
         openConfessions: false,
         openSettings: false,
-        darkMode: false
     };
     constructor(props) {
         super(props);
@@ -64,9 +66,11 @@ export class Admin extends Component {
             <AdminProvider>
                 <AdminContext.Consumer>
                     {(adminProperties) => {
+
                         // this dark theme cannot work from context because we have,
                         // called a differnent URL inorder to fix and make it a global we need to make use of local storage
-                        const { darkMode } = this.state; // the default theme is dark
+                        const { dark, setDark } = adminProperties;
+                        let darkMode = dark;
                         return (
                             <div className={darkMode ? 'admin dark' : 'admin light'}>
                                 <CssBaseline />
@@ -86,11 +90,12 @@ export class Admin extends Component {
                                         <IconButton color="inherit" onClick={() => {
                                             let bool = true; // stay positive :)
                                             if (darkMode === true) {
-                                                this.setState({ darkMode: false }, () => { localStorage.setItem("theme-dark", JSON.stringify(false)); });
+                                                setDark(false);
+                                                localStorage.setItem("theme-dark", JSON.stringify(false));
                                             } else {
-                                                this.setState({ darkMode: true }, () => { localStorage.setItem("theme-dark", JSON.stringify(true)); }); // just to scare people 😋
+                                                setDark(true);
+                                                localStorage.setItem("theme-dark", JSON.stringify(true)); // just to scare people 😋
                                             }
-                                            console.log(darkMode, this.state.darkMode);
                                         }}>
                                             {darkMode ? <Brightness7 /> : <Brightness4 />}
                                         </IconButton>

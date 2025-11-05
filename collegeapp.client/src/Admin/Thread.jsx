@@ -168,6 +168,16 @@ export default class Thread extends Component {
                 <AdminContext.Consumer>
                     {(adminProperties) => {
                         const { dark } = adminProperties;
+                        const darkPagination = {
+                            '& .MuiPaginationItem-root': {
+                                color: dark ? '#fff' : '#ffffffff',
+                                borderColor: dark ? '#555' : '#ccc',
+                            },
+                            '& .Mui-selected': {
+                                backgroundColor: dark ? '#1976d2' : '#1976d2',
+                                color: '#fff',
+                            },
+                        }
                         return (
                             <>
                                 <Toolbar />
@@ -177,7 +187,13 @@ export default class Thread extends Component {
                                 {this.state.threads.length > 0 && (
                                     <>
                                         <hr style={{ visibility: "hidden" }} />
-                                        <Pagination className={dark ? 'pagination-light' : ''} count={10} page={1}  />
+                                        <Pagination
+                                            count={10}
+                                            page={1}
+                                            color="primary"
+                                            sx={dark === true ? darkPagination : {}}
+                                        />
+
                                     </>
                                 )}
                             </>
