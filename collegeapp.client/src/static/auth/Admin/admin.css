@@ -99,3 +99,26 @@
 .thread-admin-table {
   user-select: none;
 }
+
+.view-content-thread-admin {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  width: 100%;
+  min-height: 350px;
+  height: auto;
+  background-color: white;
+  border-radius: 0.5px;
+}
+
+.admin-view-theard {
+  width: 95%;
+  margin-top: 10px;
+}
+
+.admin-view-thread-labels {
+  width: 100%;
+  text-align: left;
+  padding: 15px;
+  margin-top: 10px;
+  color: black;
+  font-weight: lighter;
+}

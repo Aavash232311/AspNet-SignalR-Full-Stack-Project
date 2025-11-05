@@ -11,6 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Services from "../utils/utils.js";
 import Pagination from '@mui/material/Pagination';
 import "../static/auth/Admin/thread.css";
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const services = new Services();
 
@@ -18,13 +19,18 @@ export function StickyHeadTable(args) {
     const { props } = args;
 
     const { columns, pageNum, pageSize, rows } = props;
-    let rowsPerPage = pageSize;
+
+    const viewContent = (objectId) => {
+        const { props } = args;
+        const { viewPage } = props;
+        viewPage(objectId);
+    }
     return (
         <AdminContext.Consumer>
             {(adminProperties) => {
                 return (
                     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                        <TableContainer sx={{ maxHeight: 440 }}>
+                        <TableContainer sx={{ maxHeight: 440, overflowX: "auto" }}>
                             <Table stickyHeader aria-label="sticky table">
                                 <TableHead>
                                     <TableRow>
@@ -39,6 +45,9 @@ export function StickyHeadTable(args) {
                                         ))}
                                         <TableCell>
                                             Action
+                                        </TableCell>
+                                        <TableCell>
+                                            View
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -65,6 +74,11 @@ export function StickyHeadTable(args) {
                                                             Delete
                                                         </button>
                                                     </TableCell>
+                                                    <TableCell>
+                                                        <button onClick={() => { viewContent(row["id"]) }} className="btn btn-outline-primary">
+                                                            View
+                                                        </button>
+                                                    </TableCell>
                                                 </TableRow>
                                             );
                                         })}
@@ -88,7 +102,8 @@ export default class Thread extends Component {
         totalPages: 1,
         threads: [],
         page: 1,
-        pageSize: 5
+        pageSize: 5,
+        viewContant: null,
     }
 
     services = new Services();
@@ -109,6 +124,14 @@ export default class Thread extends Component {
 
     static contextType = AdminContext;
 
+    view = (objectId) => {
+        const { threads } = this.state;
+        const findObjectToView = threads.find((x) => x.id === objectId);
+        if (findObjectToView !== undefined) {
+            this.setState({ viewContant: findObjectToView });
+        }
+    }
+
     render() {
 
         const columns = [
@@ -117,35 +140,30 @@ export default class Thread extends Component {
             {
                 id: 'likes',
                 label: 'Likes',
-                minWidth: 10,
                 align: 'right',
                 format: (value) => value.toLocaleString('en-US'),
             },
             {
                 id: 'added',
                 label: 'Added Date',
-                minWidth: 170,
                 align: 'right',
                 format: (value) => value.toLocaleString('en-US'),
             },
             {
                 id: 'lastModified',
                 label: 'Last modified',
-                minWidth: 170,
                 align: 'right',
                 format: (value) => value.toFixed(2),
             },
             {
                 id: 'userId',
                 label: 'Auth0 Id',
-                minWidth: 170,
                 align: 'right',
                 format: (value) => value.toFixed(2),
             },
             {
                 id: 'confessionId',
                 label: 'Confession Id',
-                minWidth: 170,
                 align: 'right',
                 format: (value) => value.toFixed(2),
             },
@@ -160,7 +178,8 @@ export default class Thread extends Component {
             columns,
             pageNum: this.state.page,
             pageSize: this.state.pageSize,
-            rows
+            rows,
+            viewPage: this.view
         }
 
         return (
@@ -183,19 +202,43 @@ export default class Thread extends Component {
                                 <Toolbar />
                                 <Typography variant="h4">Thread page</Typography>
                                 <p>Admin confession control.</p>
-                                {this.state.threads.length > 0 && <StickyHeadTable className="thread-admin-table" props={tableProps} />}
-                                {this.state.threads.length > 0 && (
-                                    <>
-                                        <hr style={{ visibility: "hidden" }} />
-                                        <Pagination
-                                            count={10}
-                                            page={1}
-                                            color="primary"
-                                            sx={dark === true ? darkPagination : {}}
-                                        />
+                                {this.state.viewContant === null &&
+                                    (<>
+                                        {this.state.threads.length > 0 && <StickyHeadTable className="thread-admin-table" props={tableProps} />}
+                                        {this.state.threads.length > 0 && (
+                                            <>
+                                                <hr style={{ visibility: "hidden" }} />
+                                                <Pagination
+                                                    count={this.state.totalPages}
+                                                    page={1}
+                                                    color="primary"
+                                                    sx={dark === true ? darkPagination : {}}
+                                                />
 
+                                            </>
+                                        )}
+                                    </>
+                                    )}
+
+                                {this.state.viewContant !== null && (
+                                    <>
+                                        {console.log(this.state.viewContant)}
+                                        <div className="view-content-thread-admin">
+                                            <div className="admin-view-thread-labels" style={{textAlign: "right"}}>
+                                                <CancelIcon onClick={() => {this.setState({viewContant: null})}} />
+                                            </div>
+                                            <div className="admin-view-thread-labels">
+                                                Comment
+                                            </div>
+                                            <center>
+                                                <textarea className="form-control admin-view-theard" readOnly defaultValue={this.state.viewContant.comments} name="" id="">
+                                                </textarea>
+                                            </center>
+
+                                        </div>
                                     </>
                                 )}
+
                             </>
                         )
                     }}
