@@ -110,8 +110,9 @@ export default class Thread extends Component {
 
     services = new Services();
 
-    async componentDidMount() {
-        const response = await fetch(`/Admin/recent-threads?page=${this.state.page}&pageSize=${this.state.pageSize}`, {
+
+    getThreads = async (page) => {
+        const response = await fetch(`/Admin/recent-threads?page=${page}&pageSize=${this.state.pageSize}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${this.services.accessToken()}`,
@@ -124,6 +125,10 @@ export default class Thread extends Component {
         this.setState({ threads: data, totalPages });
     }
 
+    async componentDidMount() {
+        this.getThreads(this.state.page);
+    }
+
     static contextType = AdminContext;
 
     view = (objectId) => {
@@ -132,6 +137,11 @@ export default class Thread extends Component {
         if (findObjectToView !== undefined) {
             this.setState({ viewContant: findObjectToView });
         }
+    }
+
+    handleChange = (ev, val) => {
+        this.getThreads(val);
+        this.setState({page: val});
     }
 
     render() {
@@ -212,8 +222,9 @@ export default class Thread extends Component {
                                                 <hr style={{ visibility: "hidden" }} />
                                                 <Pagination
                                                     count={this.state.totalPages}
-                                                    page={1}
+                                                    page={this.state.page}
                                                     color="primary"
+                                                    onChange={this.handleChange}
                                                     sx={dark === true ? darkPagination : {}}
                                                 />
 
@@ -344,7 +355,7 @@ export class Auth0User extends Component {
                                     <tbody>
                                         <tr>
                                             <th>Email verified</th>
-                                            <th>{email_verified === true ? <VerifiedIcon />: <NewReleasesIcon/>}</th>
+                                            <th>{email_verified === true ? <VerifiedIcon /> : <NewReleasesIcon />}</th>
                                         </tr>
                                     </tbody>
                                     <tbody>
