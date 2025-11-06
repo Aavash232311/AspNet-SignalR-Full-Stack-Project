@@ -46,7 +46,7 @@ export class Admin extends Component {
     constructor(props) {
         super(props);
     }
-    static contextType = AdminContext;
+
     componentDidMount() {
         const adminData = this.context;
         const { setDark } = adminData;

@@ -222,19 +222,57 @@ export default class Thread extends Component {
 
                                 {this.state.viewContant !== null && (
                                     <>
-                                        {console.log(this.state.viewContant)}
-                                        <div className="view-content-thread-admin">
-                                            <div className="admin-view-thread-labels" style={{textAlign: "right"}}>
-                                                <CancelIcon onClick={() => {this.setState({viewContant: null})}} />
+                                        <div className={`view-content-thread-admin ${dark === true ? "p-3 mb-2 bg-dark text-white" : ""}`} id="view-table">
+                                            <div className="admin-view-thread-labels" style={{ textAlign: "right" }}>
+                                                <CancelIcon style={{color: dark === true ? "white" : "black"}} onClick={() => { this.setState({ viewContant: null }) }} />
                                             </div>
-                                            <div className="admin-view-thread-labels">
-                                                Comment
-                                            </div>
-                                            <center>
-                                                <textarea className="form-control admin-view-theard" readOnly defaultValue={this.state.viewContant.comments} name="" id="">
-                                                </textarea>
-                                            </center>
 
+                                            <table className={`table ${dark === true ? "table-dark table-striped" : ""}`} >
+                                                <thead>
+                                                    <tr>
+                                                        {Object.entries(this.state.viewContant).map((i, j) => {
+                                                            const key = i[0]
+                                                            if (key === "comments" || key === "replies") return;
+                                                            return (
+                                                                <React.Fragment key={j}>
+                                                                    <th>
+                                                                        {key}
+                                                                    </th>
+                                                                </React.Fragment>
+                                                            )
+                                                        })}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        {Object.entries(this.state.viewContant).map((i, j) => {
+                                                            let value = i[1];
+                                                            const key = i[0];
+                                                            if (key === "comments" || key === "replies") return;
+                                                            if (key === "parentId" && value === null) {
+                                                                value = "Root thread";
+                                                            }
+
+
+                                                            return (
+                                                                <React.Fragment key={value + Math.random(0, 1000)}>
+                                                                    <th>
+                                                                        {key === "profileColor" ? (
+                                                                            <>
+                                                                                <div className="profile-color-shample-admin" style={{backgroundColor: value}}>
+
+                                                                                </div>
+                                                                            </>
+                                                                        ) :  value}
+                                                                    </th>
+                                                                </React.Fragment>
+                                                            )
+                                                        })}
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <hr />
+                                            <textarea className={`form-control ${dark === true ? "p-3 mb-2 bg-dark text-white" : ""}`} readOnly defaultValue={this.state.viewContant.comments}></textarea>
                                         </div>
                                     </>
                                 )}
