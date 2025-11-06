@@ -106,6 +106,7 @@ export default class Thread extends Component {
         page: 1,
         pageSize: 5,
         viewContant: null,
+        userInfo: null,
     }
 
     services = new Services();
@@ -135,13 +136,28 @@ export default class Thread extends Component {
         const { threads } = this.state;
         const findObjectToView = threads.find((x) => x.id === objectId);
         if (findObjectToView !== undefined) {
-            this.setState({ viewContant: findObjectToView });
+            this.loadUser(findObjectToView.userId).then(() => {
+                this.setState({ viewContant: findObjectToView });
+            });
         }
     }
 
     handleChange = (ev, val) => {
         this.getThreads(val);
-        this.setState({page: val});
+        this.setState({ page: val });
+    }
+
+    loadUser = async (userId) => {
+        var res = await fetch(`/Admin/get-clientinfo?auth0Id=${userId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "GET"
+        });
+        var data = await res.json();
+        const { value } = data;
+        this.setState({ userInfo: value })
     }
 
     render() {
@@ -292,7 +308,7 @@ export default class Thread extends Component {
                                             <h6 className="h6">
                                                 User Information
                                             </h6>
-                                            <Auth0User clientId={this.state.viewContant.userId} />
+                                            <Auth0User userInfo={this.state.userInfo} />
                                         </div>
                                     </>
                                 )}
@@ -319,17 +335,8 @@ export class Auth0User extends Component {
     services = new Services();
 
     async componentDidMount() {
-        if (this.props.clientId === undefined) return;
-        var res = await fetch(`/Admin/get-clientinfo?auth0Id=${this.props.clientId}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.services.accessToken()}`,
-            },
-            method: "GET"
-        });
-        var data = await res.json();
-        const { value } = data;
-        this.setState({ userInfo: value });
+        if (this.props.userInfo === null) return;
+        this.setState({ userInfo: this.props.userInfo });
     }
     render() {
         return (
@@ -339,7 +346,7 @@ export class Auth0User extends Component {
                         const { dark } = adminProperties;
                         if (this.state.userInfo === null) return (
                             <>
-                                No information
+                                <b>No information</b>
                             </>
                         );
                         const { email, email_verified, name, nickname, logins_count, created_at, last_login, picture, updated_at, user_id } = this.state.userInfo;
