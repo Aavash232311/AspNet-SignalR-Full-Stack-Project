@@ -6,6 +6,8 @@ import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
 import SideNavPost from "./useable/SideNavPost";
 import { AiOutlinePlusCircle } from "react-icons/ai";
+import Face6Icon from '@mui/icons-material/Face6';
+import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
 // I had to heal with Response object and http header but this will do that job in our case.
@@ -293,16 +295,18 @@ class CommentRenderCompoenent extends Component {
               style={{ backgroundColor: i.profileColor, color: "white" }}
               id="profile-circle"
             >
-              A
+              <EmojiPeopleIcon />
             </div>
             <div style={{ textAlign: "left" }} className="anonymous-user-label">
               <div>
-                <b>Anonymous participant{" "}
-                  {i.id.substring(i.id.length - 5, i.id.length)}
+                <b>Unsigned Responder {" "}
+                  <small className="anonymous-code">{i.id.substring(i.id.length - 4, i.id.length)}</small>
                 </b>
               </div>
               <small className="date-font-small">
-                {this.services.normalizeASPDate(i.added)}
+                <div>
+                  {this.services.normalizeASPDate(i.added)}
+                </div>
               </small>
             </div>
           </div>
@@ -526,12 +530,33 @@ export default class View extends Component {
               <>
                 <div>
                   <div id="confession-topic">
+                    <div className="profile-and-name">
+                      <div id="profile-circle">
+                        <Face6Icon />
+                      </div>
+                      <div style={{ textAlign: "left" }} className="anonymous-user-label">
+                        <div>
+                          <b>Unsigned participant{" "}
+                          </b>
+                        </div>
+                        <small className="date-font-small">
+                          {this.services.normalizeASPDate(this.state.confession.added)}
+
+                          {this.state.confession.lastModified !== this.state.confession.added ? (
+                            <>
+                              &#9;
+                              <b>Edited:</b> {this.services.normalizeASPDate(this.state.confession.lastModified)}
+                            </>
+                          ) : ""}
+                        </small>
+                      </div>
+                    </div>
                     <br />
-                    <h5 style={{ fontWeight: "lighter" }}>
+                    <h5 className="momo-trust-display-regular">
                       {this.state.confession.topic}
                     </h5>{" "}
                     <br />
-                    <div>{this.state.confession.description}</div>
+                    <div className="confession-body-font">{this.state.confession.description}</div>
                     <Comment />
                   </div>
                 </div>

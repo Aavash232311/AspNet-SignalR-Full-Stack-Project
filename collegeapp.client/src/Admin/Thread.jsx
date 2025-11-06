@@ -14,6 +14,9 @@ import "../static/auth/Admin/thread.css";
 import CancelIcon from '@mui/icons-material/Cancel';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import SecurityIcon from '@mui/icons-material/Security';
+import Link from '@mui/material/Link';
+
 
 const services = new Services();
 
@@ -306,7 +309,15 @@ export default class Thread extends Component {
                                             <textarea className={`form-control ${dark === true ? "p-3 mb-2 bg-dark text-white" : ""}`} readOnly defaultValue={this.state.viewContant.comments}></textarea>
                                             <hr />
                                             <h6 className="h6">
-                                                User Information
+                                                User Information:    <Link
+                                                    component="button"
+                                                    variant="body2"
+                                                    onClick={() => {
+                                                        window.location.href = "https://manage.auth0.com/dashboard/us/dev-3gfo42id/"
+                                                    }}
+                                                >
+                                                    Auth0 <SecurityIcon />
+                                                </Link>
                                             </h6>
                                             <Auth0User userInfo={this.state.userInfo} />
                                         </div>
