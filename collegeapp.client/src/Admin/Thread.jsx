@@ -12,7 +12,8 @@ import Services from "../utils/utils.js";
 import Pagination from '@mui/material/Pagination';
 import "../static/auth/Admin/thread.css";
 import CancelIcon from '@mui/icons-material/Cancel';
-import { domain, clientId } from "../auth/auth.jsx";
+import VerifiedIcon from '@mui/icons-material/Verified';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
 
 const services = new Services();
 
@@ -280,7 +281,7 @@ export default class Thread extends Component {
                                             <h6 className="h6">
                                                 User Information
                                             </h6>
-                                            <Auth0User />
+                                            <Auth0User clientId={this.state.viewContant.userId} />
                                         </div>
                                     </>
                                 )}
@@ -299,17 +300,105 @@ export class Auth0User extends Component {
         super(props);
     }
 
-    componentDidMount() {
-        
+
+    state = {
+        userInfo: null,
+    }
+
+    services = new Services();
+
+    async componentDidMount() {
+        if (this.props.clientId === undefined) return;
+        var res = await fetch(`/Admin/get-clientinfo?auth0Id=${this.props.clientId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "GET"
+        });
+        var data = await res.json();
+        const { value } = data;
+        this.setState({ userInfo: value });
     }
     render() {
         return (
             <>
                 <AdminContext.Consumer>
                     {(adminProperties) => {
+                        const { dark } = adminProperties;
+                        if (this.state.userInfo === null) return (
+                            <>
+                                No information
+                            </>
+                        );
+                        const { email, email_verified, name, nickname, logins_count, created_at, last_login, picture, updated_at, user_id } = this.state.userInfo;
                         return (
                             <>
+                                <table className={`table ${dark === true ? "table-dark" : ""}`} >
+                                    <thead>
+                                        <tr>
+                                            <th>User email</th>
+                                            <th>{email}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>Email verified</th>
+                                            <th>{email_verified === true ? <VerifiedIcon />: <NewReleasesIcon/>}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>{name}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Nickname</th>
+                                            <th>{nickname}</th>
+                                        </tr>
+                                    </tbody>
 
+                                    <tbody>
+                                        <tr>
+                                            <th>Login count</th>
+                                            <th>{logins_count}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Account created</th>
+                                            <th>{this.services.normalizeASPDate(created_at)}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Last login</th>
+                                            <th>{this.services.normalizeASPDate(last_login)}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Updated At</th>
+                                            <th>{this.services.normalizeASPDate(updated_at)}</th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Picture</th>
+                                            <th>
+                                                <img className="profile-color-shample-admin" src={picture} alt="" />
+                                            </th>
+                                        </tr>
+                                    </tbody>
+                                    <tbody>
+                                        <tr>
+                                            <th>Auth0 Id</th>
+                                            <th>{user_id}</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </>
                         )
                     }}
