@@ -50,5 +50,21 @@ namespace CollegeApp.Server.Controllers
             var pagination = _helper.NormalPagination(pageSize, page, threads.AsQueryable());
             return new JsonResult(Ok(pagination));
         }
+
+        [Route("get-clientinfo")]
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUserInfo(string auth0Id)
+        {
+            if (string.IsNullOrEmpty(auth0Id))
+            {
+                return new JsonResult(BadRequest(new { error = "Id is required" }));
+            }
+
+            var response = await _userManager.GetUserInfo(auth0Id);
+
+            return new JsonResult(Ok(response));
+
+        }
     }
 }

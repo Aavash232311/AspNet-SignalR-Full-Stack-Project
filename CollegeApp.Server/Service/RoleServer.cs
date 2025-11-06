@@ -2,6 +2,8 @@
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
+using Azure.Core;
+using System;
 
 namespace CollegeApp.Server.Service
 {
@@ -49,7 +51,7 @@ namespace CollegeApp.Server.Service
             return token;
         }
 
-        public async Task AssignRoleToUserAsync(string UserId, string RoleId)
+        public async Task<object> AssignRoleToUserAsync(string UserId, string RoleId)
         {
             var token = await GetManagementApiToken();
             var domain = _configuration["Auth0:Domain"];
@@ -60,8 +62,26 @@ namespace CollegeApp.Server.Service
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Failed to assign role: {await response.Content.ReadAsStringAsync()} . Try re logging in");
+            return response;
+        }
+
+        // we need to grab the user info from auth0, this involves using "client secret" so calling from backend
+        public async Task<JsonElement> GetUserInfo(string clientId)
+        {
+            var domain = _configuration["Auth0:Domain"];
+            var clientSecret = _configuration["Auth0:ClientSecret"];
+            var audience = _configuration["Auth0:ManagementApiAudience"];
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{domain}/api/v2/users/{Uri.EscapeUriString(clientId)}");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var getManagementAPIToken = await GetManagementApiToken(); // this is another request call for management api token
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", getManagementAPIToken);
+
+            var response = await _httpClient.SendAsync(request);
+
+            response.EnsureSuccessStatusCode();
+            return JsonSerializer.Deserialize<JsonElement>(await response.Content.ReadAsStringAsync());
         }
 
         public async Task<string> RefreshToken(string refreshToken)

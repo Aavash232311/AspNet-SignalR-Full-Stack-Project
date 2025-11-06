@@ -33,10 +33,10 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
     return <NotFound />;
 };
 
+export const domain = "dev-3gfo42id.us.auth0.com";
+export const clientId = "iauvQygsniC9PMR9MbtICPc1vg9Cy1QW";
 
 export const AuthProvider = ({ children }) => {
-    const domain = "dev-3gfo42id.us.auth0.com";
-    const clientId = "iauvQygsniC9PMR9MbtICPc1vg9Cy1QW";
     const [loggedIn, setLoggedIn] = React.useState(undefined);
     const [user, setUser] = React.useState(null);
     const [roles, setRoles] = React.useState([]);

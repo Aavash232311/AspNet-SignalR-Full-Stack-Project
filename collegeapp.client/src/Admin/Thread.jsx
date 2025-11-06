@@ -12,6 +12,7 @@ import Services from "../utils/utils.js";
 import Pagination from '@mui/material/Pagination';
 import "../static/auth/Admin/thread.css";
 import CancelIcon from '@mui/icons-material/Cancel';
+import { domain, clientId } from "../auth/auth.jsx";
 
 const services = new Services();
 
@@ -224,9 +225,11 @@ export default class Thread extends Component {
                                     <>
                                         <div className={`view-content-thread-admin ${dark === true ? "p-3 mb-2 bg-dark text-white" : ""}`} id="view-table">
                                             <div className="admin-view-thread-labels" style={{ textAlign: "right" }}>
-                                                <CancelIcon style={{color: dark === true ? "white" : "black"}} onClick={() => { this.setState({ viewContant: null }) }} />
+                                                <CancelIcon style={{ color: dark === true ? "white" : "black" }} onClick={() => { this.setState({ viewContant: null }) }} />
                                             </div>
-
+                                            <h6 className="h6">
+                                                View Content
+                                            </h6>
                                             <table className={`table ${dark === true ? "table-dark table-striped" : ""}`} >
                                                 <thead>
                                                     <tr>
@@ -259,11 +262,11 @@ export default class Thread extends Component {
                                                                     <th>
                                                                         {key === "profileColor" ? (
                                                                             <>
-                                                                                <div className="profile-color-shample-admin" style={{backgroundColor: value}}>
+                                                                                <div className="profile-color-shample-admin" style={{ backgroundColor: value }}>
 
                                                                                 </div>
                                                                             </>
-                                                                        ) :  value}
+                                                                        ) : value}
                                                                     </th>
                                                                 </React.Fragment>
                                                             )
@@ -273,6 +276,11 @@ export default class Thread extends Component {
                                             </table>
                                             <hr />
                                             <textarea className={`form-control ${dark === true ? "p-3 mb-2 bg-dark text-white" : ""}`} readOnly defaultValue={this.state.viewContant.comments}></textarea>
+                                            <hr />
+                                            <h6 className="h6">
+                                                User Information
+                                            </h6>
+                                            <Auth0User />
                                         </div>
                                     </>
                                 )}
@@ -282,6 +290,31 @@ export default class Thread extends Component {
                     }}
                 </AdminContext.Consumer>
             </Admin>
+        )
+    }
+}
+
+export class Auth0User extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    componentDidMount() {
+        
+    }
+    render() {
+        return (
+            <>
+                <AdminContext.Consumer>
+                    {(adminProperties) => {
+                        return (
+                            <>
+
+                            </>
+                        )
+                    }}
+                </AdminContext.Consumer>
+            </>
         )
     }
 }

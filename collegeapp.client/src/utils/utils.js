@@ -45,4 +45,6 @@ export default class Services {
     substring(str, characters) {
         return str.length >= characters ? str.substring(0, characters) + "..." : str;
     }
+
+    
 }
