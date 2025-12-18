@@ -12,7 +12,7 @@ import AuthContext from "../../auth/auth";
 
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
-// I had to heal with Response object and http header but this will do that job in our case.
+// I had to deal with Response object and http header but this will do that job in our case.
 
 // as a developer, if your recursion failed in client side, at wrost,
 // all it can do is crash client's browser, but if it failed in server,it will break everything
@@ -426,7 +426,7 @@ class CommentRecurComponent extends Component {
       Second and "n" times this compoenent is called from this compoenent itself,
       Since we want to make data sync from web-sockets and fetch call. We want this all thing to render once the "root" node is changed, using "DSA"terminilogy
 
-      For the first phase we could bing this, and invoke the method in parent componenet,
+      For the first phase we could ping this, and invoke the method in parent componenet,
       For the second phase parent itself is the current child compoenent that's how recursion works in computer.
 
       Question is how do we bind in sucha way that things work out?

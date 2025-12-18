@@ -41,7 +41,9 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = React.useState(null);
     const [roles, setRoles] = React.useState([]);
 
-    const [dark, setDark] = React.useState(false);
+    const getTheme = localStorage.getItem("theme-dark")
+
+    const [dark, setDark] = React.useState(JSON.parse(getTheme));
 
     /* we don't need to worry much about signup since all public credentials are passed to thrid party api */
     const signup = async (name, email, password, conformPassword) => {

@@ -10,10 +10,6 @@ import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';
 import { CiHeart } from "react-icons/ci";
 import SideNavPost from './components/Auth/useable/SideNavPost';
-import { Card, CardContent, CardActions, IconButton, Typography, Box } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 
 export default class Dashboard extends Component {

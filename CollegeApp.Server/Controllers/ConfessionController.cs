@@ -142,7 +142,7 @@ namespace CollegeApp.Server.Controllers
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
 
             string profileColor = "";
-            Guid randomName;
+            Guid randomName = Guid.NewGuid();
 
             if (!(previousUserComment == null))
             {
@@ -153,7 +153,6 @@ namespace CollegeApp.Server.Controllers
             else
             {
                 profileColor = helper.RandomRGB();
-                randomName = Guid.NewGuid();
             }
 
             // Not just the profile color, we want their label "Anonymous Id" to be the same as well
@@ -194,7 +193,7 @@ namespace CollegeApp.Server.Controllers
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
             var comments = _context.Comments.Where(b => b.Parent == null).OrderByDescending(d => d.Added);
-            /* From the prespective of runtime complexity, okay if we load all at once then it's a nexted structure right,
+            /* From the point of runtime complexity, okay if we load all at once then it's a nexted structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from
             front-end for that.*/
@@ -226,6 +225,24 @@ namespace CollegeApp.Server.Controllers
             var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 
+            // Since comment is in different table
+            var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
+
+            string profileColor = "";
+            Guid randomName = Guid.NewGuid();
+
+            if (!(previousUserComment == null))
+            {
+                profileColor = previousUserComment.profileColor;
+                // if found user comment, in the same confession then we will use the same label
+                randomName = previousUserComment.AnonymousName;
+            }
+            else
+            {
+                profileColor = helper.RandomRGB();
+            }
+
+
             Comments newComment = new Comments() // creating a reply comment
             {
                 comments = comment,
@@ -235,7 +252,8 @@ namespace CollegeApp.Server.Controllers
                 ConfessionId = parentComment.ConfessionId, // setting the confessionId to the parent comment's confessionId
                 Confessions = getConfession, // setting the confession to the current confession,
                 // a clever way to use cascade in this sort of like hierarchial structure is to pass in parent reference in the every child comment
-                profileColor = helper.RandomRGB() // setting the profile color to a random color
+                profileColor = profileColor, // setting the profile color to a random color,
+                AnonymousName = randomName // setting the anonymous name to a random guid
             };
 
             parentComment.Replies.Add(newComment); // adding the new comment to the parent comment's children list for easy navigation 

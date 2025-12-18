@@ -140,12 +140,12 @@ const customTheme = createTheme({
 
 // dark theme for the MUI contaners
 const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#ff5252',
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#ff5252',
+        },
     },
-  },
 });
 
 
@@ -165,14 +165,21 @@ export default function SideNavPost(props) {
     return (
         <AuthContext.Consumer>
             {(provider) => {
-                const { dark, setDark } = provider;
+                let { dark, setDark } = provider;
+                dark = JSON.parse(dark);
+
                 const toggleThemeDark = () => {
-                    (dark == true ? setDark(false) : setDark(true))
+                    const setThemeLocalStorage = (bool) => {
+                        setDark(bool);
+                        localStorage.setItem("theme-dark", JSON.stringify(bool));
+                    }
+
+                    (dark == true ? setThemeLocalStorage(false) : setThemeLocalStorage(true))
                 }
 
                 return (
                     <>
-                        <ThemeProvider theme={dark === true ? darkTheme: customTheme}>
+                        <ThemeProvider theme={dark === true ? darkTheme : customTheme}>
                             <Box sx={{ display: 'flex' }}  >
                                 <CssBaseline />
                                 <AppBar position="fixed" open={open}>
@@ -273,7 +280,7 @@ export default function SideNavPost(props) {
                                     </List>
 
                                 </Drawer>
-                                <Box theme={dark === true ? darkTheme: customTheme} component="main" sx={{ flexGrow: 1, p: 3 }}>
+                                <Box theme={dark === true ? darkTheme : customTheme} component="main" sx={{ flexGrow: 1, p: 3 }}>
                                     <DrawerHeader />
                                     <div>
 
