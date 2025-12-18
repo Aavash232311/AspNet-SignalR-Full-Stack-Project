@@ -26,7 +26,9 @@ namespace CollegeApp.Server.Models
         [JsonIgnore]
         public Comments? Parent { get; set; } // parent comment
         public Guid? ParentId { get; set; } // foregin key for parent comment
+        [MaxLength(20)]
         public string profileColor { get; set; } = string.Empty;
+        public Guid AnonymousName { get; set; } = Guid.Empty;
 
     }
 }

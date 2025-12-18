@@ -307,7 +307,7 @@ class CommentRenderCompoenent extends Component {
             <div style={{ textAlign: "left" }} className="anonymous-user-label">
               <div>
                 <b>Unsigned Responder {" "}
-                  <small className="anonymous-code">{i.id.substring(i.id.length - 4, i.id.length)}</small>
+                  <small className="anonymous-code">{(i.anonymousName).substring(0, 5)}</small>
                 </b>
               </div>
               <small className="date-font-small">

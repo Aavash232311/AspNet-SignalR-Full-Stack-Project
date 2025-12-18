@@ -132,15 +132,46 @@ namespace CollegeApp.Server.Controllers
 
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
+
+            /* Now we want the game profile color if the customer is same,
+             * Here let's search in our database with the same user_id and same confession.
+             * A user can have a different profile color for different confession,
+             */
+
+            // Since comment is in different table
+            var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
+
+            string profileColor = "";
+            Guid randomName;
+
+            if (!(previousUserComment == null))
+            {
+                profileColor = previousUserComment.profileColor;
+                // if found user comment, in the same confession then we will use the same label
+                randomName = previousUserComment.AnonymousName;
+            }
+            else
+            {
+                profileColor = helper.RandomRGB();
+                randomName = Guid.NewGuid();
+            }
+
+            // Not just the profile color, we want their label "Anonymous Id" to be the same as well
+
+
+
             // in comment for the default cascade behaviour to work
             // we need to specify foregin key
+
+
             Comments newComment = new Comments()
             {
                 comments = comments,
                 UserId = userId,
                 ConfessionId = getConfessions.Id,
                 Confessions = getConfessions,
-                profileColor = helper.RandomRGB()
+                profileColor = profileColor,
+                AnonymousName = randomName
             };
             var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
