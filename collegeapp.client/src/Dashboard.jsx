@@ -75,10 +75,18 @@ export default class Dashboard extends Component {
         return (
             <AuthContext.Consumer>
                 {(authFunctions) => {
+                    const {dark} = authFunctions;
+
+                    // change styling accordingly
+                    let mainDivStyle = "";
+                    if (dark) {
+                        mainDivStyle = "p-3 mb-2 bg-dark text-white";
+                    }
+
                     return (
                         <SideNavPost>
                             <center>
-                                <div id="confession-content">
+                                <div id="confession-content" className={mainDivStyle}>
                                     <center>
                                         <div id="confession-content-align">
                                             <br />

@@ -5,7 +5,7 @@ import SideNavPost from './components/Auth/useable/SideNavPost';
 import "./static/auth/add-confession.css";
 import Services from './utils/utils';
 import { IoChevronBackOutline } from "react-icons/io5";
-
+import AuthContext from './auth/auth';
 
 export default class Confessions extends Component {
     constructor(props) {
@@ -94,80 +94,88 @@ export default class Confessions extends Component {
     render() {
 
         return (
-            <React.Fragment>
-                <SideNavPost>
-                    <center>
-                        {this.state.added && (
-                            <>
-                                <div className="alert alert-success" role="alert">
-                                    Confession added!!
-                                </div>
-                            </>
-                        )}
-                        <div id='add-confession-content'>
-                            <form onSubmit={this.addConfession}>
-                                <hr style={{ visibility: "hidden" }} />
-                                <div className='add-confession-form-wrapper'>
-                                    <div id='add-confession-label-and-back' className='confession-add-labels'>
-                                        <div>
-                                            <h6>Add your confessions </h6>
+            <>
+                <React.Fragment>
+                    <AuthContext.Consumer>
+                        {(provider) => {
+                            return (
+                                <SideNavPost>
+                                    <center>
+                                        {this.state.added && (
+                                            <>
+                                                <div className="alert alert-success" role="alert">
+                                                    Confession added!!
+                                                </div>
+                                            </>
+                                        )}
+                                        <div id='add-confession-content'>
+                                            <form onSubmit={this.addConfession}>
+                                                <hr style={{ visibility: "hidden" }} />
+                                                <div className='add-confession-form-wrapper'>
+                                                    <div id='add-confession-label-and-back' className='confession-add-labels'>
+                                                        <div>
+                                                            <h6>Add your confessions </h6>
+                                                        </div>
+                                                        <div style={{ textAlign: "right" }}>
+                                                            <NavItem style={{ listStyle: "none" }}>
+                                                                <NavLink
+                                                                    tag={Link}
+                                                                    to={"/dashboard"}
+                                                                >
+                                                                    <IoChevronBackOutline />
+                                                                </NavLink>
+                                                            </NavItem>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className='add-confession-form-wrapper'>
+                                                    <div className='confession-add-labels'>
+                                                        Topic
+                                                    </div>
+                                                    <div>
+                                                        <input defaultValue={this.state.editConfession !== null ? this.state.editConfession.topic : ""} required autoComplete='off' name='Topic' className='form-control' type="text" placeholder='topic' />
+                                                    </div>
+                                                </div>
+
+                                                <div className='add-confession-form-wrapper'>
+                                                    <div className='confession-add-labels'>
+                                                        Add Confession
+                                                    </div>
+                                                    <div>
+                                                        <textarea defaultValue={this.state.editConfession !== null ? this.state.editConfession.description : ""} required autoComplete='off' className='form-control' name="Description" placeholder='Confessions' id=""></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div className='add-confession-form-wrapper' id='add-new-confession-grid'>
+                                                    <button type='submit' className='btn btn-success submit-confession-button'>
+                                                        Add
+                                                    </button>
+                                                    <NavItem style={{ listStyle: "none" }}>
+                                                        <NavLink
+                                                            tag={Link}
+                                                            to={"/dashboard"}
+                                                        >
+                                                            <div className='btn btn-primary'>New</div>
+                                                        </NavLink>
+                                                    </NavItem>
+                                                </div>
+                                            </form>
+
+                                            <div className='add-confession-form-wrapper' id='add-confession-note'>
+                                                <span>
+                                                    This is a safe space to share what’s on your mind — anonymously and without judgment. Whether it’s something funny, deep, embarrassing, or heartfelt, feel free to express yourself.
+                                                    Just type it out and hit submit — no names, no pressure.
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div style={{ textAlign: "right" }}>
-                                            <NavItem style={{ listStyle: "none" }}>
-                                                <NavLink
-                                                    tag={Link}
-                                                    to={"/dashboard"}
-                                                >
-                                                    <IoChevronBackOutline />
-                                                </NavLink>
-                                            </NavItem>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className='add-confession-form-wrapper'>
-                                    <div className='confession-add-labels'>
-                                        Topic
-                                    </div>
-                                    <div>
-                                        <input defaultValue={this.state.editConfession !== null ? this.state.editConfession.topic : ""} required autoComplete='off' name='Topic' className='form-control' type="text" placeholder='topic' />
-                                    </div>
-                                </div>
-
-                                <div className='add-confession-form-wrapper'>
-                                    <div className='confession-add-labels'>
-                                        Add Confession
-                                    </div>
-                                    <div>
-                                        <textarea defaultValue={this.state.editConfession !== null ? this.state.editConfession.description : ""} required autoComplete='off' className='form-control' name="Description" placeholder='Confessions' id=""></textarea>
-                                    </div>
-                                </div>
-
-                                <div className='add-confession-form-wrapper' id='add-new-confession-grid'>
-                                    <button type='submit' className='btn btn-success submit-confession-button'>
-                                        Add
-                                    </button>
-                                    <NavItem style={{ listStyle: "none" }}>
-                                        <NavLink
-                                            tag={Link}
-                                            to={"/dashboard"}
-                                        >
-                                            <div className='btn btn-primary'>New</div>
-                                        </NavLink>
-                                    </NavItem>
-                                </div>
-                            </form>
-
-                            <div className='add-confession-form-wrapper' id='add-confession-note'>
-                                <span>
-                                    This is a safe space to share what’s on your mind — anonymously and without judgment. Whether it’s something funny, deep, embarrassing, or heartfelt, feel free to express yourself.
-                                    Just type it out and hit submit — no names, no pressure.
-                                </span>
-                            </div>
-                        </div>
-                    </center>
-                </SideNavPost>
-            </React.Fragment>
+                                    </center>
+                                </SideNavPost>
+                            )
+                        }}
+                    </AuthContext.Consumer>
+                </React.Fragment>
+            </>
         )
     }
 }

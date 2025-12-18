@@ -195,3 +195,7 @@
   border-color: #3898EC;
   outline: none;
 }
+
+#chat-fourm-frame {
+  overflow: auto;
+}

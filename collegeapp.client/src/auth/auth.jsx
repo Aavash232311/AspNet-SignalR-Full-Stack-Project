@@ -41,6 +41,8 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = React.useState(null);
     const [roles, setRoles] = React.useState([]);
 
+    const [dark, setDark] = React.useState(false);
+
     /* we don't need to worry much about signup since all public credentials are passed to thrid party api */
     const signup = async (name, email, password, conformPassword) => {
         if (password !== conformPassword) return { error: "Two password field didn't matched" };
@@ -151,7 +153,9 @@ export const AuthProvider = ({ children }) => {
         isUserAuthenticated,
         user,
         logout,
-        roles
+        roles,
+        setDark,
+        dark
     };
     /* Refresh token logic auth0, we need to refrresh our access token based on the refresh token */
 

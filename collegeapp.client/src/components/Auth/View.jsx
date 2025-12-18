@@ -8,6 +8,8 @@ import SideNavPost from "./useable/SideNavPost";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import Face6Icon from '@mui/icons-material/Face6';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
+import AuthContext from "../../auth/auth";
+
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
 // I had to heal with Response object and http header but this will do that job in our case.
@@ -76,6 +78,9 @@ class Comment extends Component {
       .withAutomaticReconnect()
       .build();
 
+    /* We have a problen, when the data comes from the socket,
+    and if we click on "thread" it renders thread of parent which is
+    not related to the parent thread */
     connection.on(
       "ReceiveMessage",
       function (valueFromSocket) {
@@ -95,6 +100,8 @@ class Comment extends Component {
           this.setState({ confessions });
         } else if (order === "top-level" && confessions.length <= stdPaingationSize) {
           // then we need to directly add into that confession array;
+
+          // we have a problem here, the recursive function wont structure the data correctly
           this.setState(prevState => ({
             confessions: [
               parent,
@@ -213,7 +220,7 @@ class Comment extends Component {
           </button>
           <hr style={{ visibility: "hidden" }} />
         </form>
-        <div id="chat-fourm-frame">
+        <div id="chat-fourm-frame" >
           {this.state.confessions && (
             <>
               {this.state.confessions.map((i, j) => {

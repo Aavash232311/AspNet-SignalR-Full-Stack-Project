@@ -22,6 +22,8 @@ import { Link } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Brightness4, Brightness7 } from '@mui/icons-material';
+import AuthContext from '../../../auth/auth';
 
 const drawerWidth = 240;
 
@@ -136,6 +138,16 @@ const customTheme = createTheme({
     },
 });
 
+// dark theme for the MUI contaners
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#ff5252',
+    },
+  },
+});
+
 
 export default function SideNavPost(props) {
     const theme = useTheme();
@@ -149,85 +161,130 @@ export default function SideNavPost(props) {
         setOpen(false);
     };
 
+
     return (
-        <ThemeProvider theme={customTheme}>
-            <Box sx={{ display: 'flex' }} >
-                <CssBaseline />
-                <AppBar position="fixed" open={open}>
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            onClick={handleDrawerOpen}
-                            edge="start"
-                            sx={[
-                                {
-                                    marginRight: 5,
-                                },
-                                open && { display: 'none' },
-                            ]}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography variant="h6" noWrap component="div">
-                            Confession App
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
-                <Drawer variant="permanent" open={open}>
-                    <DrawerHeader>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                width: '100%',
-                                userSelect: "none"
-                            }}
-                        >
-                            <Typography variant="h6">Menu</Typography>
-                            <IconButton onClick={handleDrawerClose}>
-                                {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                            </IconButton>
-                        </Box>
-                    </DrawerHeader>
-                    <Divider />
-                    <List>
-                        {/* If we use nav link then its going to throw warning */}
-                        {navContent.map((object, index) => (
-                            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-                                <ListItemButton
-                                    component={Link}
-                                    to={object.link}
-                                    sx={[
-                                        { minHeight: 48, px: 2.5 },
-                                        open ? { justifyContent: 'initial' } : { justifyContent: 'center' },
-                                    ]}
-                                >
-                                    <ListItemIcon
-                                        sx={[
-                                            { minWidth: 0, justifyContent: 'center' },
-                                            open ? { mr: 3 } : { mr: 'auto' },
-                                        ]}
-                                    >
-                                        {object.icons}
-                                    </ListItemIcon>
+        <AuthContext.Consumer>
+            {(provider) => {
+                const { dark, setDark } = provider;
+                const toggleThemeDark = () => {
+                    (dark == true ? setDark(false) : setDark(true))
+                }
 
-                                    <ListItemText
-                                        primary={object.label}
-                                        sx={[open ? { opacity: 1 } : { opacity: 0 }]}
-                                    />
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
-                    </List>
+                return (
+                    <>
+                        <ThemeProvider theme={dark === true ? darkTheme: customTheme}>
+                            <Box sx={{ display: 'flex' }}  >
+                                <CssBaseline />
+                                <AppBar position="fixed" open={open}>
+                                    <Toolbar>
+                                        <IconButton
+                                            color="inherit"
+                                            aria-label="open drawer"
+                                            onClick={handleDrawerOpen}
+                                            edge="start"
+                                            sx={[
+                                                {
+                                                    marginRight: 5,
+                                                },
+                                                open && { display: 'none' },
+                                            ]}
+                                        >
+                                            <MenuIcon />
+                                        </IconButton>
+                                        <Typography variant="h6" noWrap component="div">
+                                            Confession App
+                                        </Typography>
+                                    </Toolbar>
+                                </AppBar>
 
-                </Drawer>
-                <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <DrawerHeader />
-                    {props.children}
-                </Box>
-            </Box>
-        </ThemeProvider>
+                                <Drawer variant="permanent" open={open}>
+                                    <DrawerHeader>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                width: '100%',
+                                                userSelect: "none"
+                                            }}
+                                        >
+                                            <Typography variant="h6">Menu</Typography>
+                                            <IconButton onClick={handleDrawerClose}>
+                                                {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                                            </IconButton>
+                                        </Box>
+                                    </DrawerHeader>
+                                    <Divider />
+                                    <List>
+                                        {/* If we use nav link then its going to throw warning */}
+                                        {navContent.map((object, index) => (
+                                            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+                                                <ListItemButton
+                                                    component={Link}
+                                                    to={object.link}
+                                                    sx={[
+                                                        { minHeight: 48, px: 2.5 },
+                                                        open ? { justifyContent: 'initial' } : { justifyContent: 'center' },
+                                                    ]}
+                                                >
+                                                    <ListItemIcon
+                                                        sx={[
+                                                            { minWidth: 0, justifyContent: 'center' },
+                                                            open ? { mr: 3 } : { mr: 'auto' },
+                                                        ]}
+                                                    >
+                                                        {object.icons}
+                                                    </ListItemIcon>
+
+                                                    <ListItemText
+                                                        primary={object.label}
+                                                        sx={[open ? { opacity: 1 } : { opacity: 0 }]}
+                                                    />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        ))}
+
+                                        <ListItem disablePadding sx={{ display: 'block' }}>
+
+                                            <ListItemButton
+                                                sx={[
+                                                    { minHeight: 48, px: 2.5 },
+                                                    open ? { justifyContent: 'initial' } : { justifyContent: 'center' },
+                                                ]}
+                                                onClick={() => { toggleThemeDark(); }}
+                                            >
+                                                <ListItemIcon
+                                                    sx={[
+                                                        { minWidth: 0, justifyContent: 'center' },
+                                                        open ? { mr: 3 } : { mr: 'auto' },
+                                                    ]}
+                                                >
+                                                    {dark === true ? <Brightness4 /> : <Brightness7 />}
+                                                </ListItemIcon>
+
+                                                <ListItemText
+                                                    primary={dark === true ? "Dark" : "Light"}
+                                                    sx={[open ? { opacity: 1 } : { opacity: 0 }]}
+                                                />
+                                            </ListItemButton>
+
+                                        </ListItem>
+
+                                    </List>
+
+                                </Drawer>
+                                <Box theme={dark === true ? darkTheme: customTheme} component="main" sx={{ flexGrow: 1, p: 3 }}>
+                                    <DrawerHeader />
+                                    <div>
+
+                                    </div>
+                                    {props.children}
+                                </Box>
+                            </Box>
+                        </ThemeProvider >
+                    </>
+                )
+            }}
+        </AuthContext.Consumer>
     );
 }
