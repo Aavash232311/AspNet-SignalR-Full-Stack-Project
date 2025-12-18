@@ -1,8 +1,21 @@
-﻿using System;
+﻿using CollegeApp.Server.Models;
+using System;
 using System.Reflection;
 
 namespace CollegeApp.Server.Service
 {
+
+    public struct NameAndProfileColor
+    {
+        public Guid CommonName;
+        public string ProfileColor;
+
+        public NameAndProfileColor(Guid commonName, string profileColor)
+        {
+            CommonName = commonName;
+            ProfileColor = profileColor;
+        }
+    }
     public class Helper
     {
         Random random = new Random();
@@ -28,6 +41,26 @@ namespace CollegeApp.Server.Service
             {
                 throw new Exception(ex.Message);
             }
+        }
+        
+        // We want to re-user this, assigning random RGB value and common name here
+        public NameAndProfileColor CommonNameAndProfile(Comments? previousUserComment)
+        {
+
+            Guid commonName;
+            string profileColor;
+            if (!(previousUserComment == null))
+            {
+                commonName = previousUserComment.AnonymousName;
+                profileColor = previousUserComment.profileColor;
+            }
+            else
+            {
+                // if it's not null then assign new name
+                commonName = Guid.NewGuid();
+                profileColor = RandomRGB();
+            }
+            return new NameAndProfileColor(commonName, profileColor);
         }
     }
 }

@@ -141,19 +141,7 @@ namespace CollegeApp.Server.Controllers
             // Since comment is in different table
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
 
-            string profileColor = "";
-            Guid randomName = Guid.NewGuid();
-
-            if (!(previousUserComment == null))
-            {
-                profileColor = previousUserComment.profileColor;
-                // if found user comment, in the same confession then we will use the same label
-                randomName = previousUserComment.AnonymousName;
-            }
-            else
-            {
-                profileColor = helper.RandomRGB();
-            }
+            NameAndProfileColor nameAndProfile = helper.CommonNameAndProfile(previousUserComment);
 
             // Not just the profile color, we want their label "Anonymous Id" to be the same as well
 
@@ -169,8 +157,8 @@ namespace CollegeApp.Server.Controllers
                 UserId = userId,
                 ConfessionId = getConfessions.Id,
                 Confessions = getConfessions,
-                profileColor = profileColor,
-                AnonymousName = randomName
+                profileColor = nameAndProfile.ProfileColor,
+                AnonymousName = nameAndProfile.CommonName
             };
             var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
@@ -228,19 +216,7 @@ namespace CollegeApp.Server.Controllers
             // Since comment is in different table
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
 
-            string profileColor = "";
-            Guid randomName = Guid.NewGuid();
-
-            if (!(previousUserComment == null))
-            {
-                profileColor = previousUserComment.profileColor;
-                // if found user comment, in the same confession then we will use the same label
-                randomName = previousUserComment.AnonymousName;
-            }
-            else
-            {
-                profileColor = helper.RandomRGB();
-            }
+            NameAndProfileColor nameAndProfile = helper.CommonNameAndProfile(previousUserComment);
 
 
             Comments newComment = new Comments() // creating a reply comment
@@ -252,8 +228,8 @@ namespace CollegeApp.Server.Controllers
                 ConfessionId = parentComment.ConfessionId, // setting the confessionId to the parent comment's confessionId
                 Confessions = getConfession, // setting the confession to the current confession,
                 // a clever way to use cascade in this sort of like hierarchial structure is to pass in parent reference in the every child comment
-                profileColor = profileColor, // setting the profile color to a random color,
-                AnonymousName = randomName // setting the anonymous name to a random guid
+                profileColor = nameAndProfile.ProfileColor, // setting the profile color to a random color,
+                AnonymousName = nameAndProfile.CommonName // setting the anonymous name to a random guid
             };
 
             parentComment.Replies.Add(newComment); // adding the new comment to the parent comment's children list for easy navigation 
