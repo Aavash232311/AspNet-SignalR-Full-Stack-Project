@@ -292,11 +292,10 @@ namespace CollegeApp.Server.Controllers
             {
                 return new JsonResult(BadRequest(new
                 {
-                    errorCode = "No reference to the table"
+                    errorCode = "No reference to the table",
+                    entry = report
                 }));
             }
-
- 
 
             Confession associatedConfession = new Confession();
             Comments associatedComments = new Comments();

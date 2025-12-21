@@ -99,7 +99,7 @@
 
 #manipulate-comment {
     display: grid;
-    grid-template-columns: repeat(7, minmax(25px, auto));
+    grid-template-columns: repeat(8, minmax(25px, auto));
     font-size: small;
     padding: 10px;
     grid-gap: 5px;

@@ -297,6 +297,14 @@ class CommentRenderCompoenent extends Component {
     return (
       <React.Fragment>
         <div className="comment-frames">
+          {/* This is for, reporting comment! */}
+          {this.state.report === true ? (
+            <>
+              <ReportConfessionAndComment reportFor={{
+                type: "comments",
+                id: i.id
+              }} closeDiag={() => { this.setState({ report: false }) }} />
+            </>) : null}
           <div className="profile-and-name">
             <div
               style={{ backgroundColor: i.profileColor, color: "white" }}
@@ -341,6 +349,11 @@ class CommentRenderCompoenent extends Component {
             <div className="center-flex-grid hover-effect">
               <FaShare className="comment-icons center-flex-grid" /> {" "}
               <small>Share</small>
+            </div>
+            <div className="center-flex-grid hover-effect">
+              <ReportGmailerrorredIcon onClick={() => {
+                this.setState({ report: true });
+              }} />
             </div>
           </div>
           {this.state.showReplyThread === true && (
@@ -597,7 +610,8 @@ class ReportConfessionAndComment extends Component {
     super(props);
     this.state = {
       reason: '',
-      isSubmitting: false
+      isSubmitting: false,
+      report: false
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -700,7 +714,7 @@ class ReportConfessionAndComment extends Component {
             </div>
           </form>
         </div>
-      </div>
+      </div >
     );
   }
 }
