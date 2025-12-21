@@ -8,7 +8,7 @@ namespace CollegeApp.Server.Models
         public Guid Id { get; set; }
 
         [Required]
-        [MaxLength(2000)]
+        [MaxLength(2000)] 
         public string comments { get; set; } = string.Empty;
         public int likes { get; set; } = 0;
         public DateTime Added { get; set; } = DateTime.UtcNow;

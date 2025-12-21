@@ -8,7 +8,7 @@ import SideNavPost from "./useable/SideNavPost";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import Face6Icon from '@mui/icons-material/Face6';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
-import AuthContext from "../../auth/auth";
+import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
@@ -510,6 +510,7 @@ export default class View extends Component {
   state = {
     confession: null,
     comment: [],
+    report: false
   };
   componentDidMount() {
     fetch(`Confession/GetCurrentConfession?id=${this.url.get("topic")}`, {
@@ -531,6 +532,14 @@ export default class View extends Component {
   render() {
     return (
       <SideNavPost>
+        {this.state.report === true ? (
+          <>
+            <ReportConfessionAndComment reportFor={{
+              type: "confession",
+              id: this.state.confession.id
+            }} closeDiag={() => { this.setState({ report: false }) }} />
+          </>
+        ) : null}
         <center>
           <div id="view-frame">
             {this.state.confession !== null ? (
@@ -556,6 +565,13 @@ export default class View extends Component {
                             </>
                           ) : ""}
                         </small>
+                        &#9;
+                        <small>
+                          <ReportGmailerrorredIcon onClick={() => {
+                            this.setState({ report: true });
+                          }} fontSize="small" />
+                        </small>
+
                       </div>
                     </div>
                     <br />
@@ -572,6 +588,112 @@ export default class View extends Component {
           </div>
         </center>
       </SideNavPost>
+    );
+  }
+}
+
+class ReportConfessionAndComment extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      reason: '',
+      isSubmitting: false
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ reason: event.target.value });
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    this.setState({ isSubmitting: true });
+    const data = new FormData(event.currentTarget);
+    const { reportFor } = this.props;
+    const { type, id } = reportFor;
+
+    let comId; // comment id
+    let confId; // confession id
+
+    if (type === "confession") {
+      confId = id;
+      comId = null;
+    } else if (type === "comments") {
+      comId = id;
+      confId = null;
+    }
+
+    console.log(type, id);
+
+    fetch(`Confession/report`, {
+      method: "POST",
+      body: JSON.stringify({
+        reason: data.get("reason"),
+        ConfId: confId,
+        ComId: comId
+      })
+    }).then((r) => r.json()).then((response) => {
+      const {statusCode} = response;
+      if (statusCode === 200){
+        
+      }
+    })
+  }
+
+  cancelReport = () => {
+    this.props.closeDiag();
+  }
+
+
+  render() {
+    const { reason, isSubmitting } = this.state;
+
+    return (
+      // The outer overlay: covers screen, darkens background, handles outside clicks
+      <div className="modal-overlay" onClick={this.props.onClose}>
+        {/* The modal content box: sits in center. stopPropagation prevents closing when clicking inside */}
+        <div className="report-modal-container" onClick={e => e.stopPropagation()}>
+
+          <header className="report-header">
+            <h2>Report Content</h2>
+            <p>Help keep our community safe. Why are you reporting this?</p>
+          </header>
+
+          <form onSubmit={this.handleSubmit}>
+            <div className="form-group">
+              <textarea
+                id="reason-input"
+                name="reason"
+                value={reason}
+                onChange={this.handleChange}
+                placeholder="e.g. Harassment, hate speech, personal information..."
+                required
+              />
+            </div>
+
+            <div className="report-footer">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => { this.cancelReport() }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={!reason.trim() || isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     );
   }
 }

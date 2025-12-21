@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -19,6 +20,15 @@ namespace CollegeApp.Server.Controllers
                 .ForMember(dest => dest.ReplyCount,
                     opt => opt.MapFrom(src => src.Replies.Count));
         }
+    }
+
+    public class ReportType : Report
+    {
+        [Required]
+        [MaxLength(100)]
+        public string type { get; set; } = string.Empty;
+        public Guid? ConfId { get; set; } = Guid.Empty; // since we want only the id, we will sort and assign the object from the database
+        public Guid ComId { get; set; } = Guid.Empty;
     }
 
     public class CommentWithReplyCount: Comments
@@ -251,5 +261,83 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok(comment));
         }
 
+        [Route("deleted-user-comment")]
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeleteOwnUserComment(Guid commentId)
+        {
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
+
+            // User can only delete comment associated with him, we will later look at the default database behaviour regarding this
+            var getComment = _context.Comments.FirstOrDefault(x => x.Id == commentId && x.UserId == userId);
+            if (getComment == null) return new JsonResult(NotFound(new { message = "Comment not found" }));
+            _context.Comments.Remove(getComment);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
+
+        // Report on comment/confession
+        [Route("report")]
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Report(ReportType report)
+        {
+            // We always want to make sure the user is valid, even though it's authorize to get here, but we still user id
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
+
+            // there either one of `Confession` or `Comments` is required, cause a report might be for either one of them.
+            // we need to check if either one is there
+
+            if (report.ConfId == Guid.Empty && report.ComId == Guid.Empty)
+            {
+                return new JsonResult(BadRequest(new
+                {
+                    errorCode = "no identifer for the report"
+                }));
+            }
+
+            Confession associatedConfession = new Confession();
+            Comments associatedComments = new Comments();
+
+            // check if the confession or comments exist, and search them
+            if (report.ConfId != Guid.Empty)
+            {
+                var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == report.ConfId);
+                if (getConfession == null)
+                {
+                    return new JsonResult(NotFound(new
+                    {
+                        errorCode = "confession not found"
+                    }));
+                }
+                associatedConfession = getConfession;
+            }
+            else
+            {
+                var getComments = _context.Comments.FirstOrDefault(x => x.Id == report.ComId);
+                if (getComments == null)
+                {
+                    return new JsonResult(NotFound(new
+                    {
+                        errorCode = "comments not found"
+                    }));
+                }
+                associatedComments = getComments;
+            }
+
+
+            Report newReport = new Report()
+            {
+                reason = report.reason,
+                Confession = associatedConfession,
+                Comments = associatedComments,
+                reportedByUserId = userId,
+            };
+            _context.Reports.Add(newReport);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
     }
 }

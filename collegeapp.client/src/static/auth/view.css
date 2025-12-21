@@ -99,7 +99,7 @@
 
 #manipulate-comment {
     display: grid;
-    grid-template-columns: repeat(7, minmax(20px, auto));
+    grid-template-columns: repeat(7, minmax(25px, auto));
     font-size: small;
     padding: 10px;
     grid-gap: 5px;
@@ -163,4 +163,136 @@
         "BLED" 0,
         "SCAN" 0;
     font-size: 8px;
+}
+
+
+/* Report UI  */
+
+/* 1. The Overlay - Makes background less visible and centers content */
+.modal-overlay {
+  position: fixed; /* Stays put regardless of scrolling */
+  top: 0;
+  left: 0;
+  width: 100vw; /* Full viewport width */
+  height: 100vh; /* Full viewport height */
+  background-color: rgba(0, 0, 0, 0.6); /* Black background with 60% opacity */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  z-index: 9999; /* Ensure it's on top of everything */
+  backdrop-filter: blur(3px); /* Optional: adds a slight blur to background */
+  animation: fadeIn 0.2s ease-out; /* Smooth entrance */
+}
+
+/* 2. The Modal Container - The actual UI box */
+.report-modal-container {
+  background: #ffffff;
+  width: 90%; /* Responsive width */
+  max-width: 480px; /* Maximum width doesn't get too large */
+  border-radius: 12px;
+  /* Stronger shadow to make it pop out from the dark background */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 5px 15px rgba(0,0,0,0.1);
+  padding: 24px;
+  position: relative;
+  animation: slideUp 0.3s ease-out; /* Smooth slide up effect */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Internal Content Styles --- */
+
+.report-header h2 {
+  margin: 0 0 8px 0;
+  color: #d32f2f; /* Red color emphasizing urgency */
+  font-size: 1.5rem;
+}
+
+.report-header p {
+  color: #555;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+textarea {
+  width: 100%;
+  height: 130px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: none; /* Disables resizing handle */
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  background-color: #fafafa;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #d32f2f;
+  background-color: #fff;
+}
+
+textarea::placeholder {
+    color: #aaa;
+}
+
+.report-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.cancel-btn:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.submit-btn {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #b71c1c;
+}
+
+.submit-btn:disabled {
+  background: #ef9a9a;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

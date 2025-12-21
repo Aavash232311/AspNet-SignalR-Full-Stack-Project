@@ -9,6 +9,7 @@ namespace CollegeApp.Server.Data
         public ApplicationDbContext(DbContextOptions options) : base(options) { }
         public DbSet<Confession> Confessions { get; set; }
         public DbSet<Comments> Comments { get; set; }
+        public DbSet<Report> Reports { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Confession>()

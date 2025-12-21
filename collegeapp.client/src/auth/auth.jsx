@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
     const [loggedIn, setLoggedIn] = React.useState(undefined);
     const [user, setUser] = React.useState(null);
     const [roles, setRoles] = React.useState([]);
+    const [atObject, acObjects] = React.useState(null);
 
     const getTheme = localStorage.getItem("theme-dark")
 
@@ -140,6 +141,8 @@ export const AuthProvider = ({ children }) => {
         // if autheticated let's decode JWT for roles
         const token = localStorage.getItem('access_token');
         const decoded = jwtDecode(token);
+        acObjects(decoded);
+        
         const getRoles = decoded["roles/roles"];
         setRoles(getRoles);
     }, []);
@@ -157,7 +160,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         roles,
         setDark,
-        dark
+        dark,
+        atObject
     };
     /* Refresh token logic auth0, we need to refrresh our access token based on the refresh token */
 
