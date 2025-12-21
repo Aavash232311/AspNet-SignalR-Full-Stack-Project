@@ -27,8 +27,8 @@ namespace CollegeApp.Server.Controllers
         [Required]
         [MaxLength(100)]
         public string type { get; set; } = string.Empty;
-        public Guid? ConfId { get; set; } = Guid.Empty; // since we want only the id, we will sort and assign the object from the database
-        public Guid ComId { get; set; } = Guid.Empty;
+        public Guid? ConfId { get; set; } = null; // since we want only the id, we will sort and assign the object from the database
+        public Guid? ComId { get; set; } = null;
     }
 
     public class CommentWithReplyCount: Comments
@@ -290,19 +290,21 @@ namespace CollegeApp.Server.Controllers
             // there either one of `Confession` or `Comments` is required, cause a report might be for either one of them.
             // we need to check if either one is there
 
-            if (report.ConfId == Guid.Empty && report.ComId == Guid.Empty)
+            if (report.ConfId == null && report.ComId == null) // here null, because we don't want to send initial value as guid.empty from the client side
             {
                 return new JsonResult(BadRequest(new
                 {
-                    errorCode = "no identifer for the report"
+                    errorCode = "No reference to the table"
                 }));
             }
+
+ 
 
             Confession associatedConfession = new Confession();
             Comments associatedComments = new Comments();
 
             // check if the confession or comments exist, and search them
-            if (report.ConfId != Guid.Empty)
+            if (report.ConfId != null) 
             {
                 var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == report.ConfId);
                 if (getConfession == null)

@@ -603,6 +603,7 @@ class ReportConfessionAndComment extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  services = new Services();
 
   handleChange(event) {
     this.setState({ reason: event.target.value });
@@ -626,21 +627,26 @@ class ReportConfessionAndComment extends Component {
       confId = null;
     }
 
-    console.log(type, id);
-
     fetch(`Confession/report`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.services.accessToken()}`,
+      },
       body: JSON.stringify({
         reason: data.get("reason"),
         ConfId: confId,
-        ComId: comId
+        ComId: comId,
+        type
       })
     }).then((r) => r.json()).then((response) => {
-      const {statusCode} = response;
-      if (statusCode === 200){
-        
+      const { statusCode } = response;
+      if (statusCode === 200) {
+        alert("Repored");
+        // let's close this dialuge once everything is done;
+        this.props.closeDiag();
       }
-    })
+    });
   }
 
   cancelReport = () => {
