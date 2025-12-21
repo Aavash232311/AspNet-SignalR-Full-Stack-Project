@@ -16,6 +16,7 @@ import AdminMessage from './Admin/Admin.jsx';
 import AdminConfession from './Admin/Confession.jsx';
 import Thread from './Admin/Thread.jsx';
 import { AdminProvider } from './Admin/Admin.jsx';
+import ReportsAdmin from './Admin/Reports.jsx';
 
 createRoot(document.getElementById('root')).render(
   <AdminProvider>
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/add-confession" element={<Confessions />} />
             <Route path="/view" element={<View />} />
             <Route path="/not-found" element={<NotFound />} />
+            <Route path="/admin-reports" element={<ReportsAdmin />} />
 
             <Route path="/su-route-root" element={
               <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>

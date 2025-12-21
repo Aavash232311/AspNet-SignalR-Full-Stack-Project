@@ -1,4 +1,5 @@
 ﻿using CollegeApp.Server.Data;
+using CollegeApp.Server.Models;
 using CollegeApp.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,6 +66,22 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(response));
 
+        }
+
+        [Route("get-admin-report")]
+        [HttpGet]
+        public async Task<IActionResult> GetAdminReport(int page)
+        {
+            if (page < 1)
+            {
+                return new JsonResult(BadRequest(new { error = "Page number must be greater than 0" }));
+            }
+
+            var reports = await _context.Reports.OrderByDescending(p => p.reportedAt).ToListAsync();
+
+            var pagination = _helper.NormalPagination(10, page, reports.AsQueryable());
+
+            return new JsonResult(Ok(pagination));
         }
     }
 }

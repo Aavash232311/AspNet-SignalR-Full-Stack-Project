@@ -11,6 +11,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import TryIcon from '@mui/icons-material/Try';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import FlagCircleIcon from '@mui/icons-material/FlagCircle';
 
 
 export const AdminContext = createContext();
@@ -140,6 +141,18 @@ export class Admin extends Component {
                                                         <ListItemIcon><ShowChartIcon /></ListItemIcon>
                                                         <ListItemText primary="Analytics" />
                                                     </ListItem>
+
+                                                    {/* Admin to see reports! */}
+                                                    <NavLink
+                                                        tag={Link}
+                                                        to={"/admin-reports"}
+                                                    >
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><FlagCircleIcon /></ListItemIcon>
+                                                            <ListItemText primary="Reports" />
+                                                        </ListItem>
+                                                    </NavLink>
+
                                                     <NavLink
                                                         tag={Link}
                                                         to={"/su-route-root/confession"}
