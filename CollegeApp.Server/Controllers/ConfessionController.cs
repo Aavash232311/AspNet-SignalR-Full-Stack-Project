@@ -27,8 +27,6 @@ namespace CollegeApp.Server.Controllers
         [Required]
         [MaxLength(100)]
         public string type { get; set; } = string.Empty;
-        public Guid? ConfId { get; set; } = null; // since we want only the id, we will sort and assign the object from the database
-        public Guid? ComId { get; set; } = null;
     }
 
     public class CommentWithReplyCount: Comments
@@ -290,7 +288,7 @@ namespace CollegeApp.Server.Controllers
             // there either one of `Confession` or `Comments` is required, cause a report might be for either one of them.
             // we need to check if either one is there
 
-            if (report.ConfId == null && report.ComId == null) // here null, because we don't want to send initial value as guid.empty from the client side
+            if (report.Confession == null && report.Comments == null) // here null, because we don't want to send initial value as guid.empty from the client side
             {
                 return new JsonResult(BadRequest(new
                 {
@@ -304,26 +302,28 @@ namespace CollegeApp.Server.Controllers
             Comments associatedComments = new Comments();
 
             // check if the confession or comments exist, and search them
-            if (report.ConfId != null) 
+            if (report.type == "confession") 
             {
-                var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == report.ConfId);
+                var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == report.Confession);
                 if (getConfession == null)
                 {
                     return new JsonResult(NotFound(new
                     {
-                        errorCode = "confession not found"
+                        errorCode = "confession not found",
+                        entry = report
                     }));
                 }
                 associatedConfession = getConfession;
             }
             else
             {
-                var getComments = _context.Comments.FirstOrDefault(x => x.Id == report.ComId);
+                var getComments = _context.Comments.FirstOrDefault(x => x.Id == report.Comments);
                 if (getComments == null)
                 {
                     return new JsonResult(NotFound(new
                     {
-                        errorCode = "comments not found"
+                        errorCode = "comments not found",
+                        entry = report   
                     }));
                 }
                 associatedComments = getComments;
@@ -333,8 +333,8 @@ namespace CollegeApp.Server.Controllers
             Report newReport = new Report()
             {
                 reason = report.reason,
-                Confession = associatedConfession,
-                Comments = associatedComments,
+                Confession = associatedConfession.Id, // just making sure, that those two exists before adding them.
+                Comments = associatedComments.Id,
                 reportedByUserId = userId,
             };
             _context.Reports.Add(newReport);

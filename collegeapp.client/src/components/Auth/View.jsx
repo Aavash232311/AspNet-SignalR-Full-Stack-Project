@@ -635,12 +635,13 @@ class ReportConfessionAndComment extends Component {
       },
       body: JSON.stringify({
         reason: data.get("reason"),
-        ConfId: confId,
-        ComId: comId,
+        Comments: comId,
+        Confession: confId,
         type
       })
     }).then((r) => r.json()).then((response) => {
       const { statusCode } = response;
+
       if (statusCode === 200) {
         alert("Repored");
         // let's close this dialuge once everything is done;
