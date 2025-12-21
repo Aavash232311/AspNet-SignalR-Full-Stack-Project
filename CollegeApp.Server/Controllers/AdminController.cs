@@ -7,6 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CollegeApp.Server.Controllers
 {
+    public class UserInfo
+    {
+        public Guid associatedTable { get; set; }
+        public object userInfo { get; set; } = new object();
+    }
+
     [Route("[controller]")]
     [ApiController]
     [Authorize(Policy = "AdminOnly")]
@@ -70,6 +76,7 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-admin-report")]
         [HttpGet]
+        [AllowAnonymous] // here we have a problem, we will update this accordingly
         public async Task<IActionResult> GetAdminReport(int page)
         {
             if (page < 1)

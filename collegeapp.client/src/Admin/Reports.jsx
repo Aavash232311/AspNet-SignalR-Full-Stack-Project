@@ -7,6 +7,8 @@ import {
 } from '@mui/material';
 import Services from '../utils/utils';
 import "../static/auth/Admin/report.css";
+import { Auth0User } from './Thread';
+import SecurityIcon from '@mui/icons-material/Security';
 
 const services = new Services();
 
@@ -17,7 +19,8 @@ class ReportsAdmin extends Component {
             reports: [],
             page: 1,
             totalPages: 1,
-            isLoading: false
+            isLoading: false,
+            userInfo: null
         };
     }
 
@@ -80,12 +83,34 @@ class ReportsAdmin extends Component {
             });
     }
 
+    loadUser = async (userId) => {
+        var res = await fetch(`/Admin/get-clientinfo?auth0Id=${userId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${services.accessToken()}`,
+            },
+            method: "GET"
+        });
+        var data = await res.json();
+        const { value } = data;
+        this.setState({ userInfo: value })
+    }
+
     render() {
         const { reports, page, totalPages, isLoading } = this.state;
+        console.log(reports);
 
         return (
             <Admin>
                 <Toolbar />
+                {this.state.userInfo != null ? (
+                    <div className="admin-modal-backdrop" onClick={() => this.setState({ userInfo: null })}>
+                        <Auth0User
+                            userInfo={this.state.userInfo}
+                            onClose={() => this.setState({ userInfo: null })}
+                        />
+                    </div>
+                ) : null}
                 <Box className="admin-container">
                     <Typography variant="h4" gutterBottom>Admin Report Management</Typography>
                     <Typography variant="subtitle1" gutterBottom>
@@ -116,7 +141,13 @@ class ReportsAdmin extends Component {
                                             {report.Confession ? <Chip label="Confession" size="small" color="primary" variant="outlined" /> : null}
                                             {report.Comments ? <Chip label="Comment" size="small" color="secondary" variant="outlined" /> : null}
                                         </TableCell>
-                                        <TableCell className="user-id">{report.reportedByUserId || 'Anonymous'}</TableCell>
+                                        <TableCell className="user-id">
+                                            <button className='btn btn-danger btn-sm' onClick={() => {
+                                                this.loadUser(report.reportedByUserId);
+                                            }}>
+                                                View User <SecurityIcon />
+                                            </button>
+                                        </TableCell>
                                         <TableCell align="center">
                                             <Switch
                                                 checked={report.isVerified}

@@ -149,7 +149,7 @@ export default class Thread extends Component {
         this.getThreads(val);
         this.setState({ page: val });
     }
-
+    // this method is efficient, cause we are getting this from a third-party server, and if we were to pre-fetch this it would be inefficient
     loadUser = async (userId) => {
         var res = await fetch(`/Admin/get-clientinfo?auth0Id=${userId}`, {
             headers: {
@@ -436,3 +436,94 @@ export class Auth0User extends Component {
         )
     }
 }
+
+// export class Auth0User extends Component {
+//     constructor(props) {
+//         super(props);
+//     }
+
+//     state = {
+//         userInfo: null,
+//     }
+
+//     services = new Services();
+
+//     async componentDidMount() {
+//         if (this.props.userInfo === null) return;
+//         this.setState({ userInfo: this.props.userInfo });
+//     }
+
+//     render() {
+//         return (
+//             <>
+//                 <AdminContext.Consumer>
+//                     {(adminProperties) => {
+//                         const { dark } = adminProperties;
+//                         if (this.state.userInfo === null) return (
+//                             <b>No information</b>
+//                         );
+//                         const { email, email_verified, name, nickname, logins_count, created_at, last_login, picture, user_id } = this.state.userInfo;
+                        
+//                         return (
+//                             <div className="user-info-overlay" onClick={this.props.onClose}>
+//                                 /* Added Content Box Div */
+//                                 <div className={`user-info-modal ${dark ? "dark-mode" : ""}`} onClick={e => e.stopPropagation()}>
+//                                     <table className={`table ${dark === true ? "table-dark" : ""}`} >
+//                                         <thead>
+//                                             <tr>
+//                                                 <th>User email</th>
+//                                                 <th>{email}</th>
+//                                             </tr>
+//                                         </thead>
+//                                         <tbody>
+//                                             <tr>
+//                                                 <th>Email verified</th>
+//                                                 <th>{email_verified === true ? <VerifiedIcon /> : <NewReleasesIcon />}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Name</th>
+//                                                 <th>{name}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Nickname</th>
+//                                                 <th>{nickname}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Login count</th>
+//                                                 <th>{logins_count}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Account created</th>
+//                                                 <th>{this.services.normalizeASPDate(created_at)}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Last login</th>
+//                                                 <th>{this.services.normalizeASPDate(last_login)}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Updated At</th>
+//                                                 <th>{this.services.normalizeASPDate(this.state.userInfo.updated_at)}</th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Picture</th>
+//                                                 <th>
+//                                                     <img className="profile-color-shample-admin" src={picture} alt="" />
+//                                                 </th>
+//                                             </tr>
+//                                             <tr>
+//                                                 <th>Auth0 Id</th>
+//                                                 <th>{user_id}</th>
+//                                             </tr>
+//                                         </tbody>
+//                                     </table>
+                                    
+                                
+//                                 </div>
+//                             </div>
+//                         )
+//                     }}
+//                 </AdminContext.Consumer>
+//             </>
+//         )
+//     }
+// }

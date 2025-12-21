@@ -140,11 +140,13 @@ export const AuthProvider = ({ children }) => {
         refreshTokenFetch();
         // if autheticated let's decode JWT for roles
         const token = localStorage.getItem('access_token');
-        const decoded = jwtDecode(token);
-        acObjects(decoded);
-        
-        const getRoles = decoded["roles/roles"];
-        setRoles(getRoles);
+        if (token !== null) {
+            const decoded = jwtDecode(token);
+            acObjects(decoded);
+
+            const getRoles = decoded["roles/roles"];
+            setRoles(getRoles);
+        }
     }, []);
 
     const refreshTokenFetch = () => {
