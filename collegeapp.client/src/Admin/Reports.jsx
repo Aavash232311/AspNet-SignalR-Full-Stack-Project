@@ -174,12 +174,7 @@ class ReportsAdmin extends Component {
                 }
                 this.setState({ deletePrompt: null }, () => {
                     // now what we want to do is update the state acoordingly!
-                    this.setState((prevState) => ({
-                        reports: prevState.reports.map((item) =>
-                            item.id === reportLog.id ? { ...item, isDeleted: status } : item
-                        ),
-                    }));
-
+                    this.getReports(this.state.page);
                 });
             });
         }

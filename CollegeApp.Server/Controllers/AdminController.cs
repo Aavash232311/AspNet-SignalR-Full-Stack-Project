@@ -143,6 +143,19 @@ namespace CollegeApp.Server.Controllers
                 comment.deleted = status;
                 await _context.SaveChangesAsync();
             }
+
+            // we need to update all the record with same report as well!
+            await _context.Reports
+            .Where(x => x.Confession == getRecords.Confession &&
+                x.Comments == getRecords.Comments &&
+                x.parentConfessionId == getRecords.parentConfessionId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(r => r.isDeleted, status)  
+            );
+            await _context.SaveChangesAsync();
+            // The list of record we get from this thing will be same for all the records associated with whatever
+
+
             // After that what we want to do is, restrict that message doing to api from the backend
             return new JsonResult(Ok());
         }
