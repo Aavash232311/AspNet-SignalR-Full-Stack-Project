@@ -1,8 +1,10 @@
 ﻿using CollegeApp.Server.Data;
 using CollegeApp.Server.Models;
 using CollegeApp.Server.Service;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace CollegeApp.Server.Controllers
@@ -12,6 +14,19 @@ namespace CollegeApp.Server.Controllers
         public Guid associatedTable { get; set; }
         public object userInfo { get; set; } = new object();
     }
+
+    public class FrequencyReport
+    {
+        public int frequency { get; set; } = 0;
+        public Guid refId { get; set; } = Guid.NewGuid();
+    }
+    public class PaginationResult<T>
+    {
+        public int totalPages { get; set; }
+        public List<T> data { get; set; }
+        public int totalObjects { get; set; }
+    }
+
 
     [Route("[controller]")]
     [ApiController]
@@ -87,8 +102,30 @@ namespace CollegeApp.Server.Controllers
             var reports = await _context.Reports.OrderByDescending(p => p.reportedAt).ToListAsync();
 
             var pagination = _helper.NormalPagination(10, page, reports.AsQueryable());
+            var slicedReports = pagination.data;
+            List<FrequencyReport> frequencyReports = new List<FrequencyReport>();
 
-            return new JsonResult(Ok(pagination));
+            foreach (var item in pagination.data)
+            {
+                var confessionId = item.Confession;  
+                var commentId = item.Comments;
+
+                var freq = _context.Reports.Count(
+                    c => c.Comments == commentId &&
+                    c.Confession == confessionId
+                );
+                frequencyReports.Add(new FrequencyReport
+                {
+                    frequency = freq,
+                    refId = item.id
+                });
+            }
+
+            return new JsonResult(Ok(new
+            {
+                pagination,
+                frequencyReports
+            }));
         }
 
         [Route("report-verified")]

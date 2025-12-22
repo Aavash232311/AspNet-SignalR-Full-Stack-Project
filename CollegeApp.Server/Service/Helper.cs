@@ -27,14 +27,14 @@ namespace CollegeApp.Server.Service
             return $"rgb({r}, {g}, {b})";
         }
 
-        public object NormalPagination<T>(int pageSize, int page, IQueryable<T> dbo)// this is for the normal pagination that takes place 
+        public PaginationResult<T> NormalPagination<T>(int pageSize, int page, IQueryable<T> dbo)// this is for the normal pagination that takes place 
         {
             try
             {
                 var totalObjects = dbo.Count();
                 var takeSkip = dbo.Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 int totalPages = (int)Math.Ceiling(totalObjects / (double)pageSize);
-                return new { totalPages, data = takeSkip, totalObjects };
+                return new PaginationResult<T> { totalPages = totalPages, data = takeSkip, totalObjects = totalObjects };
             }
             catch (Exception ex)
             {

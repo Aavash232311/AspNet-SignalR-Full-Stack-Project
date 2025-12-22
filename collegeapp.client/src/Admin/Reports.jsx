@@ -28,7 +28,8 @@ class ReportsAdmin extends Component {
             totalPages: 1,
             isLoading: false,
             userInfo: null,
-            viewReport: null
+            viewReport: null,
+            frequencyReports: null
         };
     }
 
@@ -48,11 +49,13 @@ class ReportsAdmin extends Component {
             .then((r) => r.json())
             .then((response) => {
                 const { value } = response;
-                const { data, totalPages } = value;
+                const { pagination, frequencyReports } = value;
+                const { data, totalPages } = pagination;
                 this.setState({
                     reports: data || [],
                     totalPages: totalPages || 1,
-                    isLoading: false
+                    isLoading: false,
+                    frequencyReports
                 });
             })
             .catch(err => {
@@ -125,8 +128,9 @@ class ReportsAdmin extends Component {
             const result = await response.json();
 
             if (result.statusCode === 200) {
+                const { comment } = result.value;
                 this.setState({
-                    viewReport: result.value
+                    viewReport: comment
                 });
             } else {
                 console.error("Error:", result.value?.message || "Comment not found");
@@ -207,6 +211,7 @@ class ReportsAdmin extends Component {
                                             <TableCell></TableCell>
                                             <TableCell>Reported By</TableCell>
                                             <TableCell>Delete</TableCell>
+                                            <TableCell>f</TableCell>
                                             <TableCell>View Confession</TableCell>
                                             <TableCell align="center">Verified</TableCell>
                                         </TableRow>
@@ -217,71 +222,77 @@ class ReportsAdmin extends Component {
                                             <TableRow>
                                                 <TableCell colSpan={5} align="center"><CircularProgress /></TableCell>
                                             </TableRow>
-                                        ) : reports.map((report) => (
-                                            <TableRow key={report.id} hover>
-                                                <TableCell>{new Date(report.reportedAt).toLocaleDateString()}</TableCell>
-                                                <TableCell className="reason-cell">{report.reason}</TableCell>
-                                                <TableCell>
-                                                    {report.Confession ? <Chip label="Confession" size="small" color="primary" variant="outlined" /> : null}
-                                                    {report.Comments ? <Chip label="Comment" size="small" color="secondary" variant="outlined" /> : null}
-                                                </TableCell>
-                                                <TableCell className="user-id">
-                                                    <div style={{ cursor: "pointer" }} onClick={() => {
-                                                        this.loadUser(report.reportedByUserId);
-                                                    }}>
-                                                        View User <SecurityIcon fontSize='small' />
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                                                        <Select
-                                                            value={report.isDeleted ? "deleted" : "active"}
-                                                            onChange={(e) => {
-                                                                // Only open the prompt if moving from Active to Deleted
-                                                                if (e.target.value === "active") {
-                                                                    deleteItem(report, false);
-                                                                } else {
-                                                                    // Logic to "undo" delete if your API supports it
-                                                                    deleteItem(report, true);
-                                                                }
+                                        ) : reports.map((report) => {
+                                            const f = this.state.frequencyReports.find((x) => x.refId === report.id);
+                                            return (
+                                                <TableRow key={report.id} hover>
+                                                    <TableCell>{new Date(report.reportedAt).toLocaleDateString()}</TableCell>
+                                                    <TableCell className="reason-cell">{report.reason}</TableCell>
+                                                    <TableCell>
+                                                        {report.Confession ? <Chip label="Confession" size="small" color="primary" variant="outlined" /> : null}
+                                                        {report.Comments ? <Chip label="Comment" size="small" color="secondary" variant="outlined" /> : null}
+                                                    </TableCell>
+                                                    <TableCell className="user-id">
+                                                        <div style={{ cursor: "pointer" }} onClick={() => {
+                                                            this.loadUser(report.reportedByUserId);
+                                                        }}>
+                                                            View User <SecurityIcon fontSize='small' />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                                                            <Select
+                                                                value={report.isDeleted ? "deleted" : "active"}
+                                                                onChange={(e) => {
+                                                                    // Only open the prompt if moving from Active to Deleted
+                                                                    if (e.target.value === "active") {
+                                                                        deleteItem(report, false);
+                                                                    } else {
+                                                                        // Logic to "undo" delete if your API supports it
+                                                                        deleteItem(report, true);
+                                                                    }
+                                                                }}
+                                                                sx={{
+                                                                    fontSize: '0.85rem',
+                                                                    color: report.isDeleted ? 'error.main' : 'success.main',
+                                                                    fontWeight: 'bold',
+                                                                    '& .MuiSelect-select': { py: 1 }
+                                                                }}
+                                                            >
+                                                                <MenuItem value="active">
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <CheckCircleIcon fontSize="small" color="success" /> Active
+                                                                    </div>
+                                                                </MenuItem>
+                                                                <MenuItem value="deleted">
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <DeleteIcon fontSize="small" color="error" /> Deleted
+                                                                    </div>
+                                                                </MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {this.state.frequencyReports !== null ? f.frequency : null}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div style={{ cursor: "pointer" }} onClick={() => { this.viewReport(report) }}>
+                                                            View <ChatBubbleOutlineIcon fontSize='small' />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Switch
+                                                            checked={report.isVerified}
+                                                            onChange={() => {
+                                                                // do a fetch call to make this state change to verified
+                                                                this.toggleVerify(report);
                                                             }}
-                                                            sx={{
-                                                                fontSize: '0.85rem',
-                                                                color: report.isDeleted ? 'error.main' : 'success.main',
-                                                                fontWeight: 'bold',
-                                                                '& .MuiSelect-select': { py: 1 }
-                                                            }}
-                                                        >
-                                                            <MenuItem value="active">
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <CheckCircleIcon fontSize="small" color="success" /> Active
-                                                                </div>
-                                                            </MenuItem>
-                                                            <MenuItem value="deleted">
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                    <DeleteIcon fontSize="small" color="error" /> Deleted
-                                                                </div>
-                                                            </MenuItem>
-                                                        </Select>
-                                                    </FormControl>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div style={{ cursor: "pointer" }} onClick={() => { this.viewReport(report) }}>
-                                                        View <ChatBubbleOutlineIcon fontSize='small' />
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Switch
-                                                        checked={report.isVerified}
-                                                        onChange={() => {
-                                                            // do a fetch call to make this state change to verified
-                                                            this.toggleVerify(report);
-                                                        }}
-                                                        color="success"
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                                            color="success"
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })}
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -315,7 +326,6 @@ class ReportsAdmin extends Component {
 
 class ViewDepthCommentReply extends Component {
     render() {
-
         return (
             <>
                 {/* The main blur backdrop */}

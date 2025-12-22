@@ -363,11 +363,10 @@ namespace CollegeApp.Server.Controllers
         public async Task<IActionResult> getSingleComment(Guid id)
         {
             var comment = _context.Comments.FirstOrDefault(x => x.Id == id);
-            if (comment == null)
+            return new JsonResult(Ok(new
             {
-                return new JsonResult(NotFound(new { message = "Comment not found" }));
-            }
-            return new JsonResult(Ok(comment));
+                comment
+            }));
         }
     }
 }
