@@ -3,7 +3,7 @@ export default class Services {
     formatString = (str, values) => { return str.replace(/%d/g, () => values.shift()); };
     refreshToken = () => localStorage.getItem("refresh_token");
     accessToken = () => localStorage.getItem("access_token");
-    
+
     /* asp.net returns default error in little different which does not align with how our error compoenet work,
     errors can be
     {key: [list of problems]} or [ {key1: [list of problems] }, {key2: [list of problems]} ]   */
@@ -46,5 +46,12 @@ export default class Services {
         return str.length >= characters ? str.substring(0, characters) + "..." : str;
     }
 
-    
+    EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+    checkEmptyGuid(guid) {
+        if (guid === this.EMPTY_GUID) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

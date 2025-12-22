@@ -96,6 +96,7 @@ export function StickyHeadTable(args) {
         </AdminContext.Consumer>
     );
 }
+
 export default class Thread extends Component {
 
     constructor(props) {

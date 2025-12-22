@@ -49,3 +49,102 @@
     from { opacity: 0; transform: translateY(10px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+
+/* 1. The Backdrop (Blurs the background) */
+.share-comment-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(26, 26, 27, 0.6); /* Semi-transparent dark overlay */
+  backdrop-filter: blur(10px); /* This blurs everything behind it */
+  -webkit-backdrop-filter: blur(10px); /* For Safari support */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* 2. The Modal Box (Focused and clear) */
+.share-comment-modal {
+  background: white;
+  width: 450px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  color: #1a1a1b;
+}
+
+/* Modal Headers */
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #878a8c;
+}
+
+/* Preview Section (Looks like a Reddit comment) */
+.share-content-preview {
+  border: 1px solid #edeff1;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f6f7f8;
+  margin-bottom: 20px;
+}
+
+.preview-header {
+  font-size: 12px;
+  color: #878a8c;
+  margin-bottom: 8px;
+}
+
+.preview-body {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Grid of share options */
+.share-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+
+.share-option {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.share-icon-circle {
+  width: 48px;
+  height: 48px;
+  background: #f0f2f3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: background 0.2s;
+}
+
+.share-option:hover .share-icon-circle {
+  background: #e3e6e8;
+}

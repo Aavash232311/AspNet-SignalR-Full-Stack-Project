@@ -341,5 +341,18 @@ namespace CollegeApp.Server.Controllers
             await _context.SaveChangesAsync();
             return new JsonResult(Ok());
         }
+
+        /* This api let's user get single comment object */
+        [Route("get-comment")]
+        [HttpGet]
+        public async Task<IActionResult> getSingleComment(Guid id)
+        {
+            var comment = _context.Comments.FirstOrDefault(x => x.Id == id);
+            if (comment == null)
+            {
+                return new JsonResult(NotFound(new { message = "Comment not found" }));
+            }
+            return new JsonResult(Ok(comment));
+        }
     }
 }

@@ -10,8 +10,6 @@ import "../static/auth/Admin/report.css";
 import { Auth0User } from './Thread';
 import SecurityIcon from '@mui/icons-material/Security';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { NavLink } from "reactstrap";
-import Link from '@mui/material/Link';
 
 const services = new Services();
 
@@ -23,7 +21,8 @@ class ReportsAdmin extends Component {
             page: 1,
             totalPages: 1,
             isLoading: false,
-            userInfo: null
+            userInfo: null,
+            viewReport: null
         };
     }
 
@@ -99,6 +98,44 @@ class ReportsAdmin extends Component {
             .catch(err => console.error("Update failed:", err));
     }
 
+    viewReport = async (report) => {
+        // here, if the report is about confession then we simply re-direct them to the confession page
+        // if the report is about commment then we render them
+
+        if (!(services.checkEmptyGuid(report.confession))) {
+            window.open(`view?topic=${report.parentConfessionId}`, "_blank");
+            return;
+        }
+
+        // else if it's not about confession itself but, the report of one of it's comments then
+        try {
+            const response = await fetch(`/Confession/get-comment?id=${report.comments}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const result = await response.json();
+
+            if (result.statusCode === 200) {
+                this.setState({
+                    viewReport: result.value
+                });
+            } else {
+                console.error("Error:", result.value?.message || "Comment not found");
+                return null;
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            return null;
+        }
+    }
+
+    closeReport = () => {
+        this.setState({ viewReport: null });
+    }
+
     render() {
         const { reports, page, totalPages, isLoading } = this.state;
         return (
@@ -117,6 +154,8 @@ class ReportsAdmin extends Component {
                     <Typography variant="subtitle1" gutterBottom>
                         Review and verify reported confessions and comments.
                     </Typography>
+
+                    {this.state.viewReport !== null ? <ViewDepthCommentReply content={this.state.viewReport} close={this.closeReport} /> : null}
 
                     {reports.length > 0 ? (
                         <>
@@ -153,9 +192,7 @@ class ReportsAdmin extends Component {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div style={{cursor: "pointer"}} onClick={() => {
-                                                        window.open(`view?topic=${report.parentConfessionId}`, "_blank");
-                                                    }}>
+                                                    <div style={{ cursor: "pointer" }} onClick={() => { this.viewReport(report) }}>
                                                         View <ChatBubbleOutlineIcon fontSize='small' />
                                                     </div>
                                                 </TableCell>
@@ -198,6 +235,53 @@ class ReportsAdmin extends Component {
                 }
             </Admin>
         );
+    }
+}
+
+
+class ViewDepthCommentReply extends Component {
+    render() {
+        return (
+            <>
+                {/* The main blur backdrop */}
+                <div className="share-comment-overlay">
+
+                    {/* The actual share box */}
+                    <div className="share-comment-modal">
+
+                        <div className="share-modal-header">
+                            <span>Share Comment</span>
+                            <button onClick={() => { this.props.close() }} className="close-btn">×</button>
+                        </div>
+
+                        {/* Sample Content Preview */}
+                        <div className="share-content-preview">
+                            <p className="preview-body">
+                                This is a sample comment that will look clear and focused while everything
+                                else in the background is blurred out!
+                            </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="share-actions-grid">
+                            <div className="share-option">
+                                <div className="share-icon-circle">🔗</div>
+                                <span>Copy Link</span>
+                            </div>
+                            <div onClick={() => {
+                                const { content } = this.props;
+                                const { confessionId } = content;
+                                window.open(`view?topic=${confessionId}`, "_blank");
+                            }} className="share-option">
+                                <div className="share-icon-circle">💬</div>
+                                <span>Full Chat</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </>
+        )
     }
 }
 

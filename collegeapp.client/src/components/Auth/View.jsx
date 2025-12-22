@@ -685,7 +685,6 @@ class ReportConfessionAndComment extends Component {
       const { statusCode } = response;
 
       if (statusCode === 200) {
-        alert("Repored");
         // let's close this dialuge once everything is done;
         this.props.closeDiag();
       }
