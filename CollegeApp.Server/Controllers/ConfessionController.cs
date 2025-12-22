@@ -130,7 +130,8 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok());
         }
 
-        /* This api is for adding top level comments, not replying to threads */
+        /* This api is for adding top level comments, not replying to threads,
+         * it's a direct reply to confession!! */
         [Route("AddComment")]
         [Authorize]
         [HttpPost]
@@ -138,8 +139,13 @@ namespace CollegeApp.Server.Controllers
         {
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
+            if (getConfessions.deleted)
+            {
+                // we will handle other problems in the front end, I have made the button disabled, if someone tries to manupulate the code in the client then server stops it anyway.
+                return new JsonResult(BadRequest(new { message = "Cannot comment on deleted confession" }));
+            }
 
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
 
             /* Now we want the game profile color if the customer is same,
@@ -216,10 +222,16 @@ namespace CollegeApp.Server.Controllers
         [Route("ReplyComment")]
         [Authorize]
         [HttpPost]
+        /* The way it's developed is you cannot reply to comment if they are deleted.
+         * If the confession is deleted you can still reply to their comments. */
         public async Task<IActionResult> ReplyComment(string comment, Guid parentId, Guid confessionId)
         {
             var parentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
+
             if (parentComment == null) return new JsonResult(BadRequest(new {message = "No parent found."}));
+
+            if (parentComment.deleted) return new JsonResult(BadRequest(new { message = "Cannot reply to deleted comment." }));
+
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authorize to get to this point, i get annoyed by that underline
             var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);

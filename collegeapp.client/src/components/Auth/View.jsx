@@ -212,6 +212,7 @@ class Comment extends Component {
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
         that we get from fetch API call so that we can re-render everything */
+
     return (
       <div>
         <hr />
@@ -222,6 +223,7 @@ class Comment extends Component {
               className="main-textarea"
               placeholder="What are your thoughts?"
               autoComplete="off"
+              disabled={this.props.deletedConfession === true ? true : false}
             ></textarea>
 
             <div className="comment-form-footer">
@@ -300,6 +302,8 @@ class CommentRenderCompoenent extends Component {
           this.setState({ showReplyThread: false });
           return;
         }
+      }).catch((err) => {
+        alert(err);
       });
   }
 
@@ -353,7 +357,7 @@ class CommentRenderCompoenent extends Component {
             {/* 2. Comment Group */}
             <div
               className="action-item hover-bg"
-              onClick={() => this.setState(prev => ({ showReplyThread: !prev.showReplyThread }))}
+              onClick={() => { if (!(i.deleted)) { this.setState(prev => ({ showReplyThread: !prev.showReplyThread })); } }}
             >
               <FaRegComment className="icon" />
               <span className="label">Comments</span>
@@ -621,7 +625,7 @@ export default class View extends Component {
                     </h5>{" "}
                     <br />
                     <div className="confession-body-font">{this.state.confession.description}</div>
-                    <Comment />
+                    <Comment deletedConfession={this.state.confession.deleted} />
                   </div>
                 </div>
               </>
