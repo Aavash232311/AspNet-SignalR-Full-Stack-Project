@@ -102,7 +102,8 @@ namespace CollegeApp.Server.Controllers
             var query = _context.Confessions.Where(x => x.UserId == userId);
             if (query.Any())
             {
-                return new JsonResult(Ok(helper.NormalPagination(pageSize, page, query)));
+                query = helper.NormalPagination(pageSize, page, helper.hideDeletedConfession(query));
+                return new JsonResult(Ok());
             }
             return new JsonResult(NotFound());
         }
@@ -113,7 +114,7 @@ namespace CollegeApp.Server.Controllers
         {
             var confession = _context.Confessions.FirstOrDefault(x => x.Id == id);
             if (confession == null) return new JsonResult(NotFound());
-            return new JsonResult(Ok(confession));
+            return new JsonResult(Ok(helper.hideDeletedConfession(confession)));
         }
 
         [Route("DeleteConfession")]
@@ -195,9 +196,9 @@ namespace CollegeApp.Server.Controllers
             front-end for that.*/
             int pageSize = 5;
 
-            var pagination = helper.NormalPagination(pageSize, page, comments);
-            // Here since pagination is used, the time complexity for iterating over time is not that much so we can do that
+            var pagination = helper.NormalPagination(pageSize, page, helper.hideDeletedConfession(comments));
 
+            // Here since pagination is used, the time complexity for iterating over time is not that much so we can do that
             return new JsonResult(Ok(pagination));
         }
         [Route("get-children-comments")]
@@ -206,7 +207,10 @@ namespace CollegeApp.Server.Controllers
         {
             // this is replies, to one depth, we are using auto mapper here
             var getParentComments = _context.Comments.Where(x => x.ParentId == parentId).ProjectTo<CommentWithReplyCount>(_mapper.ConfigurationProvider).ToList();
-            return new JsonResult(Ok(getParentComments)); // load everything for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
+            // here the comment might be deleted, so we need to account for that as well!
+
+            
+            return new JsonResult(Ok(helper.hideDeletedConfession(getParentComments))); // load everything for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
         }
 
         [Route("ReplyComment")]
