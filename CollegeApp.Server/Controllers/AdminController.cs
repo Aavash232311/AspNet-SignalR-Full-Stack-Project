@@ -4,6 +4,7 @@ using CollegeApp.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -15,6 +16,7 @@ namespace CollegeApp.Server.Controllers
 
     [Route("[controller]")]
     [ApiController]
+    [AllowAnonymous]
     [Authorize(Policy = "AdminOnly")]
     public class AdminController : ControllerBase
     {
@@ -76,7 +78,6 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-admin-report")]
         [HttpGet]
-        [AllowAnonymous] // here we have a problem, we will update this accordingly
         public async Task<IActionResult> GetAdminReport(int page)
         {
             if (page < 1)
@@ -92,7 +93,6 @@ namespace CollegeApp.Server.Controllers
         }
 
         [Route("report-verified")]
-        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> ReportVerified(Guid reportId, bool status)
         {
@@ -105,6 +105,36 @@ namespace CollegeApp.Server.Controllers
             _context.Reports.Update(report);
             await _context.SaveChangesAsync();
             return new JsonResult(Ok(new { message = "Report marked as verified", status }));
+        }
+
+        [Route("delete-comment-conf")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteComment(string type, Guid id)
+        {
+            /* It's not a casade delete or something, from which if one parent is deleted
+             * all the other will be deleted. We just want to hide the comment */
+            if (type == "confession")
+            {
+                var confession = await _context.Confessions.FirstOrDefaultAsync(c => c.Id == id);
+                if (confession == null)
+                {
+                    return new JsonResult(NotFound(new { error = "Confession not found", id }));
+                }
+                confession.deleted = true;
+                await _context.SaveChangesAsync();
+            }
+            else if (type == "comment")
+            {
+                var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id);
+                if (comment == null)
+                {
+                    return new JsonResult(NotFound(new { error = "Comment not found", id }));
+                }
+                comment.deleted = true;
+                await _context.SaveChangesAsync();
+            }
+            // After that what we want to do is, restrict that message doing to api from the backend
+            return new JsonResult(Ok());
         }
     }
 }

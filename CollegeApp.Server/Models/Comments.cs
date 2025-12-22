@@ -29,7 +29,7 @@ namespace CollegeApp.Server.Models
         [MaxLength(20)]
         public string profileColor { get; set; } = string.Empty;
         public Guid AnonymousName { get; set; } = Guid.Empty;
-
+        public bool deleted { get; set; } = false;
     }
 }
 

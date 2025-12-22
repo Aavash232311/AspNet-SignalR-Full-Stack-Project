@@ -19,7 +19,7 @@ namespace CollegeApp.Server.Models
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
         public ICollection<Comments> Comments { get; set; } = new List<Comments>(); // one confession can have many comments, so we can use list here
         /* Rest of the related model like, likes and comments we can keep in different database model */
-
+        public bool deleted { get; set; } = false;
     }
 }
 // https://learn.microsoft.com/en-us/ef/core/modeling/relationships/one-to-many

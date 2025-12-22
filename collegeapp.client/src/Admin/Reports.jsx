@@ -10,6 +10,10 @@ import "../static/auth/Admin/report.css";
 import { Auth0User } from './Thread';
 import SecurityIcon from '@mui/icons-material/Security';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteApp from '../components/Auth/useable/Prompt';
 
 const services = new Services();
 
@@ -22,7 +26,8 @@ class ReportsAdmin extends Component {
             totalPages: 1,
             isLoading: false,
             userInfo: null,
-            viewReport: null
+            viewReport: null,
+            deletePrompt: null
         };
     }
 
@@ -138,6 +143,58 @@ class ReportsAdmin extends Component {
 
     render() {
         const { reports, page, totalPages, isLoading } = this.state;
+
+        const handleDialogueDel = (status) => {
+            if (!(status)) {
+                this.setState({ deletePrompt: null });
+                return;
+            }
+            deleteCommentAsAdmin();
+        }
+
+        const deleteCommentAsAdmin = () => {
+            // fetch(`/Admin/get-comment?id=${}`)
+            const reportLog = this.state.deletePrompt;
+
+            // let's check for what the report is really about
+
+            var reportId;
+            var type;
+
+            if (services.checkEmptyGuid(reportLog.comments)) {
+                // if comment has a empty guid then it's about confession
+                reportId = reportLog.confession;
+                type = "confession";
+            } else {
+                reportId = reportLog.comments;
+                type = "comment"
+            }
+            deleteItem(type, reportId);
+        }
+
+        const deleteItem = (type, id) => {
+            // Assuming "Admin" is the base controller route as you mentioned
+            const url = `/Admin/delete-comment-conf?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
+
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${services.accessToken()}`,
+                },
+            }).then((r) => r.json()).then((res) => {
+                const { statusCode } = res;
+                if (!(statusCode === 200)) {
+                    alert("Something wen't wrong!");
+                }
+                this.setState({deletePrompt: null});
+            }).catch(error => {
+                console.error("Error deleting item:", error);
+                alert("Failed to delete item.");
+                this.setState({deletePrompt: null});
+            });
+        }
+
         return (
             <Admin>
                 <Toolbar />
@@ -156,7 +213,7 @@ class ReportsAdmin extends Component {
                     </Typography>
 
                     {this.state.viewReport !== null ? <ViewDepthCommentReply content={this.state.viewReport} close={this.closeReport} /> : null}
-
+                    {this.state.deletePrompt !== null && <DeleteApp output={handleDialogueDel} />}
                     {reports.length > 0 ? (
                         <>
                             <TableContainer component={Paper} className="table-container">
@@ -167,6 +224,7 @@ class ReportsAdmin extends Component {
                                             <TableCell>Reason</TableCell>
                                             <TableCell></TableCell>
                                             <TableCell>Reported By</TableCell>
+                                            <TableCell>Delete</TableCell>
                                             <TableCell>View Confession</TableCell>
                                             <TableCell align="center">Verified</TableCell>
                                         </TableRow>
@@ -189,6 +247,13 @@ class ReportsAdmin extends Component {
                                                         this.loadUser(report.reportedByUserId);
                                                     }}>
                                                         View User <SecurityIcon fontSize='small' />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div onClick={() => {
+                                                        this.setState({ deletePrompt: report }, () => { });
+                                                    }} className='share-option'>
+                                                        <div className="share-icon-circle"> <DeleteIcon /></div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -241,11 +306,11 @@ class ReportsAdmin extends Component {
 
 class ViewDepthCommentReply extends Component {
     render() {
+
         return (
             <>
                 {/* The main blur backdrop */}
                 <div className="share-comment-overlay">
-
                     {/* The actual share box */}
                     <div className="share-comment-modal">
 
