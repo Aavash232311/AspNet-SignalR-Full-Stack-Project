@@ -10,10 +10,12 @@ import "../static/auth/Admin/report.css";
 import { Auth0User } from './Thread';
 import SecurityIcon from '@mui/icons-material/Security';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteApp from '../components/Auth/useable/Prompt';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const services = new Services();
 
@@ -26,8 +28,7 @@ class ReportsAdmin extends Component {
             totalPages: 1,
             isLoading: false,
             userInfo: null,
-            viewReport: null,
-            deletePrompt: null
+            viewReport: null
         };
     }
 
@@ -144,20 +145,7 @@ class ReportsAdmin extends Component {
     render() {
         const { reports, page, totalPages, isLoading } = this.state;
 
-        const handleDialogueDel = (status) => {
-            if (!(status)) {
-                this.setState({ deletePrompt: null });
-                return;
-            }
-            deleteCommentAsAdmin();
-        }
-
-        const deleteCommentAsAdmin = () => {
-            // fetch(`/Admin/get-comment?id=${}`)
-            const reportLog = this.state.deletePrompt;
-
-            // let's check for what the report is really about
-
+        const deleteItem = (reportLog, status) => {
             var reportId;
             var type;
 
@@ -169,12 +157,9 @@ class ReportsAdmin extends Component {
                 reportId = reportLog.comments;
                 type = "comment"
             }
-            deleteItem(type, reportId);
-        }
 
-        const deleteItem = (type, id) => {
             // Assuming "Admin" is the base controller route as you mentioned
-            const url = `/Admin/delete-comment-conf?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
+            const url = `/Admin/delete-comment-conf?type=${encodeURIComponent(type)}&id=${encodeURIComponent(reportId)}&recordId=${encodeURIComponent(reportLog.id)}&status=${status}`;
 
             fetch(url, {
                 method: 'DELETE',
@@ -187,14 +172,17 @@ class ReportsAdmin extends Component {
                 if (!(statusCode === 200)) {
                     alert("Something wen't wrong!");
                 }
-                this.setState({deletePrompt: null});
-            }).catch(error => {
-                console.error("Error deleting item:", error);
-                alert("Failed to delete item.");
-                this.setState({deletePrompt: null});
+                this.setState({ deletePrompt: null }, () => {
+                    // now what we want to do is update the state acoordingly!
+                    this.setState((prevState) => ({
+                        reports: prevState.reports.map((item) =>
+                            item.id === reportLog.id ? { ...item, isDeleted: status } : item
+                        ),
+                    }));
+
+                });
             });
         }
-
         return (
             <Admin>
                 <Toolbar />
@@ -213,7 +201,6 @@ class ReportsAdmin extends Component {
                     </Typography>
 
                     {this.state.viewReport !== null ? <ViewDepthCommentReply content={this.state.viewReport} close={this.closeReport} /> : null}
-                    {this.state.deletePrompt !== null && <DeleteApp output={handleDialogueDel} />}
                     {reports.length > 0 ? (
                         <>
                             <TableContainer component={Paper} className="table-container">
@@ -228,6 +215,7 @@ class ReportsAdmin extends Component {
                                             <TableCell>View Confession</TableCell>
                                             <TableCell align="center">Verified</TableCell>
                                         </TableRow>
+
                                     </TableHead>
                                     <TableBody>
                                         {isLoading ? (
@@ -250,11 +238,37 @@ class ReportsAdmin extends Component {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div onClick={() => {
-                                                        this.setState({ deletePrompt: report }, () => { });
-                                                    }} className='share-option'>
-                                                        <div className="share-icon-circle"> <DeleteIcon /></div>
-                                                    </div>
+                                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                                                        <Select
+                                                            value={report.isDeleted ? "deleted" : "active"}
+                                                            onChange={(e) => {
+                                                                // Only open the prompt if moving from Active to Deleted
+                                                                if (e.target.value === "active") {
+                                                                    deleteItem(report, false);
+                                                                } else {
+                                                                    // Logic to "undo" delete if your API supports it
+                                                                    deleteItem(report, true);
+                                                                }
+                                                            }}
+                                                            sx={{
+                                                                fontSize: '0.85rem',
+                                                                color: report.isDeleted ? 'error.main' : 'success.main',
+                                                                fontWeight: 'bold',
+                                                                '& .MuiSelect-select': { py: 1 }
+                                                            }}
+                                                        >
+                                                            <MenuItem value="active">
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <CheckCircleIcon fontSize="small" color="success" /> Active
+                                                                </div>
+                                                            </MenuItem>
+                                                            <MenuItem value="deleted">
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <DeleteIcon fontSize="small" color="error" /> Deleted
+                                                                </div>
+                                                            </MenuItem>
+                                                        </Select>
+                                                    </FormControl>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div style={{ cursor: "pointer" }} onClick={() => { this.viewReport(report) }}>

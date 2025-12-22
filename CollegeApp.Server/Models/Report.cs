@@ -15,6 +15,7 @@ namespace CollegeApp.Server.Models
         public bool isVerified { get; set; } = false;
         // It might be reported comment, or confession, we still need to trak it's parent
         public Guid? parentConfessionId { get; set; }
+        public bool isDeleted { get; set; } = false;
 
     }
 }

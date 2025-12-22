@@ -109,10 +109,19 @@ namespace CollegeApp.Server.Controllers
 
         [Route("delete-comment-conf")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteComment(string type, Guid id)
+        public async Task<IActionResult> DeleteComment(string type, Guid id, Guid recordId, bool status)
         {
             /* It's not a casade delete or something, from which if one parent is deleted
              * all the other will be deleted. We just want to hide the comment */
+
+            // we need to keep the record in the record model itself,
+            // then why are we keeping the boolean in comment and confession, because we want the api from backend to exclude the comment text if it's deleted
+            var getRecords = await _context.Reports.FirstOrDefaultAsync(r => r.id == recordId);
+            if (getRecords == null)
+            {
+                return new JsonResult(NotFound(new { error = "Record not found", recordId }));
+            }
+
             if (type == "confession")
             {
                 var confession = await _context.Confessions.FirstOrDefaultAsync(c => c.Id == id);
@@ -120,7 +129,8 @@ namespace CollegeApp.Server.Controllers
                 {
                     return new JsonResult(NotFound(new { error = "Confession not found", id }));
                 }
-                confession.deleted = true;
+                getRecords.isDeleted = status; // since we want to toggle that, admin might accidently delete and want to un-delete
+                confession.deleted = status;
                 await _context.SaveChangesAsync();
             }
             else if (type == "comment")
@@ -130,7 +140,8 @@ namespace CollegeApp.Server.Controllers
                 {
                     return new JsonResult(NotFound(new { error = "Comment not found", id }));
                 }
-                comment.deleted = true;
+                getRecords.isDeleted = status;
+                comment.deleted = status;
                 await _context.SaveChangesAsync();
             }
             // After that what we want to do is, restrict that message doing to api from the backend
