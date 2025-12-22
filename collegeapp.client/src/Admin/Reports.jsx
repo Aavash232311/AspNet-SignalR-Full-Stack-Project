@@ -334,15 +334,14 @@ class ViewDepthCommentReply extends Component {
                     <div className="share-comment-modal">
 
                         <div className="share-modal-header">
-                            <span>Share Comment</span>
+                            <span>Comment</span>
                             <button onClick={() => { this.props.close() }} className="close-btn">×</button>
                         </div>
 
                         {/* Sample Content Preview */}
                         <div className="share-content-preview">
                             <p className="preview-body">
-                                This is a sample comment that will look clear and focused while everything
-                                else in the background is blurred out!
+                                {this.props.content.comments}
                             </p>
                         </div>
 
