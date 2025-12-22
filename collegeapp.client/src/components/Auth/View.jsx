@@ -71,6 +71,14 @@ class Comment extends Component {
     totalPages: 1,
   };
 
+  /* Here we do need to create a method that can expand, the comments that are like the 
+  leaf node. In order to do that we must first go step by step in fetching those nodes.
+  We do not want to make a special case for any of those, we want to keep the logic same. */
+  // I mean that could be done but I don't want to complexity will be way high
+
+
+
+
   // again using like arrow function automatically binds it
   componentDidMount = () => {
     const connection = new signalR.HubConnectionBuilder()
@@ -207,18 +215,21 @@ class Comment extends Component {
     return (
       <div>
         <hr />
-        <form onSubmit={this.addComment}>
-          <textarea
-            name="comment"
-            className="form-control"
-            placeholder="add comment"
-            id=""
-          ></textarea>
-          <br />
-          <button type="submit" className="btn btn-primary btn-sm">
-            Add
-          </button>
-          <hr style={{ visibility: "hidden" }} />
+        <form onSubmit={this.addComment} className="modern-comment-form">
+          <div className="comment-input-container">
+            <textarea
+              name="comment"
+              className="main-textarea"
+              placeholder="What are your thoughts?"
+              autoComplete="off"
+            ></textarea>
+
+            <div className="comment-form-footer">
+              <button type="submit" className="submit-button">
+                Comment
+              </button>
+            </div>
+          </div>
         </form>
         <div id="chat-fourm-frame" >
           {this.state.confessions && (
@@ -326,59 +337,76 @@ class CommentRenderCompoenent extends Component {
             </div>
           </div>
           <div className="commenct-frame">{i.comments}</div>
-          <div id="manipulate-comment">
-            <div className="center-flex-grid">
-              <FaRegComment
-                className="comment-icons hover-effect"
-                onClick={() => {
-                  this.state.showReplyThread === true
-                    ? this.setState({ showReplyThread: false })
-                    : this.setState({ showReplyThread: true });
-                }}
-              />
+
+          <div className="reddit-comment-bar">
+            {/* 1. Voting Group */}
+            <div className="action-group voting">
+              <button className="action-item hover-upvote">
+                <FaChevronUp className="icon" />
+              </button>
+              <span className="count">0</span>
+              <button className="action-item hover-downvote">
+                <FaChevronDown className="icon" />
+              </button>
             </div>
-            <div className="center-flex-grid hover-effect">
-              <FaChevronUp className="comment-icons center-flex-grid" /> {"  "}
-              <small>Reply</small>
+
+            {/* 2. Comment Group */}
+            <div
+              className="action-item hover-bg"
+              onClick={() => this.setState(prev => ({ showReplyThread: !prev.showReplyThread }))}
+            >
+              <FaRegComment className="icon" />
+              <span className="label">Comments</span>
             </div>
-            <div className="center-flex-grid">0</div>
-            <div className="hover-effect">
-              <FaChevronDown className="comment-icons" />
+
+            {/* 3. Reply Group */}
+            <div className="action-item hover-bg">
+              <small className="label">Reply</small>
             </div>
-            <div className="center-flex-grid">0</div>
-            <div className="center-flex-grid hover-effect">
-              <FaShare className="comment-icons center-flex-grid" /> {" "}
-              <small>Share</small>
+
+            {/* 4. Share Group */}
+            <div className="action-item hover-bg">
+              <FaShare className="icon" />
+              <span className="label">Share</span>
             </div>
-            <div className="center-flex-grid hover-effect">
-              <ReportGmailerrorredIcon onClick={() => {
-                this.setState({ report: true });
-              }} />
+
+            {/* 5. Report Group */}
+            <div
+              className="action-item hover-bg"
+              onClick={() => this.setState({ report: true })}
+            >
+              <ReportGmailerrorredIcon className="icon" />
+              <span className="label">Report</span>
             </div>
           </div>
           {this.state.showReplyThread === true && (
             <>
               <form
-                onSubmit={(ev) => {
-                  this.replyCommentUpload(ev, i.id);
-                }}
+                className="modern-reply-form"
+                onSubmit={(ev) => this.replyCommentUpload(ev, i.id)}
               >
-                <div className="reply-thread-wrapper">
+                <div className="reply-input-container">
                   <textarea
-                    type="text"
-                    placeholder="write a comment!"
+                    placeholder="What are your thoughts?"
                     autoComplete="off"
                     name="comment"
-                    className="form-control reply-thread-comment"
+                    className="reply-textarea"
                   />
-                  <br />
-                  <button
-                    type="submit"
-                    className="comment-button"
-                  >
-                    Comment
-                  </button>
-                  <br /> <br />
+                  <div className="reply-form-footer">
+                    <button
+                      type="button"
+                      className="cancel-button"
+                      onClick={() => this.setState({ showReplyThread: false })}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="submit-button"
+                    >
+                      Comment
+                    </button>
+                  </div>
                 </div>
               </form>
             </>

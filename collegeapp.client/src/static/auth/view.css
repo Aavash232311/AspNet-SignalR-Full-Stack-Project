@@ -27,33 +27,6 @@
     line-height: 1.4;
 }
 
-.reply-thread-wrapper {
-    grid-template-columns: 50% 50%;
-    grid-gap: 50px;
-}
-
-.comment-button {
-    background-color: rgb(136, 33, 38);
-    outline-width: 0;
-    border: #622427;
-    color: white;
-    border-radius: 2px;
-}
-
-
-
-.comment-button:hover {
-    background-color: #bb484e;
-}
-
-.comment-frames {
-    display: grid;
-    grid-template-rows: auto auto auto;
-    grid-gap: 2.5px;
-    min-height: 50px;
-    height: auto;
-}
-
 .profile-and-name {
     display: grid;
     grid-template-columns: 50px auto;
@@ -97,20 +70,64 @@
     background-color: rgb(179, 179, 179);
 }
 
-#manipulate-comment {
-    display: grid;
-    grid-template-columns: repeat(8, minmax(25px, auto));
-    font-size: small;
-    padding: 10px;
-    grid-gap: 5px;
-    width: 250px;
+.reddit-comment-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #878a8c; /* Reddit's icon gray */
+  font-family: "IBM Plex Sans", sans-serif;
+  height: 32px;
 }
 
+/* Base style for every clickable item */
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
 
-.center-flex-grid {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.action-item .icon {
+  font-size: 18px;
+}
+
+.action-item .label {
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.action-item .count {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 2px;
+  color: #1a1a1b; /* Darker color for numbers */
+}
+
+/* Hover Effects */
+.hover-bg:hover {
+  background-color: rgba(26, 26, 27, 0.1);
+}
+
+.hover-upvote:hover {
+  background-color: rgba(26, 26, 27, 0.1);
+  color: #ff4500; 
+}
+
+.hover-downvote:hover {
+  background-color: rgba(26, 26, 27, 0.1);
+  color: #7193ff; 
+}
+
+/* The Voting Container */
+.voting {
+  display: flex;
+  align-items: center;
 }
 
 #chat-fourm-frame {
@@ -295,4 +312,133 @@ textarea::placeholder {
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Container that holds everything */
+.reply-input-container {
+  border: 1px solid #edeff1;
+  border-radius: 4px;
+  background-color: #f6f7f8;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden; /* Ensures the footer stays inside the rounded corners */
+  margin-top: 10px;
+}
+
+/* Focus state: When the user clicks into the box */
+.reply-input-container:focus-within {
+  background-color: #ffffff;
+  border-color: #1a1a1b; /* Darker border on focus */
+}
+
+/* The actual Textarea */
+.reply-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical; /* Allows user to pull down but not out */
+  color: #1a1a1b;
+}
+
+/* The bottom bar that holds buttons */
+.reply-form-footer {
+  display: flex;
+  justify-content: flex-end; /* Aligns buttons to the right */
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f0f2f3; /* Subtle gray background for the footer */
+  border-top: 1px solid #edeff1;
+}
+
+/* Base button styling */
+.submit-button, .cancel-button {
+  padding: 6px 16px;
+  border-radius: 999px; /* Fully rounded "pill" buttons */
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+}
+
+/* Primary "Comment" Button */
+.submit-button {
+  background-color: #0079d3; /* Reddit Blue */
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #005fa3;
+}
+
+/* Secondary "Cancel" Button */
+.cancel-button {
+  background-color: transparent;
+  color: #878a8c;
+  border: 1px solid transparent;
+}
+
+.cancel-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Style for main reply */
+/* Container for the box */
+.comment-input-container {
+  border: 1px solid #edeff1;
+  border-radius: 4px;
+  background-color: #f6f7f8;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  margin-bottom: 20px; /* Space between the box and the first comment */
+}
+
+/* Change color when user clicks inside */
+.comment-input-container:focus-within {
+  background-color: #ffffff;
+  border-color: #1a1a1b;
+}
+
+/* The textarea */
+.main-textarea {
+  width: 100%;
+  min-height: 120px; /* Slightly taller for main comments */
+  padding: 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  color: #1a1a1b;
+}
+
+/* The bottom action bar */
+.comment-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  background-color: #f0f2f3;
+  border-top: 1px solid #edeff1;
+}
+
+/* The Button */
+.submit-button {
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #0079d3;
+  color: white;
+  border: none;
+  transition: background 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #005fa3;
 }
