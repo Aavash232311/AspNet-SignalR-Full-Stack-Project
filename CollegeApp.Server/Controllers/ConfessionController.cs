@@ -95,15 +95,14 @@ namespace CollegeApp.Server.Controllers
         [Authorize]
         public IActionResult GetConfessions(int page)
         {
-            if (page == 0) return new JsonResult(BadRequest()); 
+            if (page == 0) return new JsonResult(BadRequest());
             int pageSize = 5;
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return new JsonResult(Unauthorized(new {message = "User not found"}));
+            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
             var query = _context.Confessions.Where(x => x.UserId == userId);
             if (query.Any())
             {
-                query = helper.NormalPagination(pageSize, page, helper.hideDeletedConfession(query));
-                return new JsonResult(Ok());
+                return new JsonResult(Ok(helper.NormalPagination(pageSize, page, query)));
             }
             return new JsonResult(NotFound());
         }

@@ -1,8 +1,5 @@
 ﻿using CollegeApp.Server.Controllers;
 using CollegeApp.Server.Models;
-using RestSharp;
-using System;
-using System.Reflection;
 
 namespace CollegeApp.Server.Service
 {
@@ -29,8 +26,8 @@ namespace CollegeApp.Server.Service
 
             return $"rgb({r}, {g}, {b})";
         }
-        
-        public dynamic NormalPagination(int pageSize, int page, IQueryable<dynamic> dbo) // this is for the normal pagination that takes place 
+
+        public object NormalPagination<T>(int pageSize, int page, IQueryable<T> dbo)// this is for the normal pagination that takes place 
         {
             try
             {
@@ -142,5 +139,9 @@ namespace CollegeApp.Server.Service
             }
             return commentsList;
         }
+    }
+
+    public class T
+    {
     }
 }
