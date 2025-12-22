@@ -13,6 +13,8 @@ namespace CollegeApp.Server.Models
         public Guid? Confession { get; set; } // required foregin key property according to microsoft
         public Guid? Comments { get; set; }
         public bool isVerified { get; set; } = false;
+        // It might be reported comment, or confession, we still need to trak it's parent
+        public Guid? parentConfessionId { get; set; }
 
     }
 }

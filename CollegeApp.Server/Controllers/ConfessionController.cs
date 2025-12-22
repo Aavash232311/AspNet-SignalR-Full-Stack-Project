@@ -335,6 +335,7 @@ namespace CollegeApp.Server.Controllers
                 Confession = associatedConfession.Id, // just making sure, that those two exists before adding them.
                 Comments = associatedComments.Id,
                 reportedByUserId = userId,
+                parentConfessionId = report.type == "confession" ? associatedConfession.Id : associatedComments.ConfessionId
             };
             _context.Reports.Add(newReport);
             await _context.SaveChangesAsync();

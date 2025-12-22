@@ -90,5 +90,21 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(pagination));
         }
+
+        [Route("report-verified")]
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ReportVerified(Guid reportId, bool status)
+        {
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.id == reportId);
+            if (report == null)
+            {
+                return new JsonResult(NotFound(new { error = "Report not found", reportId, status }));
+            }
+            report.isVerified = status;
+            _context.Reports.Update(report);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok(new { message = "Report marked as verified", status }));
+        }
     }
 }
