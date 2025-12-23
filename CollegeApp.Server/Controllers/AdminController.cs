@@ -1,11 +1,11 @@
 ﻿using CollegeApp.Server.Data;
 using CollegeApp.Server.Models;
 using CollegeApp.Server.Service;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -15,11 +15,17 @@ namespace CollegeApp.Server.Controllers
         public object userInfo { get; set; } = new object();
     }
 
+    public class ExtendedReportTable : Report
+    {
+        public int frequency { get; set; } = 0;
+    }
+
     public class FrequencyReport
     {
         public int frequency { get; set; } = 0;
         public Guid refId { get; set; } = Guid.NewGuid();
     }
+
     public class PaginationResult<T>
     {
         public int totalPages { get; set; }
@@ -97,14 +103,17 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-admin-report")]
         [HttpGet]
-        public async Task<IActionResult> GetAdminReport(int page)
+        public async Task<IActionResult> GetAdminReport(int page, string status)
         {
             if (page < 1)
             {
                 return new JsonResult(BadRequest(new { error = "Page number must be greater than 0" }));
             }
 
-            var reports = await _context.Reports.OrderByDescending(p => p.reportedAt).ToListAsync();
+            var reports = status == "deleted" ?
+                    _context.Reports.Where(p => p.isDeleted == true) :
+                    status == "active" ? _context.Reports.Where(p => p.isDeleted == false) :
+                    _context.Reports.OrderByDescending(p => p.reportedAt);
 
             var pagination = _helper.NormalPagination(10, page, reports.AsQueryable());
             var slicedReports = pagination.data;
@@ -112,7 +121,7 @@ namespace CollegeApp.Server.Controllers
 
             foreach (var item in pagination.data)
             {
-                var confessionId = item.Confession;  
+                var confessionId = item.Confession;
                 var commentId = item.Comments;
 
                 var freq = _context.Reports.Count(

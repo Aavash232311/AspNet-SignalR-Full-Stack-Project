@@ -35,8 +35,7 @@ class ReportsAdmin extends Component {
             userInfo: null,
             viewReport: null,
             frequencyReports: null,
-            status: 'active',
-            sortBy: 'high-low',
+            status: 'all',
             fchart: null
         };
     }
@@ -47,7 +46,7 @@ class ReportsAdmin extends Component {
 
     getReports = (page) => {
         this.setState({ isLoading: true });
-        fetch(`/Admin/get-admin-report?page=${page}`, {
+        fetch(`/Admin/get-admin-report?page=${page}&status=${this.state.status}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${services.accessToken()}`,
@@ -59,6 +58,7 @@ class ReportsAdmin extends Component {
                 const { value } = response;
                 const { pagination, frequencyReports } = value;
                 const { data, totalPages } = pagination;
+                console.log(data);
                 this.setState({
                     reports: data || [],
                     totalPages: totalPages || 1,
@@ -156,9 +156,11 @@ class ReportsAdmin extends Component {
     // Universal handler for select inputs
     handleFilterChange = (event) => {
         const { name, value } = event.target;
+
         this.setState({ [name]: value }, () => {
-            // Optional: Trigger a callback or API call after state updates
-            console.log(`Filter updated: ${name} = ${value}`);
+            // let's just re-fetch the data of whatever page it might be in!
+
+            this.getReports(this.state.page);
         });
     };
 
@@ -234,28 +236,10 @@ class ReportsAdmin extends Component {
                                     >
                                         <MenuItem value="active">Active Reports</MenuItem>
                                         <MenuItem value="deleted">Deleted Reports</MenuItem>
-                                        <MenuItem value="deleted">All Reports</MenuItem>
+                                        <MenuItem value="all">All Reports</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
-
-                            {/* Sort Filter */}
-                            <Grid size={{ xs: 12, md: 3 }}>
-                                <FormControl fullWidth size="small">
-                                    <InputLabel id="sort-label">Order By</InputLabel>
-                                    <Select
-                                        labelId="sort-label"
-                                        name="sortBy" // Must match the state key
-                                        value={this.state.sortBy}
-                                        label="Order By"
-                                        onChange={this.handleFilterChange}
-                                    >
-                                        <MenuItem value="high-low">f: High to Low</MenuItem>
-                                        <MenuItem value="low-high">f: Low to High</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
                         </Grid>
                     </Box>
 
@@ -396,6 +380,7 @@ class ReportsAdmin extends Component {
     }
 }
 
+// calander heatmap
 ChartJS.register(MatrixController, MatrixElement, Title, Tooltip, Legend, TimeScale, LinearScale);
 
 class ReportFrequencyVisualazation extends Component {
@@ -462,7 +447,6 @@ class ReportFrequencyVisualazation extends Component {
                             data: matrixData,
                             backgroundColor: (context) => {
                                 const value = context.dataset.data[context.dataIndex]?.v || 0;
-                                // GitHub Color Logic
                                 if (value === 0) return '#ebedf0';
                                 if (value === 1) return '#9be9a8';
                                 if (value <= 3) return '#40c463';
