@@ -3,7 +3,9 @@ import { Admin } from './Admin';
 import {
     Toolbar, Typography, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Paper,
-    Pagination, Switch, Box, Chip, CircularProgress
+    Pagination, Switch, Box, Chip, CircularProgress,
+    // Added imports for the selection menus
+    FormControl, InputLabel, Select, MenuItem, Grid2 as Grid
 } from '@mui/material';
 import Services from '../utils/utils';
 import "../static/auth/Admin/report.css";
@@ -12,9 +14,6 @@ import SecurityIcon from '@mui/icons-material/Security';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteApp from '../components/Auth/useable/Prompt';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const services = new Services();
@@ -29,7 +28,9 @@ class ReportsAdmin extends Component {
             isLoading: false,
             userInfo: null,
             viewReport: null,
-            frequencyReports: null
+            frequencyReports: null,
+            status: 'active',
+            sortBy: 'high-low',
         };
     }
 
@@ -146,6 +147,15 @@ class ReportsAdmin extends Component {
         this.setState({ viewReport: null });
     }
 
+    // Universal handler for select inputs
+    handleFilterChange = (event) => {
+        const { name, value } = event.target;
+        this.setState({ [name]: value }, () => {
+            // Optional: Trigger a callback or API call after state updates
+            console.log(`Filter updated: ${name} = ${value}`);
+        });
+    };
+
     render() {
         const { reports, page, totalPages, isLoading } = this.state;
 
@@ -198,6 +208,47 @@ class ReportsAdmin extends Component {
                     <Typography variant="subtitle1" gutterBottom>
                         Review and verify reported confessions and comments.
                     </Typography>
+
+                    <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0', bgcolor: 'white' }}>
+                        <Grid container spacing={2} alignItems="center">
+
+                            {/* Status Filter */}
+                            <Grid size={{ xs: 12, md: 3 }}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel id="status-label">Report Status</InputLabel>
+                                    <Select
+                                        labelId="status-label"
+                                        name="status" // Must match the state key
+                                        value={this.state.status}
+                                        label="Report Status"
+                                        onChange={this.handleFilterChange}
+                                    >
+                                        <MenuItem value="active">Active Reports</MenuItem>
+                                        <MenuItem value="deleted">Deleted Reports</MenuItem>
+                                        <MenuItem value="deleted">All Reports</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            {/* Sort Filter */}
+                            <Grid size={{ xs: 12, md: 3 }}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel id="sort-label">Order By</InputLabel>
+                                    <Select
+                                        labelId="sort-label"
+                                        name="sortBy" // Must match the state key
+                                        value={this.state.sortBy}
+                                        label="Order By"
+                                        onChange={this.handleFilterChange}
+                                    >
+                                        <MenuItem value="high-low">f: High to Low</MenuItem>
+                                        <MenuItem value="low-high">f: Low to High</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                        </Grid>
+                    </Box>
 
                     {this.state.viewReport !== null ? <ViewDepthCommentReply content={this.state.viewReport} close={this.closeReport} /> : null}
                     {reports.length > 0 ? (
