@@ -4,8 +4,8 @@ import {
     Toolbar, Typography, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Paper,
     Pagination, Switch, Box, Chip, CircularProgress,
-    // Added imports for the selection menus
-    FormControl, InputLabel, Select, MenuItem, Grid2 as Grid
+    FormControl, InputLabel, Select, MenuItem, Grid2 as Grid,// for the bluer effect
+    IconButton, Button
 } from '@mui/material';
 import Services from '../utils/utils';
 import "../static/auth/Admin/report.css";
@@ -13,10 +13,16 @@ import { Auth0User } from './Thread';
 import SecurityIcon from '@mui/icons-material/Security';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DeleteApp from '../components/Auth/useable/Prompt';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
+import { Chart as ChartJS, Title, Tooltip, Legend, TimeScale, LinearScale } from 'chart.js';
+import { MatrixController, MatrixElement } from 'chartjs-chart-matrix';
+import { Chart } from 'react-chartjs-2';
+import 'chartjs-adapter-luxon';
+import { DateTime } from 'luxon';
 
 const services = new Services();
+
 
 class ReportsAdmin extends Component {
     constructor(props) {
@@ -31,6 +37,7 @@ class ReportsAdmin extends Component {
             frequencyReports: null,
             status: 'active',
             sortBy: 'high-low',
+            fchart: null
         };
     }
 
@@ -143,9 +150,8 @@ class ReportsAdmin extends Component {
         }
     }
 
-    closeReport = () => {
-        this.setState({ viewReport: null });
-    }
+    closeReport = () => this.setState({ viewReport: null });
+    clostFchart = () => this.setState({ fchart: null });
 
     // Universal handler for select inputs
     handleFilterChange = (event) => {
@@ -203,6 +209,9 @@ class ReportsAdmin extends Component {
                         />
                     </div>
                 ) : null}
+
+                {this.state.fchart === null ? null : <ReportFrequencyVisualazation info={this.state.fchart} close={this.clostFchart} />}
+
                 <Box className="admin-container">
                     <Typography variant="h4" gutterBottom>Admin Report Management</Typography>
                     <Typography variant="subtitle1" gutterBottom>
@@ -324,7 +333,20 @@ class ReportsAdmin extends Component {
                                                         </FormControl>
                                                     </TableCell>
                                                     <TableCell>
-                                                        {this.state.frequencyReports !== null ? f.frequency : null}
+                                                        {this.state.frequencyReports !== null ? (
+                                                            <Button
+                                                                variant="outlined" // or "contained" for a solid look
+                                                                size="small"
+                                                                onClick={() => { this.setState({ fchart: report }) }}
+                                                                sx={{
+                                                                    minWidth: '40px',
+                                                                    textTransform: 'none',
+                                                                    fontWeight: 'bold'
+                                                                }}
+                                                            >
+                                                                {f.frequency}
+                                                            </Button>
+                                                        ) : null}
                                                     </TableCell>
                                                     <TableCell>
                                                         <div style={{ cursor: "pointer" }} onClick={() => { this.viewReport(report) }}>
@@ -374,8 +396,175 @@ class ReportsAdmin extends Component {
     }
 }
 
+ChartJS.register(MatrixController, MatrixElement, Title, Tooltip, Legend, TimeScale, LinearScale);
+
+class ReportFrequencyVisualazation extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            chartData: {
+                datasets: []
+            },
+            loading: true
+        };
+    }
+
+    processData = (rawData) => {
+        const counts = {};
+
+        // 1. Map existing data to a quick-lookup object
+        rawData.forEach(item => {
+            const dateStr = DateTime.fromISO(item.x).toISODate();
+            counts[dateStr] = (counts[dateStr] || 0) + parseInt(item.y);
+        });
+
+        // 2. Determine the date range (e.g., Start of the year to Today)
+        const end = DateTime.now();
+        let start = end.minus({ years: 1 }).startOf('week');
+        // Or use: let start = DateTime.fromISO("2025-01-01");
+
+        const fullCalendarGrid = [];
+
+        // 3. Loop through every single day and create a "Matrix" point
+        while (start <= end) {
+            const dateStr = start.toISODate();
+            fullCalendarGrid.push({
+                x: start.startOf('week').toMillis(), // Column (Week)
+                y: start.weekday,                    // Row (Day of Week)
+                v: counts[dateStr] || 0,             // Value (0 if no reports)
+                d: dateStr                           // Formatted date for tooltip
+            });
+            start = start.plus({ days: 1 });
+        }
+
+        return fullCalendarGrid;
+    }
+
+    fetchData = async () => {
+        try {
+            const response = await fetch(`Admin/Report-logs?reportId=${this.props.info.id}`, {
+                method: 'get',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${services.accessToken()}`,
+                },
+            });
+            const data = await response.json();
+
+            if (data.statusCode === 200) {
+                const matrixData = this.processData(data.value);
+
+                this.setState({
+                    loading: false,
+                    chartData: {
+                        datasets: [{
+                            label: 'Report Frequency',
+                            data: matrixData,
+                            backgroundColor: (context) => {
+                                const value = context.dataset.data[context.dataIndex]?.v || 0;
+                                // GitHub Color Logic
+                                if (value === 0) return '#ebedf0';
+                                if (value === 1) return '#9be9a8';
+                                if (value <= 3) return '#40c463';
+                                if (value <= 5) return '#30a14e';
+                                return '#216e39';
+                            },
+                            borderWidth: 1,
+                            borderColor: '#fff',
+                            width: ({ chart }) => (chart.chartArea ? (chart.chartArea.width / 52) - 2 : 10),
+                            height: ({ chart }) => (chart.chartArea ? (chart.chartArea.height / 7) - 2 : 10),
+                        }]
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching report logs:", error);
+        }
+    }
+
+    componentDidMount() {
+        this.fetchData();
+    }
+
+    render() {
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    display: true,
+                    offset: true,
+                    time: { unit: 'month' },
+                    grid: { display: false },
+                    ticks: { maxRotation: 0, autoSkip: true }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    offset: true,
+                    reverse: true, // Monday at the top
+                    min: 0.5,
+                    max: 7.5,
+                    grid: { display: false },
+                    ticks: {
+                        stepSize: 1,
+                        callback: (value) => {
+                            const days = ['', 'Mon', '', 'Wed', '', 'Fri', '', 'Sun'];
+                            return days[value];
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: (items) => items[0].raw.d,
+                        label: (item) => `Reports: ${item.raw.v}`
+                    }
+                }
+            }
+        };
+
+        return (
+            <div className="share-comment-overlay">
+                <IconButton
+                    aria-label="close"
+                    onClick={this.props.close}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                        '&:hover': {
+                            color: (theme) => theme.palette.error.main,
+                            backgroundColor: 'rgba(211, 47, 47, 0.04)'
+                        },
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+
+                <Box sx={{ p: 4, mt: 4, height: '250px', width: '100%' }}>
+                    {!this.state.loading && (
+                        <Chart
+                            type="matrix"
+                            data={this.state.chartData}
+                            options={options}
+                        />
+                    )}
+                </Box>
+            </div>
+        );
+    }
+}
 
 class ViewDepthCommentReply extends Component {
+
+    constructor(props) {
+        super(props)
+    }
     render() {
         return (
             <>

@@ -26,7 +26,12 @@ namespace CollegeApp.Server.Controllers
         public List<T> data { get; set; }
         public int totalObjects { get; set; }
     }
-
+    public class ReportData
+    {
+        public string x { get; set; } = string.Empty; // this is going to be the date
+        public string y { get; set; } = string.Empty;
+        public string label { get; set; } = string.Empty;
+    }
 
     [Route("[controller]")]
     [ApiController]
@@ -195,6 +200,38 @@ namespace CollegeApp.Server.Controllers
 
             // After that what we want to do is, restrict that message doing to api from the backend
             return new JsonResult(Ok());
+        }
+
+        /* Data of the report frequency, we will fix it to report log of past one year,
+         * I love blending things that I learned together, so this one came from data science course that I took.*/
+        [Route("Report-logs")]
+        [HttpGet]
+        public async Task<IActionResult> ReportLog(Guid reportId)
+        {
+            if (reportId == Guid.Empty || reportId == null)
+            {
+                return new JsonResult(BadRequest(new { error = "Report ID cannot be empty", reportId }));
+            }
+
+            // if they are not null then we will find similar type of report
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.id == reportId);
+            if (report == null)
+            {
+                return new JsonResult(NotFound(new { error = "Report not found", reportId }));
+            }
+
+            var similarReports = _context.Reports.Where(r =>
+                (r.Confession == report.Confession) &&
+                (r.Comments == report.Comments) && 
+                r.reportedAt >= DateTime.UtcNow.AddYears(-1)
+            ).Select(item => new ReportData()
+            {
+                x = item.reportedAt.ToString("yyyy-MM-dd"),
+                y = "1", // each report counts as one,
+                label = item.reason
+            }).ToList(); // then we will have the list of similar reports
+
+            return new JsonResult(Ok(similarReports));
         }
     }
 }
