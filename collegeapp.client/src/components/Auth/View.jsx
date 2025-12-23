@@ -377,7 +377,13 @@ class CommentRenderCompoenent extends Component {
             {/* 5. Report Group */}
             <div
               className="action-item hover-bg"
-              onClick={() => this.setState({ report: true })}
+              onClick={() => {
+                if (i.deleted) {
+                  alert("You cannot report to deleted message!");
+                  return;
+                }
+                this.setState({ report: true })
+              }}
             >
               <ReportGmailerrorredIcon className="icon" />
               <span className="label">Report</span>
@@ -692,6 +698,8 @@ class ReportConfessionAndComment extends Component {
         // let's close this dialuge once everything is done;
         this.props.closeDiag();
       }
+    }).catch((err) => {
+      alert("Something wen't wrong please try to refresh the site!");
     });
   }
 

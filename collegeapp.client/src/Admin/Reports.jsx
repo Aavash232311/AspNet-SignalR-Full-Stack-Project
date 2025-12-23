@@ -58,7 +58,6 @@ class ReportsAdmin extends Component {
                 const { value } = response;
                 const { pagination, frequencyReports } = value;
                 const { data, totalPages } = pagination;
-                console.log(data);
                 this.setState({
                     reports: data || [],
                     totalPages: totalPages || 1,

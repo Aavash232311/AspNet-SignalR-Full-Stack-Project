@@ -319,6 +319,7 @@ namespace CollegeApp.Server.Controllers
             if (report.type == "confession") 
             {
                 var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == report.Confession);
+
                 if (getConfession == null)
                 {
                     return new JsonResult(NotFound(new
@@ -326,6 +327,18 @@ namespace CollegeApp.Server.Controllers
                         errorCode = "confession not found",
                         entry = report
                     }));
+                }
+                else
+                {
+                    // if it is not null, we just want to make sure we are not reporting a thing that is already deleted
+                    if (getConfession.deleted)
+                    {
+                        return new JsonResult(BadRequest(new
+                        {
+                            errorCode = "confession already deleted",
+                            entry = report
+                        }));
+                    }
                 }
                 associatedConfession = getConfession;
             }
@@ -337,8 +350,19 @@ namespace CollegeApp.Server.Controllers
                     return new JsonResult(NotFound(new
                     {
                         errorCode = "comments not found",
-                        entry = report   
+                        entry = report
                     }));
+                }
+                else
+                {
+                    if (getComments.deleted)
+                    {
+                        return new JsonResult(BadRequest(new
+                        {
+                            errorCode = "comment already deleted",
+                            entry = report
+                        }));
+                    }
                 }
                 associatedComments = getComments;
             }
