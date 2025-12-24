@@ -101,7 +101,6 @@ class Notification extends Component {
             <SideNavPost>
                 {this.state.notification.length > 0 ? (
                     <>
-
                         <Typography variant="h6" style={{ flexGrow: 1 }}>
                             Notifications
                         </Typography>
@@ -183,7 +182,13 @@ class Notification extends Component {
                             )
                         })}
                     </>
-                ) : null}
+                ) : (
+                    <>
+                        <Typography variant="h6" style={{ flexGrow: 1 }}>
+                            No notifications for you!
+                        </Typography>
+                    </>
+                )}
             </SideNavPost>
         );
     }
