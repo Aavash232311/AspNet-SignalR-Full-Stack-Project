@@ -63,6 +63,11 @@ export default defineConfig({
             '^/Admin': {
                 target,
                 secure: false,
+                ws: false
+            },
+            '^/notificationHub': {
+                target,
+                secure: false,
                 ws: true
             },
         },

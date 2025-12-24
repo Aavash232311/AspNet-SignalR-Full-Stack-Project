@@ -242,5 +242,6 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(similarReports));
         }
+        // todo: create a notification system whenever someone replies to respective user's thread!
     }
 }

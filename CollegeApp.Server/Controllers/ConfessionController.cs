@@ -41,15 +41,17 @@ namespace CollegeApp.Server.Controllers
         public ApplicationDbContext _context;
         public Auth0 _userManager;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IHubContext<NotificationHub> _pushNotification;
         public Helper helper;
         private readonly IMapper _mapper;
-        public ConfessionController(ApplicationDbContext context, Auth0 _userManager, IHubContext<ChatHub> _hubContext, Helper helper, IMapper mapper)
+        public ConfessionController(ApplicationDbContext context, Auth0 _userManager, IHubContext<ChatHub> _hubContext, IHubContext<NotificationHub> pushNotification ,Helper helper, IMapper mapper)
         {
             this._context = context;
             this._userManager = _userManager;   
             this._hubContext = _hubContext;
             this.helper = helper;
             _mapper = mapper; 
+            this._pushNotification = pushNotification;
         }
 
         [Route("AddConfession")]
@@ -129,6 +131,10 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok());
         }
 
+        // now what we want to do is, send a notification to whoever's the confession is about the notification. 
+
+
+
         /* This api is for adding top level comments, not replying to threads,
          * it's a direct reply to confession!! */
         [Route("AddComment")]
@@ -174,7 +180,7 @@ namespace CollegeApp.Server.Controllers
                 profileColor = nameAndProfile.ProfileColor,
                 AnonymousName = nameAndProfile.CommonName
             };
-            var parentComment = _context.Comments.Add(newComment);
+            //var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
             // this socket is sending message to a particular group
             await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new {
@@ -182,6 +188,33 @@ namespace CollegeApp.Server.Controllers
                 parent = newComment,
                 order = "top-level"
             });
+
+            /* 
+                We can sent push notification in two ways, first one is if someone has confessed and get got a reply from someone,
+                And every reply and comments associated with that confession should get a notification.
+
+                Other one is, if someone has commented on something, and someone replies to that particular comment, then only that user should get notification.
+                
+                We can work with one case at a time.
+            */
+
+            // okay in this notification the group name is going to be the user id, since notifcation is associated with particular user.
+            Notification newPushNotification = new Notification()
+            {
+                title = $"New Comment on your Confession by anonymous user: {userId}", // userId is the user who commented
+                message = comments,
+                type = "comment",
+                CommentId = newComment.Id,
+                userId = getConfessions.UserId // the owner of the confession
+            };
+
+            //_context.Notifications.Add(newPushNotification);
+
+
+            await _context.SaveChangesAsync();
+
+            await _pushNotification.Clients.Group((userId).ToString()).SendAsync("ReceiveNotification", newPushNotification);
+
             return new JsonResult(Ok(newComment));
         }
 

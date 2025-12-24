@@ -24,9 +24,11 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
 import AuthContext from '../../../auth/auth';
+import * as signalR from "@microsoft/signalr";
+import Services from '../../../utils/utils';
 
 const drawerWidth = 240;
-
+const services = new Services();
 
 const navContent = [
     {
@@ -160,6 +162,24 @@ export default function SideNavPost(props) {
     const handleDrawerClose = () => {
         setOpen(false);
     };
+
+    React.useState(() => {
+        // connect to a websocket which sends this particular client notification about his content!
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub", {
+                accessTokenFactory: () => services.accessToken()
+            })
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveNotification", (value) => {
+            console.log(value);
+        });
+
+        connection.start()
+            .then(() => console.log("Connected! notification group."))
+            .catch(err => console.error("Connection failed: ", err));
+    }, []);
 
 
     return (

@@ -47,6 +47,7 @@
   flex-grow: 1;
   padding: 24px;
   margin-left: 240px; /* Width of the drawer */
+  overflow: auto;
 }
 
 /* Optional hover effect for ListItems */

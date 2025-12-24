@@ -1,6 +1,5 @@
 ﻿using CollegeApp.Server.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata;
 
 namespace CollegeApp.Server.Data
 {
@@ -10,6 +9,7 @@ namespace CollegeApp.Server.Data
         public DbSet<Confession> Confessions { get; set; }
         public DbSet<Comments> Comments { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Confession>()
