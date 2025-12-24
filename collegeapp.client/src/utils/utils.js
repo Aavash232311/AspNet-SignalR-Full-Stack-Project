@@ -42,6 +42,16 @@ export default class Services {
         };
         return date.toLocaleDateString(undefined, options);
     }
+
+    aspDateHourMinutes(dateString) {
+        const date = new Date(dateString);
+        const options =
+        {
+            hour: '2-digit',
+            minute: '2-digit',
+        };
+        return date.toLocaleDateString(undefined, options);
+    }
     substring(str, characters) {
         return str.length >= characters ? str.substring(0, characters) + "..." : str;
     }

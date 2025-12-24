@@ -180,7 +180,7 @@ namespace CollegeApp.Server.Controllers
                 profileColor = nameAndProfile.ProfileColor,
                 AnonymousName = nameAndProfile.CommonName
             };
-            //var parentComment = _context.Comments.Add(newComment);
+            var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
             // this socket is sending message to a particular group
             await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new {
@@ -203,12 +203,12 @@ namespace CollegeApp.Server.Controllers
             {
                 title = $"New Comment on your Confession by anonymous user: {nameAndProfile.CommonName}", // userId is the user who commented
                 message = comments,
-                type = "comment",
+                type = "New comment",
                 CommentId = newComment.Id,
                 userId = getConfessions.UserId // the owner of the confession
             };
 
-            //_context.Notifications.Add(newPushNotification);
+            _context.Notifications.Add(newPushNotification);
 
 
             await _context.SaveChangesAsync();
@@ -424,6 +424,19 @@ namespace CollegeApp.Server.Controllers
             {
                 comment
             }));
+        }
+
+        [Route("notification")]
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetNotification(int page)
+        {
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // we will send the notification associated with each user
+            if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
+
+            var notifications = _context.Notifications.Where(u => u.userId == userId);
+
+            return new JsonResult(Ok(helper.NormalPagination(10, page, notifications)));
         }
     }
 }
