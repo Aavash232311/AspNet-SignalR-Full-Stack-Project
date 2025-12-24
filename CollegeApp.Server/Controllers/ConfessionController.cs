@@ -150,7 +150,7 @@ namespace CollegeApp.Server.Controllers
                 return new JsonResult(BadRequest(new { message = "Cannot comment on deleted confession" }));
             }
 
-                string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
 
             /* Now we want the game profile color if the customer is same,
@@ -213,7 +213,7 @@ namespace CollegeApp.Server.Controllers
 
             await _context.SaveChangesAsync();
 
-            await _pushNotification.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
+            await _pushNotification.Clients.User(getConfessions.UserId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
 
             return new JsonResult(Ok(newComment));
         }
