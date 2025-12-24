@@ -213,7 +213,7 @@ namespace CollegeApp.Server.Controllers
 
             await _context.SaveChangesAsync();
 
-            await _pushNotification.Clients.Group((userId).ToString()).SendAsync("ReceiveNotification", newPushNotification);
+            await _pushNotification.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
 
             return new JsonResult(Ok(newComment));
         }
