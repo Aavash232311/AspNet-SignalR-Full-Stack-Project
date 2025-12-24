@@ -12,8 +12,9 @@ import {
 } from '@mui/material';
 import FeedIcon from '@mui/icons-material/Feed';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Admin } from "../../Admin/Admin";
+import SideNavPost from "./useable/SideNavPost";
 import Services from "../../utils/utils";
+import ClearIcon from '@mui/icons-material/Clear';
 
 class Notification extends Component {
 
@@ -56,6 +57,23 @@ class Notification extends Component {
         this.getNotifications(this.state.page);
     }
 
+    clearNotification = (id) => {
+        fetch(`Confession/clear-notification?notificationId=${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "delete",
+        }).then((r) => r.json()).then((response) => {
+            const { statusCode } = response;
+            if (statusCode === 200) {
+                this.getNotifications(this.state.page);
+                return;
+            }
+            alert("Something wen't wrong!");
+        })
+    }
+
     render() {
         const sampleNotification = {
             id: "550e8400-e29b-41d4-a716-446655440000",
@@ -70,10 +88,23 @@ class Notification extends Component {
 
         const isUnread = !sampleNotification.isRead;
 
+        /* Now there are two case in this situatation.
+           
+            If the user is in another page, that is using the same side nav then, he will click on this page
+            and then componenentDidMount() get's called which will re-fetch data from the server.
+
+            But what if user is in the same page. We need to add the notification accordingly.
+        
+        */
+
         return (
-            <Admin>
+            <SideNavPost>
                 {this.state.notification.length > 0 ? (
                     <>
+
+                        <Typography variant="h6" style={{ flexGrow: 1 }}>
+                            Notifications
+                        </Typography>
                         {this.state.notification.map((object, index) => {
                             return (
                                 <React.Fragment key={index}>
@@ -81,7 +112,7 @@ class Notification extends Component {
                                         elevation={3}
                                         sx={{
                                             maxWidth: 450,
-                                            m: 12, // Margin to prevent sticking to edges
+                                            m: 2, // Margin to prevent sticking to edges
                                             borderRadius: 2,
                                             overflow: 'hidden',
                                             // Visual accent: blue bar on the left for unread notifications
@@ -98,8 +129,10 @@ class Notification extends Component {
                                         <ListItem
                                             alignItems="flex-start"
                                             secondaryAction={
-                                                <IconButton edge="end" size="small">
-                                                    <MoreVertIcon fontSize="small" />
+                                                <IconButton onClick={() => {
+                                                    this.clearNotification(object.id);
+                                                }} edge="end" size="small">
+                                                    <ClearIcon />
                                                 </IconButton>
                                             }
                                             sx={{ py: 2 }}
@@ -121,7 +154,7 @@ class Notification extends Component {
                                                 primary={
                                                     <Box display="flex" justifyContent="space-between" mb={0.5}>
                                                         <Typography variant="subtitle2" fontWeight={700}>
-                                                            {object.type}
+                                                            {object.title}
                                                         </Typography>
                                                         <Typography variant="caption" color="text.secondary">
                                                             {this.services.aspDateHourMinutes(object.createdAt)}
@@ -151,7 +184,7 @@ class Notification extends Component {
                         })}
                     </>
                 ) : null}
-            </Admin>
+            </SideNavPost>
         );
     }
 }

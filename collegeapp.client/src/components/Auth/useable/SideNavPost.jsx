@@ -49,7 +49,7 @@ const navContent = [
     },
     {
         label: "Notification",
-        link: "/",
+        link: "/notification",
         icons: <FeedIcon />,
     },
     {

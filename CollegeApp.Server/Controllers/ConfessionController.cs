@@ -201,7 +201,7 @@ namespace CollegeApp.Server.Controllers
             // okay in this notification the group name is going to be the user id, since notifcation is associated with particular user.
             Notification newPushNotification = new Notification()
             {
-                title = $"New Comment on your Confession by anonymous user: {nameAndProfile.CommonName}", // userId is the user who commented
+                title = $"New Comment on your Confession by anonymous user", // userId is the user who commented
                 message = comments,
                 type = "New comment",
                 CommentId = newComment.Id,
@@ -434,9 +434,25 @@ namespace CollegeApp.Server.Controllers
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // we will send the notification associated with each user
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
 
-            var notifications = _context.Notifications.Where(u => u.userId == userId);
+            var notifications = _context.Notifications.Where(u => u.userId == userId).OrderByDescending(d => d.createdAt);
 
             return new JsonResult(Ok(helper.NormalPagination(10, page, notifications)));
+        }
+
+        [Route("clear-notification")]
+        [Authorize]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteNotification(Guid notificationId)
+        {
+            var getNotification = _context.Notifications.FirstOrDefault(x => x.id == notificationId);   
+            var getUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (getUser == null) return new JsonResult(NotFound());
+
+            if (!(getNotification.userId == getUser)) return new JsonResult(Unauthorized(new {message = "Cannot clear others notification!"})); // this sort of things cannot happen in normal circumstances, if and only if someone tries to modify client side code
+            _context.Notifications.Remove(getNotification);
+            await _context.SaveChangesAsync();
+
+            return new JsonResult(Ok());
         }
     }
 }
