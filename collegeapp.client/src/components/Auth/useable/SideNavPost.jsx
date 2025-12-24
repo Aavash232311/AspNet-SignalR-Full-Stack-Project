@@ -8,7 +8,6 @@ import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -17,7 +16,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ForumIcon from '@mui/icons-material/Forum';
+import Badge from '@mui/material/Badge';
 import FeedIcon from '@mui/icons-material/Feed';
+import IconButton from '@mui/material/IconButton';
 import { Link } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -30,6 +31,16 @@ import Services from '../../../utils/utils';
 const drawerWidth = 240;
 const services = new Services();
 
+function FeedBadge(props) {
+    return (
+        <IconButton aria-label="feeds">
+            <Badge badgeContent={props.count} color="primary">
+                <FeedIcon />
+            </Badge>
+        </IconButton>
+    );
+}
+
 const navContent = [
     {
         label: "Confessions",
@@ -39,7 +50,7 @@ const navContent = [
     {
         label: "Notification",
         link: "/",
-        icons: <FeedIcon />
+        icons: <FeedIcon />,
     },
     {
         label: "Favourite",
@@ -154,6 +165,7 @@ const darkTheme = createTheme({
 export default function SideNavPost(props) {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
+    const [pushNotificationCount, setPushNotificationCount] = React.useState(0);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -173,7 +185,8 @@ export default function SideNavPost(props) {
             .build();
 
         connection.on("ReceiveNotification", (value) => {
-            console.log(value);
+            // okay if this client has a push notification then update this state accordingly
+            setPushNotificationCount(p => p + 1);
         });
 
         connection.start()
@@ -260,7 +273,9 @@ export default function SideNavPost(props) {
                                                             open ? { mr: 3 } : { mr: 'auto' },
                                                         ]}
                                                     >
-                                                        {object.icons}
+                                                        {object.label === "Notification" ?
+                                                            pushNotificationCount === 0 ? <FeedIcon /> : <FeedBadge count={pushNotificationCount} /> 
+                                                            : object.icons}
                                                     </ListItemIcon>
 
                                                     <ListItemText

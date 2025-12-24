@@ -201,7 +201,7 @@ namespace CollegeApp.Server.Controllers
             // okay in this notification the group name is going to be the user id, since notifcation is associated with particular user.
             Notification newPushNotification = new Notification()
             {
-                title = $"New Comment on your Confession by anonymous user: {userId}", // userId is the user who commented
+                title = $"New Comment on your Confession by anonymous user: {nameAndProfile.CommonName}", // userId is the user who commented
                 message = comments,
                 type = "comment",
                 CommentId = newComment.Id,
