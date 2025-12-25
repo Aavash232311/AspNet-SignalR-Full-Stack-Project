@@ -11,10 +11,11 @@ import {
     IconButton
 } from '@mui/material';
 import FeedIcon from '@mui/icons-material/Feed';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AuthContext from "../../auth/auth";
 import SideNavPost from "./useable/SideNavPost";
 import Services from "../../utils/utils";
 import ClearIcon from '@mui/icons-material/Clear';
+import Pagination from '@mui/material/Pagination';
 
 class Notification extends Component {
 
@@ -67,11 +68,25 @@ class Notification extends Component {
         }).then((r) => r.json()).then((response) => {
             const { statusCode } = response;
             if (statusCode === 200) {
+                // what if you want to remove the confession and you are
+                // like on the edge of page and you have only one item remaining in the page
+                // you would want to go back to another page!
+
+                if (this.state.notification.length <= 1 && this.state.page > 1) { // you can't get things done for page 0
+                    this.getNotifications(this.state.page - 1);
+                    return; // this bug is all around!
+                }
                 this.getNotifications(this.state.page);
                 return;
             }
             alert("Something wen't wrong!");
         })
+    }
+
+
+    handleChange = (ev, val) => {
+        this.getNotifications(val);
+        this.setState({ page: val });
     }
 
     render() {
@@ -98,98 +113,124 @@ class Notification extends Component {
         */
 
         return (
-            <SideNavPost>
-                {this.state.notification.length > 0 ? (
-                    <>
-                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                            Notifications
-                        </Typography>
-                        {this.state.notification.map((object, index) => {
-                            return (
-                                <React.Fragment key={index}>
-                                    <Paper
-                                        elevation={3}
-                                        sx={{
-                                            maxWidth: 450,
-                                            m: 2, // Margin to prevent sticking to edges
-                                            borderRadius: 2,
-                                            overflow: 'hidden',
-                                            // Visual accent: blue bar on the left for unread notifications
-                                            borderLeft: isUnread ? '5px solid' : '1px solid',
-                                            borderColor: isUnread ? 'primary.main' : 'divider',
-                                            bgcolor: 'background.paper',
-                                            transition: 'transform 0.2s, box-shadow 0.2s',
-                                            '&:hover': {
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: 6,
-                                            }
-                                        }}
-                                    >
-                                        <ListItem
-                                            alignItems="flex-start"
-                                            secondaryAction={
-                                                <IconButton onClick={() => {
-                                                    this.clearNotification(object.id);
-                                                }} edge="end" size="small">
-                                                    <ClearIcon />
-                                                </IconButton>
-                                            }
-                                            sx={{ py: 2 }}
-                                        >
-                                            <ListItemAvatar sx={{ minWidth: 56 }}>
-                                                <Avatar
-                                                    sx={{
-                                                        bgcolor: isUnread ? 'primary.light' : 'grey.200',
-                                                        color: isUnread ? 'primary.main' : 'grey.600',
-                                                        width: 42,
-                                                        height: 42
-                                                    }}
-                                                >
-                                                    <FeedIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-
-                                            <ListItemText
-                                                primary={
-                                                    <Box display="flex" justifyContent="space-between" mb={0.5}>
-                                                        <Typography variant="subtitle2" fontWeight={700}>
-                                                            {object.title}
-                                                        </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {this.services.aspDateHourMinutes(object.createdAt)}
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        lineHeight={1.4}
+            <AuthContext.Consumer>
+                {(prop) => {
+                    const { dark, setDark } = prop;
+                    const darkPagination = {
+                        '& .MuiPaginationItem-root': {
+                            color: dark ? '#fff' : '#ffffffff',
+                            borderColor: dark ? '#555' : '#ccc',
+                        },
+                        '& .Mui-selected': {
+                            backgroundColor: dark ? '#1976d2' : '#1976d2',
+                            color: '#fff',
+                        },
+                    }
+                    return (
+                        <>
+                            <SideNavPost>
+                                {this.state.notification.length > 0 ? (
+                                    <>
+                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
+                                            Notifications
+                                        </Typography>
+                                        {this.state.notification.map((object, index) => {
+                                            return (
+                                                <React.Fragment key={index}>
+                                                    <Paper
+                                                        elevation={3}
                                                         sx={{
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 2,
-                                                            WebkitBoxOrient: 'vertical',
+                                                            maxWidth: 450,
+                                                            m: 2, // Margin to prevent sticking to edges
+                                                            borderRadius: 2,
                                                             overflow: 'hidden',
+                                                            // Visual accent: blue bar on the left for unread notifications
+                                                            borderLeft: isUnread ? '5px solid' : '1px solid',
+                                                            borderColor: isUnread ? 'primary.main' : 'divider',
+                                                            bgcolor: 'background.paper',
+                                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                                            '&:hover': {
+                                                                transform: 'translateY(-2px)',
+                                                                boxShadow: 6,
+                                                            }
                                                         }}
                                                     >
-                                                        {object.message}
-                                                    </Typography>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </Paper>
-                                </React.Fragment>
-                            )
-                        })}
-                    </>
-                ) : (
-                    <>
-                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                            No notifications for you!
-                        </Typography>
-                    </>
-                )}
-            </SideNavPost>
+                                                        <ListItem
+                                                            alignItems="flex-start"
+                                                            secondaryAction={
+                                                                <IconButton onClick={() => {
+                                                                    this.clearNotification(object.id);
+                                                                }} edge="end" size="small">
+                                                                    <ClearIcon />
+                                                                </IconButton>
+                                                            }
+                                                            sx={{ py: 2 }}
+                                                        >
+                                                            <ListItemAvatar sx={{ minWidth: 56 }}>
+                                                                <Avatar
+                                                                    sx={{
+                                                                        bgcolor: isUnread ? 'primary.light' : 'grey.200',
+                                                                        color: isUnread ? 'primary.main' : 'grey.600',
+                                                                        width: 42,
+                                                                        height: 42
+                                                                    }}
+                                                                >
+                                                                    <FeedIcon />
+                                                                </Avatar>
+                                                            </ListItemAvatar>
+
+                                                            <ListItemText
+                                                                primary={
+                                                                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                                                                        <Typography variant="subtitle2" fontWeight={700}>
+                                                                            {object.title}
+                                                                        </Typography>
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {this.services.aspDateHourMinutes(object.createdAt)}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                }
+                                                                secondary={
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color="text.secondary"
+                                                                        lineHeight={1.4}
+                                                                        sx={{
+                                                                            display: '-webkit-box',
+                                                                            WebkitLineClamp: 2,
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            overflow: 'hidden',
+                                                                        }}
+                                                                    >
+                                                                        {object.message}
+                                                                    </Typography>
+                                                                }
+                                                            />
+                                                        </ListItem>
+                                                    </Paper>
+                                                </React.Fragment>
+                                            )
+                                        })}
+                                        <Pagination
+                                            count={this.state.totalPages}
+                                            page={this.state.page}
+                                            color="primary"
+                                            onChange={this.handleChange}
+                                            sx={dark === true ? darkPagination : {}}
+                                        />
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
+                                            No notifications for you!
+                                        </Typography>
+                                    </>
+                                )}
+                            </SideNavPost>
+                        </>
+                    )
+                }}
+            </AuthContext.Consumer>
         );
     }
 }
