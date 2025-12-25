@@ -293,7 +293,24 @@ namespace CollegeApp.Server.Controllers
 
             // sending the reply comment to the websocket
             await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = parentComment.Replies, parent = parentComment, order = "thread" });
+
+
+            Notification newPushNotification = new Notification()
+            {
+                title = $"New Reply to your Comment by anonymous user",
+                message = comment,
+                type = "reply-comment",
+                CommentId = newComment.Id,
+                userId = parentComment.UserId // the owner of the parent comment
+            };
+            _context.Notifications.Add(newPushNotification);
+
+            await _pushNotification.Clients.User(parentComment.UserId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
             await _context.SaveChangesAsync(); // saving the changes
+
+
+            /* Now even if someone replies to the comment, send a message to associate user
+             * that someone has replied to their message, whoever the owner might be. */
             return new JsonResult(Ok());
         }
 
