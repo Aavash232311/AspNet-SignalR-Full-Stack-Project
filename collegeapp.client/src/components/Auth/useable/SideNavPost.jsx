@@ -166,6 +166,7 @@ export default function SideNavPost(props) {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const [pushNotificationCount, setPushNotificationCount] = React.useState(0);
+    const { pushNotification, notification } = React.useContext(AuthContext);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -186,6 +187,7 @@ export default function SideNavPost(props) {
 
         connection.on("ReceiveNotification", (value) => {
             // okay if this client has a push notification then update this state accordingly
+            pushNotification(value); // single object it wil push to that context array
             setPushNotificationCount(p => p + 1);
         });
 
@@ -209,7 +211,6 @@ export default function SideNavPost(props) {
 
                     (dark == true ? setThemeLocalStorage(false) : setThemeLocalStorage(true))
                 }
-
                 return (
                     <>
                         <ThemeProvider theme={dark === true ? darkTheme : customTheme}>
@@ -274,7 +275,7 @@ export default function SideNavPost(props) {
                                                         ]}
                                                     >
                                                         {object.label === "Notification" ?
-                                                            pushNotificationCount === 0 ? <FeedIcon /> : <FeedBadge count={pushNotificationCount} /> 
+                                                            pushNotificationCount === 0 ? <FeedIcon /> : <FeedBadge count={pushNotificationCount} />
                                                             : object.icons}
                                                     </ListItemIcon>
 

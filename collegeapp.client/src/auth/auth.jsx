@@ -153,6 +153,12 @@ export const AuthProvider = ({ children }) => {
 
     }
 
+    const [notification, setNotification] = React.useState(null);
+
+    const pushNotification = (newNotification) => {
+        setNotification(newNotification);
+    };
+
     const methods = {
         signup,
         login,
@@ -163,7 +169,9 @@ export const AuthProvider = ({ children }) => {
         roles,
         setDark,
         dark,
-        atObject
+        atObject,
+        notification,
+        pushNotification
     };
     /* Refresh token logic auth0, we need to refrresh our access token based on the refresh token */
 

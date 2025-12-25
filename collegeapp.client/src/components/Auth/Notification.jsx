@@ -17,6 +17,7 @@ import Services from "../../utils/utils";
 import ClearIcon from '@mui/icons-material/Clear';
 import Pagination from '@mui/material/Pagination';
 
+
 class Notification extends Component {
 
     constructor(props) {
@@ -89,6 +90,22 @@ class Notification extends Component {
         this.setState({ page: val });
     }
 
+    static contextType = AuthContext;
+
+    componentDidUpdate() {
+        const { notification } = this.context;
+
+        if (notification !== null) {
+            const isNew = !this.state.notification.some(x => x.id === notification.id);
+
+            if (isNew) {
+                this.setState((prevState) => ({
+                    notification: [notification, ...prevState.notification]
+                }));
+            }
+        }
+    }
+
     render() {
         const sampleNotification = {
             id: "550e8400-e29b-41d4-a716-446655440000",
@@ -112,10 +129,11 @@ class Notification extends Component {
         
         */
 
+
         return (
             <AuthContext.Consumer>
                 {(prop) => {
-                    const { dark, setDark } = prop;
+                    const { dark } = prop;
                     const darkPagination = {
                         '& .MuiPaginationItem-root': {
                             color: dark ? '#fff' : '#ffffffff',
