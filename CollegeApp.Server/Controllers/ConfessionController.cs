@@ -95,9 +95,8 @@ namespace CollegeApp.Server.Controllers
         [Route("YourConfession")]
         [HttpGet]
         [Authorize]
-        public IActionResult GetConfessions(int page)
+        public IActionResult GetConfessions([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
-            if (page == 0) return new JsonResult(BadRequest());
             int pageSize = 5;
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
@@ -222,9 +221,8 @@ namespace CollegeApp.Server.Controllers
         [Route("GetComments")]
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetComments(Guid confessionId, int page)
+        public async Task<IActionResult> GetComments(Guid confessionId, [FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
-            if (page == 0) return new JsonResult(BadRequest(new { message = "Page number cannot be zero" }));
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
             var comments = _context.Comments.Where(b => b.Parent == null).OrderByDescending(d => d.Added);
@@ -321,6 +319,7 @@ namespace CollegeApp.Server.Controllers
 
             // let's look at the edge case here,
             // what if the owner of comment is the owner of confession
+
 
             if (parentComment.UserId == getConfession.UserId)
             {

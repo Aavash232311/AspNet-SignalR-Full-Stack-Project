@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -58,30 +59,29 @@ namespace CollegeApp.Server.Controllers
         [Route("get-confessions")]
         [HttpGet]
         [AllowAnonymous] // This can be used as a public as well as long as it's just get
-        public async Task<IActionResult> GetConfession(int page)
+        public async Task<IActionResult> GetConfession([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
-            if (page < 1)
-            {
-                return new JsonResult(BadRequest(new { error = "Page number must be greater than 0" }));
-            }
-            var confessions = await _context.Confessions.OrderByDescending(p => p.Added).ToListAsync();
 
-            var pagination = _helper.NormalPagination(10, page, confessions.AsQueryable());
+            var confessions = _context.Confessions.OrderByDescending(p => p.Added);
+
+            var pagination = _helper.NormalPagination(10, page, confessions);
             return new JsonResult(Ok(pagination));
         }
 
         [Route("recent-threads")]
         [HttpGet]
         [AllowAnonymous] // the api is there in confession but works for particular confession only
-        public async Task<IActionResult> GetThreads(int page, int pageSize)
+        public IActionResult GetThreads
+            ([FromQuery, Range(1, int.MaxValue)] int page = 1,
+             [FromQuery, Range(1, int.MaxValue)] int pageSize = 10) // the default pageSize = 10
         {
             if (page < 1)
             {
                 return new JsonResult(BadRequest(new { error = "Page number must be greater than 0" }));
             }
-
-            var threads = await _context.Comments.OrderByDescending(p => p.Added).ToListAsync();
-            var pagination = _helper.NormalPagination(pageSize, page, threads.AsQueryable());
+            // ToListAsync to execute the query first before pagination
+            var threads = _context.Comments.OrderByDescending(p => p.Added);
+            var pagination = _helper.NormalPagination(pageSize, page, threads);
             return new JsonResult(Ok(pagination));
         }
 
@@ -103,19 +103,14 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-admin-report")]
         [HttpGet]
-        public async Task<IActionResult> GetAdminReport(int page, string status)
+        public async Task<IActionResult> GetAdminReport([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery] string status = null) // the default status = null
         {
-            if (page < 1)
-            {
-                return new JsonResult(BadRequest(new { error = "Page number must be greater than 0" }));
-            }
-
             var reports = status == "deleted" ?
                     _context.Reports.Where(p => p.isDeleted == true) :
                     status == "active" ? _context.Reports.Where(p => p.isDeleted == false) :
                     _context.Reports.OrderByDescending(p => p.reportedAt);
 
-            var pagination = _helper.NormalPagination(10, page, reports.AsQueryable());
+            var pagination = _helper.NormalPagination(10, page, reports);
             var slicedReports = pagination.data;
             List<FrequencyReport> frequencyReports = new List<FrequencyReport>();
 
@@ -242,6 +237,29 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(similarReports));
         }
-        // todo: create a notification system whenever someone replies to respective user's thread!
+
+        [Route("get-confession-admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetConfesionAdmin([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            /* In the default model I have addded a JsonIgnore due to safety reasons, 
+             * Now what I want to do is, exempt that case for this particular API. */
+            var getConfession = _context.Confessions
+                .Select(obj => new
+                {
+                    obj.Id,
+                    obj.Topic,
+                    obj.Description,
+                    obj.Added,
+                    obj.deleted,
+                    obj.UserId,
+                    obj.LastModified
+                })
+                .OrderByDescending(c => c.Added);
+            var pagination = _helper.NormalPagination(10, page, getConfession);
+            return new JsonResult(Ok(pagination));
+        }
     }
 }
+
