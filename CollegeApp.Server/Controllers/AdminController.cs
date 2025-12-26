@@ -4,8 +4,6 @@ using CollegeApp.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using System.ComponentModel.DataAnnotations;
 
 namespace CollegeApp.Server.Controllers

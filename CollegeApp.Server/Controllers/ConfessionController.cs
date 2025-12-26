@@ -220,12 +220,12 @@ namespace CollegeApp.Server.Controllers
         /* If web socket load is success we are calling this API */
         [Route("GetComments")]
         [AllowAnonymous]
-        [HttpGet]
+        [HttpGet] // this is for retreving the first order comments!
         public async Task<IActionResult> GetComments(Guid confessionId, [FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
-            var comments = _context.Comments.Where(b => b.Parent == null).OrderByDescending(d => d.Added);
+            var comments = _context.Comments.Where(b => b.Parent == null && b.ConfessionId == confessionId).OrderByDescending(d => d.Added);
             /* From the point of runtime complexity, okay if we load all at once then it's a nexted structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from

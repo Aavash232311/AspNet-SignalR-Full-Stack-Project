@@ -145,6 +145,7 @@ class Comment extends Component {
         const { statusCode, value } = response;
         if (statusCode === 200) {
           const { data, totalObjects, totalPages } = value;
+          console.log(data);
           this.setState({
             confessions: data,
             totalObjects,
