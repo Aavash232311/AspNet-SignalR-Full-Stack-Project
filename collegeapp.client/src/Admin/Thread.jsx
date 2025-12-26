@@ -1,13 +1,20 @@
 import React, { Component } from "react";
 import { Admin, AdminContext } from "./Admin.jsx";
-import { Toolbar, Typography } from '@mui/material';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import {
+    Box,
+    TextField,
+    Button,
+    InputAdornment,
+    TableContainer,
+    Table,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell,
+    Paper,
+    Toolbar,
+    Typography
+} from '@mui/material';
 import Services from "../utils/utils.js";
 import Pagination from '@mui/material/Pagination';
 import "../static/auth/Admin/thread.css";
@@ -16,6 +23,7 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import SecurityIcon from '@mui/icons-material/Security';
 import Link from '@mui/material/Link';
+import SearchIcon from '@mui/icons-material/Search';
 
 
 const services = new Services();
@@ -111,6 +119,7 @@ export default class Thread extends Component {
         pageSize: 5,
         viewContant: null,
         userInfo: null,
+        searchQuery: ""
     }
 
     services = new Services();
@@ -214,6 +223,27 @@ export default class Thread extends Component {
             viewPage: this.view
         }
 
+        const searchThread = async () => {
+            const { searchQuery } = this.state;
+            await fetch(`/Admin/search-thread-by-query?query=${searchQuery}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${services.accessToken()}`,
+                },
+                method: "GET"
+            }).then((r) => r.json()).then((response) => {
+                const { statusCode } = response;
+                if (statusCode === 200) {
+                    const { value } = response; // this value is going to be a single object!
+                    this.setState({
+                        threads: value
+                    });
+                    console.log(value);
+                    return;
+                }
+            })
+        }
+
         return (
             <Admin>
                 <AdminContext.Consumer>
@@ -234,6 +264,47 @@ export default class Thread extends Component {
                                 <Toolbar />
                                 <Typography variant="h4">Thread page</Typography>
                                 <p>Admin confession control.</p>
+
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 2,
+                                        mb: 3 // Margin bottom to separate from table
+                                    }}
+                                >
+                                    <TextField
+                                        size="small"
+                                        variant="outlined"
+                                        placeholder="Search records..."
+                                        autoComplete="off"
+                                        onChange={(e) => {
+                                            this.setState({searchQuery: e.currentTarget.value});
+                                            if (e.target.value === "") {
+                                                this.getThreads(this.state.page);
+                                            }
+                                        }}
+                                        value={this.state.searchQuery}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ width: 300 }}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<SearchIcon />}
+                                        onClick={() => {searchThread()}}
+                                        sx={{ textTransform: 'none' }}
+                                    >
+                                        Search
+                                    </Button>
+                                </Box>
+
                                 {this.state.viewContant === null &&
                                     (<>
                                         {this.state.threads.length > 0 && <StickyHeadTable className="thread-admin-table" props={tableProps} />}
@@ -438,93 +509,3 @@ export class Auth0User extends Component {
     }
 }
 
-// export class Auth0User extends Component {
-//     constructor(props) {
-//         super(props);
-//     }
-
-//     state = {
-//         userInfo: null,
-//     }
-
-//     services = new Services();
-
-//     async componentDidMount() {
-//         if (this.props.userInfo === null) return;
-//         this.setState({ userInfo: this.props.userInfo });
-//     }
-
-//     render() {
-//         return (
-//             <>
-//                 <AdminContext.Consumer>
-//                     {(adminProperties) => {
-//                         const { dark } = adminProperties;
-//                         if (this.state.userInfo === null) return (
-//                             <b>No information</b>
-//                         );
-//                         const { email, email_verified, name, nickname, logins_count, created_at, last_login, picture, user_id } = this.state.userInfo;
-                        
-//                         return (
-//                             <div className="user-info-overlay" onClick={this.props.onClose}>
-//                                 /* Added Content Box Div */
-//                                 <div className={`user-info-modal ${dark ? "dark-mode" : ""}`} onClick={e => e.stopPropagation()}>
-//                                     <table className={`table ${dark === true ? "table-dark" : ""}`} >
-//                                         <thead>
-//                                             <tr>
-//                                                 <th>User email</th>
-//                                                 <th>{email}</th>
-//                                             </tr>
-//                                         </thead>
-//                                         <tbody>
-//                                             <tr>
-//                                                 <th>Email verified</th>
-//                                                 <th>{email_verified === true ? <VerifiedIcon /> : <NewReleasesIcon />}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Name</th>
-//                                                 <th>{name}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Nickname</th>
-//                                                 <th>{nickname}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Login count</th>
-//                                                 <th>{logins_count}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Account created</th>
-//                                                 <th>{this.services.normalizeASPDate(created_at)}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Last login</th>
-//                                                 <th>{this.services.normalizeASPDate(last_login)}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Updated At</th>
-//                                                 <th>{this.services.normalizeASPDate(this.state.userInfo.updated_at)}</th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Picture</th>
-//                                                 <th>
-//                                                     <img className="profile-color-shample-admin" src={picture} alt="" />
-//                                                 </th>
-//                                             </tr>
-//                                             <tr>
-//                                                 <th>Auth0 Id</th>
-//                                                 <th>{user_id}</th>
-//                                             </tr>
-//                                         </tbody>
-//                                     </table>
-                                    
-                                
-//                                 </div>
-//                             </div>
-//                         )
-//                     }}
-//                 </AdminContext.Consumer>
-//             </>
-//         )
-//     }
-// }

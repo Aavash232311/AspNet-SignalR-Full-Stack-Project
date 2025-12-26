@@ -93,7 +93,7 @@ export default class AdminConfession extends Component {
     }
 
     searchById = async () => {
-        await fetch(`/Admin/Search-confession-by-id?query=${this.state.searchQuery}`, {
+        await fetch(`/Admin/Search-confession-by-query?query=${this.state.searchQuery}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${services.accessToken()}`,
@@ -108,7 +108,6 @@ export default class AdminConfession extends Component {
                 });
                 return;
             }
-            
         })
     }
 
@@ -175,7 +174,9 @@ export default class AdminConfession extends Component {
                                                 onChange={(e) => {
                                                     this.setState({ searchQuery: e.target.value }, () => {
                                                         // now if the query paramms are null, re-fetch the original data
-                                                        this.fetchConfessions(this.state.page);
+                                                        if (e.target.value === "") {
+                                                            this.fetchConfessions(this.state.page);
+                                                        }
                                                     });
                                                 }}
                                                 autoComplete="off"

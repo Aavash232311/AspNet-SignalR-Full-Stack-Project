@@ -261,7 +261,7 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok(pagination));
         }
 
-        [Route("Search-confession-by-id")]
+        [Route("Search-confession-by-query")]
         [HttpGet]
         public async Task<IActionResult> SearchConfessions(string query)
         {
@@ -284,8 +284,11 @@ namespace CollegeApp.Server.Controllers
                 // search might be through anything
                 confessionsQuery = confessionsQuery.Where(x =>
                     x.Topic.Contains(query) ||
-                    x.Description.Contains(query));
+                    x.Description.Contains(query) || x.UserId.Contains(query));
             }
+
+            // There might be a case when application scales so large that we might need to paginate the search result,
+            // Although, I am aware of that I will leave it for now as it is not that necessary at the moment.
 
             var results = await confessionsQuery.ToListAsync(); // executing the query  
 
@@ -296,6 +299,35 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(results));
         }
+
+        [Route("search-thread-by-query")]
+        [HttpGet]
+        public async Task<IActionResult> SearchThreadByQuery(string query)
+        {
+            // same as above api
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return new JsonResult(BadRequest("Search query cannot be empty."));
+            }
+            var commentsQuery = _context.Comments.AsQueryable();
+            // we only have two cases in this API
+            if (Guid.TryParse(query, out Guid guidId))
+            {
+                commentsQuery = commentsQuery.Where(x => x.Id == guidId);
+            }
+            else
+            {
+                commentsQuery = commentsQuery.Where(x =>
+                    x.comments.Contains(query) || x.UserId.Contains(query)); // search only in comments
+            }
+            var results = await commentsQuery.ToListAsync(); // execute this one
+            if (results == null || !results.Any())
+            {
+                return new JsonResult(NotFound("No comments matched your search."));
+            }
+            return new JsonResult(Ok(results));
+        }
+
     }
 }
 
