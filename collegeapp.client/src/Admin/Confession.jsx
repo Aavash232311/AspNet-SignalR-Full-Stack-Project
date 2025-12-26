@@ -11,15 +11,29 @@ import {
     TableRow,
     Paper,
     Chip,
-    IconButton
+    IconButton,
+    Button
 } from '@mui/material';
 import Services from "../utils/utils.js";
 import { Auth0User } from "./Thread.jsx";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Pagination from '@mui/material/Pagination';
 import { AdminContext } from "./Admin.jsx";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { TextField, InputAdornment, Box } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 
 const services = new Services();
+
+export const copyId = async (userId) => {
+    try {
+        await window.navigator.clipboard.writeText(userId);
+        alert("Copied to clipboard");
+    } catch (err) {
+        console.error("Failed to copy!", err);
+    }
+}
 
 export default class AdminConfession extends Component {
 
@@ -29,6 +43,7 @@ export default class AdminConfession extends Component {
         totalObjects: 0,
         totalPages: 0,
         userInfo: null,
+        searchQuery: ""
     }
 
     componentDidMount() {
@@ -77,6 +92,26 @@ export default class AdminConfession extends Component {
         this.setState({ page: val });
     }
 
+    searchById = async () => {
+        await fetch(`/Admin/Search-confession-by-id?query=${this.state.searchQuery}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${services.accessToken()}`,
+            },
+            method: "GET"
+        }).then((r) => r.json()).then((response) => {
+            const { statusCode } = response;
+            if (statusCode === 200) {
+                const { value } = response; // this value is going to be a single object!
+                this.setState({
+                    confession: value
+                });
+                return;
+            }
+            
+        })
+    }
+
     render() {
         const { confession } = this.state;
         if (this.state.userInfo !== null) {
@@ -122,6 +157,7 @@ export default class AdminConfession extends Component {
                                 color: '#fff',
                             },
                         }
+
                         return (
                             <>
                                 <Toolbar />
@@ -129,72 +165,111 @@ export default class AdminConfession extends Component {
                                     Confession Management
                                 </Typography>
 
-                                <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
-                                    <Table sx={{ minWidth: 650 }} aria-label="confessions table">
-                                        <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
-                                            <TableRow>
-                                                <TableCell><strong>Topic</strong></TableCell>
-                                                <TableCell><strong>Description</strong></TableCell>
-                                                <TableCell><strong>Date Added</strong></TableCell>
-                                                <TableCell><strong>Last Modified</strong></TableCell>
-                                                <TableCell><strong>User details</strong></TableCell>
-                                                <TableCell><strong>Status</strong></TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {confession.length > 0 ? (
-                                                confession.map((item) => (
-                                                    <TableRow key={item.id} hover>
-                                                        <TableCell>{item.topic}</TableCell>
-                                                        <TableCell sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {item.description}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {new Date(item.added).toLocaleDateString()}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {new Date(item.lastModified).toLocaleTimeString()}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <IconButton onClick={() => {
-                                                                this.loadUser(item.userId);
-                                                            }}>
-                                                                <AccountCircleIcon />
-                                                            </IconButton>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {item.deleted ? (
-                                                                <Chip label="Deleted" color="error" size="small" />
-                                                            ) : (
-                                                                <Chip label="Active" color="success" size="small" />
-                                                            )}
-                                                        </TableCell>
+                                {this.state.confession.length > 0 ? (
+                                    <>
+                                        <Box sx={{ display: 'flex', gap: 1, mb: 2, justifyContent: 'flex-end' }}>
+                                            <TextField
+                                                size="small"
+                                                placeholder="Search confessions..."
+                                                value={this.state.searchQuery}
+                                                onChange={(e) => {
+                                                    this.setState({ searchQuery: e.target.value }, () => {
+                                                        // now if the query paramms are null, re-fetch the original data
+                                                        this.fetchConfessions(this.state.page);
+                                                    });
+                                                }}
+                                                autoComplete="off"
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                startIcon={<SearchIcon />}
+                                                onClick={() => {
+                                                    this.searchById();
+                                                }} // Trigger your filter logic here
+                                            >
+                                                Search
+                                            </Button>
+                                        </Box>
+
+
+                                        <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
+                                            <Table sx={{ minWidth: 650 }} aria-label="confessions table">
+                                                <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+                                                    <TableRow>
+                                                        <TableCell><strong>Topic</strong></TableCell>
+                                                        <TableCell><strong>Description</strong></TableCell>
+                                                        <TableCell><strong>Date Added</strong></TableCell>
+                                                        <TableCell><strong>Last Modified</strong></TableCell>
+                                                        <TableCell><strong>User details</strong></TableCell>
+                                                        <TableCell><strong>Copy Id</strong></TableCell>
+                                                        <TableCell><strong>Status</strong></TableCell>
                                                     </TableRow>
-                                                ))
-                                            ) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={5} align="center">
-                                                        No confessions found.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                                {this.state.page > 1 ? <>
-                                    <Pagination
-                                        count={this.state.totalPages}
-                                        page={this.state.page}
-                                        color="primary"
-                                        onChange={this.handleChange}
-                                        sx={dark === true ? darkPagination : {}}
-                                    />
-                                </> : null}
+                                                </TableHead>
+                                                <TableBody>
+                                                    {confession.length > 0 ? (
+                                                        confession.map((item, index) => (
+                                                            <TableRow key={item.id + index + Math.random(0, 1000)} hover>
+                                                                <TableCell>{item.topic}</TableCell>
+                                                                <TableCell sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {item.description}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {new Date(item.added).toLocaleDateString()}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {new Date(item.lastModified).toLocaleTimeString()}
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <IconButton onClick={() => {
+                                                                        this.loadUser(item.userId);
+                                                                    }}>
+                                                                        <AccountCircleIcon />
+                                                                    </IconButton>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <IconButton onClick={() => {
+                                                                        copyId(item.id)
+                                                                    }}>
+                                                                        <ContentCopyIcon fontSize="small" />
+                                                                    </IconButton>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {item.deleted ? (
+                                                                        <Chip label="Deleted" color="error" size="small" />
+                                                                    ) : (
+                                                                        <Chip label="Active" color="success" size="small" />
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    ) : (
+                                                        <TableRow>
+                                                            <TableCell colSpan={5} align="center">
+                                                                No confessions found.
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                        {
+                                            this.state.page > 1 ? <>
+                                                <Pagination
+                                                    count={this.state.totalPages}
+                                                    page={this.state.page}
+                                                    color="primary"
+                                                    onChange={this.handleChange}
+                                                    sx={dark === true ? darkPagination : {}}
+                                                />
+                                            </> : null
+                                        }
+                                    </>
+                                ) : null}
                             </>
                         )
                     }}
                 </AdminContext.Consumer>
-            </Admin>
+            </Admin >
         );
     }
 }

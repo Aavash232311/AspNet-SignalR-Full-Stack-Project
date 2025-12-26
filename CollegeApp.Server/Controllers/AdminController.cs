@@ -260,6 +260,42 @@ namespace CollegeApp.Server.Controllers
             var pagination = _helper.NormalPagination(10, page, getConfession);
             return new JsonResult(Ok(pagination));
         }
+
+        [Route("Search-confession-by-id")]
+        [HttpGet]
+        public async Task<IActionResult> SearchConfessions(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return new JsonResult(BadRequest("Search query cannot be empty."));
+            }
+
+            //  base quyery
+            var confessionsQuery = _context.Confessions.AsQueryable();
+
+            // we might need to check for a guid search
+            if (Guid.TryParse(query, out Guid guidId))
+            {
+                // if it's a GUID, search by exact ID match
+                confessionsQuery = confessionsQuery.Where(x => x.Id == guidId);
+            }
+            else
+            {
+                // search might be through anything
+                confessionsQuery = confessionsQuery.Where(x =>
+                    x.Topic.Contains(query) ||
+                    x.Description.Contains(query));
+            }
+
+            var results = await confessionsQuery.ToListAsync(); // executing the query  
+
+            if (results == null || !results.Any())
+            {
+                return new JsonResult(NotFound("No confessions matched your search."));
+            }
+
+            return new JsonResult(Ok(results));
+        }
     }
 }
 
