@@ -266,7 +266,7 @@ namespace CollegeApp.Server.Controllers
 
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authorize to get to this point, i get annoyed by that underline
-            var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
+            var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId); // this is the confession in which reply is being sent to
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 
             // Since comment is in different table
@@ -305,7 +305,37 @@ namespace CollegeApp.Server.Controllers
             };
             _context.Notifications.Add(newPushNotification);
 
-            await _pushNotification.Clients.User(parentComment.UserId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
+            /* Now we might want to send a push notification to the confession owner on any associated reply.
+             * If that is a first order comment then we might not want to do so cause there will be conflicting notification*/
+
+            Notification NotificationConfOnwer = new Notification()
+            {
+                title = $"New Reply on Confession Comment by anonymous user",
+                message = comment,
+                type = "reply-confession-owner",
+                CommentId = newComment.Id,
+                userId = getConfession.UserId // the owner of the confession
+            };
+
+            _context.Notifications.Add(NotificationConfOnwer);
+
+            // let's look at the edge case here,
+            // what if the owner of comment is the owner of confession
+
+            if (parentComment.UserId == getConfession.UserId)
+            {
+                // then we don't want to send double notification
+                // so we can just skip sending notification to confession owner
+                // and just remove the notification added for confession owner
+                _context.Notifications.Remove(NotificationConfOnwer);
+                await _pushNotification.Clients.User(parentComment.UserId.ToString()).SendAsync("ReceiveNotification", newPushNotification); // just one push notification! :)
+            }
+            else
+            {
+                // otherwise we can send notification to both parties
+                await _pushNotification.Clients.User(getConfession.UserId.ToString()).SendAsync("ReceiveNotification", NotificationConfOnwer);
+                await _pushNotification.Clients.User(parentComment.UserId.ToString()).SendAsync("ReceiveNotification", newPushNotification);
+            }
             await _context.SaveChangesAsync(); // saving the changes
 
 
