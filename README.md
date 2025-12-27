@@ -50,13 +50,6 @@ This project serves as a technical sandbox to bridge the gap between simple CRUD
 * **Git Workflow:** Managing professional branch merging and proper `.gitignore` configuration (ignoring static assets and migration binaries).
 
 ---
-
-## 📂 Project Structure
-
-```text
-├── Server      # ASP.NET Core Web API (Business Logic & SignalR)
-├── Client      # React.js Frontend (UI & State Management)
-└── AppHost     # Project Orchestration & Configuration
 ## 🚀 Getting Started
 
 Follow these steps to set up the project locally.
@@ -70,6 +63,14 @@ Follow these steps to set up the project locally.
 ---
 
 ### 🛠️ Installation & Setup
+
+## 📂 Project Structure
+
+```text
+├── Server      # ASP.NET Core Web API (Business Logic & SignalR)
+├── Client      # React.js Frontend (UI & State Management)
+└── AppHost     # Project Orchestration & Configuration
+
 
 
 
