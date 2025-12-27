@@ -74,7 +74,8 @@ Follow these steps to set up the project locally.
 
 
 
-#### 1. Clone the Repository
-```bash
-git clone [https://github.com/your-username/your-project.git](https://github.com/your-username/your-project.git)
-cd your-project
+## Clone the repository.
+- Create a directory named images because I have ignored certain things like the migration directory and images.
+- Create a PostgreSQL database.
+- Run migrations: dotnet ef migrations add InitialCreate, then dotnet ef database update.
+- If everything looks good, the project will be running.
