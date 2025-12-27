@@ -24,6 +24,7 @@ import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import SecurityIcon from '@mui/icons-material/Security';
 import Link from '@mui/material/Link';
 import SearchIcon from '@mui/icons-material/Search';
+import { darkMuiText } from "./Confession.jsx";
 
 
 const services = new Services();
@@ -293,7 +294,7 @@ export default class Thread extends Component {
                                                 </InputAdornment>
                                             ),
                                         }}
-                                        sx={{ width: 300 }}
+                                        sx={dark === true ? darkMuiText() : {width: 300}}
                                     />
                                     <Button
                                         variant="contained"

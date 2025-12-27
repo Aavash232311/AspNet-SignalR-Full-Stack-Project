@@ -707,7 +707,6 @@ class ReportConfessionAndComment extends Component {
   cancelReport = () => {
     this.props.closeDiag();
   }
-  // todo: once the message is deleted by admin, make client no longer able to report!
 
   render() {
     const { reason, isSubmitting } = this.state;

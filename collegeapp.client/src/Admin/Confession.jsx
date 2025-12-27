@@ -35,6 +35,31 @@ export const copyId = async (userId) => {
     }
 }
 
+export const darkMuiText = () => {
+    return {
+        backgroundColor: '#1e1e1e', // Background color of the input
+        borderRadius: '4px',
+        '& .MuiInputBase-input': {
+            color: '#ffffff', // Text color
+        },
+        '& .MuiInputBase-input::placeholder': {
+            color: '#b0b0b0', // Placeholder color
+            opacity: 1,
+        },
+        '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+                borderColor: '#444444', // Default border color
+            },
+            '&:hover fieldset': {
+                borderColor: '#888888', // Hover border color
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: '#90caf9', // Focus border color (light blue)
+            },
+        },
+    }
+}
+
 export default class AdminConfession extends Component {
 
     state = {
@@ -171,6 +196,7 @@ export default class AdminConfession extends Component {
                                                 size="small"
                                                 placeholder="Search confessions..."
                                                 value={this.state.searchQuery}
+
                                                 onChange={(e) => {
                                                     this.setState({ searchQuery: e.target.value }, () => {
                                                         // now if the query paramms are null, re-fetch the original data
@@ -180,6 +206,7 @@ export default class AdminConfession extends Component {
                                                     });
                                                 }}
                                                 autoComplete="off"
+                                                sx={dark === true ? darkMuiText() : {}}
                                             />
                                             <Button
                                                 variant="contained"
