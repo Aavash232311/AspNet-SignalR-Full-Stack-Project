@@ -24,6 +24,7 @@ import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import SecurityIcon from '@mui/icons-material/Security';
 import Link from '@mui/material/Link';
 import SearchIcon from '@mui/icons-material/Search';
+import { darkMuiText } from "./Confession.jsx";
 
 
 const services = new Services();
@@ -235,10 +236,15 @@ export default class Thread extends Component {
                 const { statusCode } = response;
                 if (statusCode === 200) {
                     const { value } = response; // this value is going to be a single object!
+
+                    if (!(Array.isArray(value))) {
+                        this.setState({ threads: [value] });
+                        return;
+                    }
+
                     this.setState({
                         threads: value
                     });
-                    console.log(value);
                     return;
                 }
             })
@@ -280,7 +286,7 @@ export default class Thread extends Component {
                                         placeholder="Search records..."
                                         autoComplete="off"
                                         onChange={(e) => {
-                                            this.setState({searchQuery: e.currentTarget.value});
+                                            this.setState({ searchQuery: e.currentTarget.value });
                                             if (e.target.value === "") {
                                                 this.getThreads(this.state.page);
                                             }
@@ -293,12 +299,12 @@ export default class Thread extends Component {
                                                 </InputAdornment>
                                             ),
                                         }}
-                                        sx={{ width: 300 }}
+                                        sx={dark === true ? darkMuiText() : { width: 300 }}
                                     />
                                     <Button
                                         variant="contained"
                                         startIcon={<SearchIcon />}
-                                        onClick={() => {searchThread()}}
+                                        onClick={() => { searchThread() }}
                                         sx={{ textTransform: 'none' }}
                                     >
                                         Search

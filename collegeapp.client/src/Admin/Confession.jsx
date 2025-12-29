@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import { Admin } from "./Admin.jsx";
 import {
     Toolbar,
@@ -22,7 +22,7 @@ import { AdminContext } from "./Admin.jsx";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { TextField, InputAdornment, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
+import LinkIcon from '@mui/icons-material/Link';
 
 const services = new Services();
 
@@ -32,6 +32,31 @@ export const copyId = async (userId) => {
         alert("Copied to clipboard");
     } catch (err) {
         console.error("Failed to copy!", err);
+    }
+}
+
+export const darkMuiText = () => {
+    return {
+        backgroundColor: '#1e1e1e', // Background color of the input
+        borderRadius: '4px',
+        '& .MuiInputBase-input': {
+            color: '#ffffff', // Text color
+        },
+        '& .MuiInputBase-input::placeholder': {
+            color: '#b0b0b0', // Placeholder color
+            opacity: 1,
+        },
+        '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+                borderColor: '#444444', // Default border color
+            },
+            '&:hover fieldset': {
+                borderColor: '#888888', // Hover border color
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: '#90caf9', // Focus border color (light blue)
+            },
+        },
     }
 }
 
@@ -103,6 +128,10 @@ export default class AdminConfession extends Component {
             const { statusCode } = response;
             if (statusCode === 200) {
                 const { value } = response; // this value is going to be a single object!
+                if (!(Array.isArray(value))) {
+                    this.setState({ confession: [value] });
+                    return;
+                }
                 this.setState({
                     confession: value
                 });
@@ -171,6 +200,7 @@ export default class AdminConfession extends Component {
                                                 size="small"
                                                 placeholder="Search confessions..."
                                                 value={this.state.searchQuery}
+
                                                 onChange={(e) => {
                                                     this.setState({ searchQuery: e.target.value }, () => {
                                                         // now if the query paramms are null, re-fetch the original data
@@ -180,6 +210,7 @@ export default class AdminConfession extends Component {
                                                     });
                                                 }}
                                                 autoComplete="off"
+                                                sx={dark === true ? darkMuiText() : {}}
                                             />
                                             <Button
                                                 variant="contained"
@@ -203,46 +234,58 @@ export default class AdminConfession extends Component {
                                                         <TableCell><strong>Last Modified</strong></TableCell>
                                                         <TableCell><strong>User details</strong></TableCell>
                                                         <TableCell><strong>Copy Id</strong></TableCell>
+                                                        <TableCell><strong>View</strong></TableCell>
                                                         <TableCell><strong>Status</strong></TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
                                                     {confession.length > 0 ? (
-                                                        confession.map((item, index) => (
-                                                            <TableRow key={item.id + index + Math.random(0, 1000)} hover>
-                                                                <TableCell>{item.topic}</TableCell>
-                                                                <TableCell sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                                    {item.description}
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {new Date(item.added).toLocaleDateString()}
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {new Date(item.lastModified).toLocaleTimeString()}
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <IconButton onClick={() => {
-                                                                        this.loadUser(item.userId);
-                                                                    }}>
-                                                                        <AccountCircleIcon />
-                                                                    </IconButton>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <IconButton onClick={() => {
-                                                                        copyId(item.id)
-                                                                    }}>
-                                                                        <ContentCopyIcon fontSize="small" />
-                                                                    </IconButton>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {item.deleted ? (
-                                                                        <Chip label="Deleted" color="error" size="small" />
-                                                                    ) : (
-                                                                        <Chip label="Active" color="success" size="small" />
-                                                                    )}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))
+                                                        confession.map((item, index) => {
+                                                            return (
+                                                                <React.Fragment key={item.id + index}>
+                                                                    <TableRow hover>
+                                                                        <TableCell>{item.topic}</TableCell>
+                                                                        <TableCell onClick={() => {
+                                                                            window.open(`/view?topic=${item.id}`);
+                                                                        }} sx={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                            {item.description}
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {new Date(item.added).toLocaleDateString()}
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {new Date(item.lastModified).toLocaleTimeString()}
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <IconButton onClick={() => {
+                                                                                this.loadUser(item.userId);
+                                                                            }}>
+                                                                                <AccountCircleIcon />
+                                                                            </IconButton>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <IconButton onClick={() => {
+                                                                                copyId(item.id)
+                                                                            }}>
+                                                                                <ContentCopyIcon fontSize="small" />
+                                                                            </IconButton>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            <IconButton onClick={() => window.open(`/view?topic=${item.id}`)}>
+                                                                                <LinkIcon />
+                                                                            </IconButton>
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {item.deleted ? (
+                                                                                <Chip label="Deleted" color="error" size="small" />
+                                                                            ) : (
+                                                                                <Chip label="Active" color="success" size="small" />
+                                                                            )}
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                </ React.Fragment>
+                                                            )
+                                                        })
                                                     ) : (
                                                         <TableRow>
                                                             <TableCell colSpan={5} align="center">

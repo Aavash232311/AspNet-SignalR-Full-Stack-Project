@@ -3,7 +3,9 @@ using CollegeApp.Server.Models;
 using CollegeApp.Server.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations;
 
 namespace CollegeApp.Server.Controllers
@@ -47,11 +49,16 @@ namespace CollegeApp.Server.Controllers
         public readonly ApplicationDbContext _context;
         public readonly Auth0 _userManager;
         public readonly Helper _helper;
-        public AdminController(ApplicationDbContext context, Auth0 userManager, Helper helper)
+        public readonly IHubContext<NotificationHub> _pushNotification;
+        public AdminController(ApplicationDbContext context,
+            Auth0 userManager,
+            Helper helper,
+            IHubContext<NotificationHub> _pushNotification)
         {
             this._context = context;
             this._userManager = userManager;
             this._helper = helper;
+            this._pushNotification = _pushNotification;
         }
 
         [Route("get-confessions")]
@@ -174,6 +181,25 @@ namespace CollegeApp.Server.Controllers
                 }
                 getRecords.isDeleted = status; // since we want to toggle that, admin might accidently delete and want to un-delete
                 confession.deleted = status;
+
+                /* We need to send push notification to confession or thread owner that their,
+                 * thread/comment has been deleted by admin! */
+
+                Notification notification = new Notification
+                {
+                    message = status ? "Your confession has been deleted by the admin due to reports." : "Your confession has been restored by the admin.",
+                    createdAt = DateTime.UtcNow,
+                    isRead = false,
+                    title = "Confession Status Update",
+                    userId = confession.UserId // this push notification goes to the confession/thread owner
+                };
+
+                // we want to send it to individual user!
+                _context.Notifications.Add(notification); // save this, ugh I feel something is off
+               
+                await _pushNotification.Clients.User(confession.UserId).SendAsync("ReceiveNotification", notification);
+
+
                 await _context.SaveChangesAsync();
             }
             else if (type == "comment")
@@ -183,8 +209,19 @@ namespace CollegeApp.Server.Controllers
                 {
                     return new JsonResult(NotFound(new { error = "Comment not found", id }));
                 }
+
+                Notification notification = new Notification()
+                {
+                    message = status ? "Your confession has been deleted by the admin. " : "Your confession has been reinstated by the admin.",
+                    createdAt = DateTime.UtcNow,
+                    isRead = false,
+                    title = "Confession Status Update",
+                    userId = comment.UserId // this push notification goes to the confession/thread owner
+                };
                 getRecords.isDeleted = status;
                 comment.deleted = status;
+                _context.Notifications.Add(notification); // save this, ugh I feel something is off
+                await _pushNotification.Clients.User(comment.UserId).SendAsync("ReceiveNotification", notification);
                 await _context.SaveChangesAsync();
             }
 
@@ -275,7 +312,11 @@ namespace CollegeApp.Server.Controllers
             if (Guid.TryParse(query, out Guid guidId))
             {
                 // if it's a GUID, search by exact ID match
-                confessionsQuery = confessionsQuery.Where(x => x.Id == guidId);
+                var getSingleObject = _context.Confessions.FirstOrDefault(
+                    x => x.Id == guidId
+                );
+
+                return new JsonResult(Ok(getSingleObject));
             }
             else
             {
@@ -311,7 +352,10 @@ namespace CollegeApp.Server.Controllers
             // we only have two cases in this API
             if (Guid.TryParse(query, out Guid guidId))
             {
-                commentsQuery = commentsQuery.Where(x => x.Id == guidId);
+                // search by exact ID match, do not use where, use first or default!
+                var getSingleObject = _context.Comments.FirstOrDefault(
+                    x => x.Id == guidId);
+                return new JsonResult(Ok(getSingleObject));
             }
             else
             {
@@ -325,6 +369,8 @@ namespace CollegeApp.Server.Controllers
             }
             return new JsonResult(Ok(results));
         }
+
+
 
     }
 }
