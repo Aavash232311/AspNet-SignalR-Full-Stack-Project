@@ -128,6 +128,10 @@ export default class AdminConfession extends Component {
             const { statusCode } = response;
             if (statusCode === 200) {
                 const { value } = response; // this value is going to be a single object!
+                if (!(Array.isArray(value))) {
+                    this.setState({ confession: [value] });
+                    return;
+                }
                 this.setState({
                     confession: value
                 });

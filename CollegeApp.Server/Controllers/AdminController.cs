@@ -312,7 +312,11 @@ namespace CollegeApp.Server.Controllers
             if (Guid.TryParse(query, out Guid guidId))
             {
                 // if it's a GUID, search by exact ID match
-                confessionsQuery = confessionsQuery.Where(x => x.Id == guidId);
+                var getSingleObject = _context.Confessions.FirstOrDefault(
+                    x => x.Id == guidId
+                );
+
+                return new JsonResult(Ok(getSingleObject));
             }
             else
             {
@@ -348,7 +352,10 @@ namespace CollegeApp.Server.Controllers
             // we only have two cases in this API
             if (Guid.TryParse(query, out Guid guidId))
             {
-                commentsQuery = commentsQuery.Where(x => x.Id == guidId);
+                // search by exact ID match, do not use where, use first or default!
+                var getSingleObject = _context.Comments.FirstOrDefault(
+                    x => x.Id == guidId);
+                return new JsonResult(Ok(getSingleObject));
             }
             else
             {
@@ -362,6 +369,8 @@ namespace CollegeApp.Server.Controllers
             }
             return new JsonResult(Ok(results));
         }
+
+
 
     }
 }
