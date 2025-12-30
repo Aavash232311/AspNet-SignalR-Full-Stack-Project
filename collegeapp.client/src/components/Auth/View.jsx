@@ -9,6 +9,8 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import Face6Icon from '@mui/icons-material/Face6';
 import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
+import Pagination from '@mui/material/Pagination';
+import { AdminContext } from "../../Admin/Admin";
 
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
@@ -76,6 +78,32 @@ class Comment extends Component {
   We do not want to make a special case for any of those, we want to keep the logic same. */
   // I mean that could be done but I don't want to complexity will be way high
 
+  getConfession = (page) => {
+    fetch(
+      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${this.state.page
+      }`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.services.accessToken()}`,
+        },
+        method: "get",
+      }
+    )
+      .then((r) => r.json())
+      .then((response) => {
+        const { statusCode, value } = response;
+        if (statusCode === 200) {
+          const { data, totalObjects, totalPages } = value;
+          console.log(data);
+          this.setState({
+            confessions: data,
+            totalObjects,
+            totalPages,
+          });
+        }
+      });
+  }
 
 
 
@@ -129,30 +157,7 @@ class Comment extends Component {
       })
       .catch((err) => console.error("Connection failed: ", err));
 
-    fetch(
-      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${this.state.page
-      }`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.services.accessToken()}`,
-        },
-        method: "get",
-      }
-    )
-      .then((r) => r.json())
-      .then((response) => {
-        const { statusCode, value } = response;
-        if (statusCode === 200) {
-          const { data, totalObjects, totalPages } = value;
-          console.log(data);
-          this.setState({
-            confessions: data,
-            totalObjects,
-            totalPages,
-          });
-        }
-      });
+    this.getConfession(this.state.page);
   }
 
   addComment(ev) {
@@ -210,60 +215,91 @@ class Comment extends Component {
       });
   };
 
+  handleChange = (ev, val) => {
+    this.getConfession(val);
+    this.setState({ page: val });
+  }
+
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
         that we get from fetch API call so that we can re-render everything */
 
     return (
-      <div>
-        <hr />
-        <form onSubmit={this.addComment} className="modern-comment-form">
-          <div className="comment-input-container">
-            <textarea
-              name="comment"
-              className="main-textarea"
-              placeholder="What are your thoughts?"
-              autoComplete="off"
-              disabled={this.props.deletedConfession === true ? true : false}
-            ></textarea>
-
-            <div className="comment-form-footer">
-              <button type="submit" className="submit-button">
-                Comment
-              </button>
-            </div>
-          </div>
-        </form>
-        <div id="chat-fourm-frame" >
-          {this.state.confessions && (
+      <AdminContext.Consumer>
+        {(adminProperties) => {
+          const { dark } = adminProperties;
+          const darkPagination = {
+            '& .MuiPaginationItem-root': {
+              color: dark ? '#fff' : '#ffffffff',
+              borderColor: dark ? '#555' : '#ccc',
+            },
+            '& .Mui-selected': {
+              backgroundColor: dark ? '#1976d2' : '#1976d2',
+              color: '#fff',
+            },
+          }
+          return (
             <>
-              {this.state.confessions.map((i, j) => {
-                // Okay here the current model that we are iterating is the parent model,
-                // And, we need to check if all the replies that we have parent Id as current
-                return (
-                  <React.Fragment key={j}>
-                    <CommentRenderCompoenent obj={i} />
-                    <br />
-                    <a
-                      onClick={() => {
-                        this.dataOnRoot(i);
-                      }}
-                    >
-                      thread  <AiOutlinePlusCircle />
-                    </a>
-                    <br />
-                    <CommentRecurComponent
-                      load={this.dataOnRoot}
-                      children={i.replies}
-                    />
-                  </React.Fragment>
-                );
-              })}
-            </>
-          )}
-        </div>
+              <div>
+                <hr />
+                <form onSubmit={this.addComment} className="modern-comment-form">
+                  <div className="comment-input-container">
+                    <textarea
+                      name="comment"
+                      className="main-textarea"
+                      placeholder="What are your thoughts?"
+                      autoComplete="off"
+                      disabled={this.props.deletedConfession === true ? true : false}
+                    ></textarea>
 
-      </div>
+                    <div className="comment-form-footer">
+                      <button type="submit" className="submit-button">
+                        Comment
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <div id="chat-fourm-frame" >
+                  {this.state.confessions && (
+                    <>
+                      {this.state.confessions.map((i, j) => {
+                        // Okay here the current model that we are iterating is the parent model,
+                        // And, we need to check if all the replies that we have parent Id as current
+                        return (
+                          <React.Fragment key={j}>
+                            <CommentRenderCompoenent obj={i} />
+                            <br />
+                            <a
+                              onClick={() => {
+                                this.dataOnRoot(i);
+                              }}
+                            >
+                              thread  <AiOutlinePlusCircle />
+                            </a>
+                            <br />
+                            <CommentRecurComponent
+                              load={this.dataOnRoot}
+                              children={i.replies}
+                            />
+                          </React.Fragment>
+                        );
+                      })}
+                    </>
+                  )}
+                </div>
+                <Pagination
+                  count={this.state.totalPages}
+                  page={this.state.page}
+                  color="primary"
+                  onChange={this.handleChange}
+                  sx={dark === true ? darkPagination : {}}
+                />
+
+              </div>
+            </>
+          )
+        }}
+      </AdminContext.Consumer>
     );
   }
 }
