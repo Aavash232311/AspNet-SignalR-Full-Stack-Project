@@ -60,7 +60,6 @@ class Comment extends Component {
   constructor(props) {
     super(props);
     this.addComment = this.addComment.bind(this);
-    this.dataOnRoot.bind(this);
   }
 
   services = new Services();
@@ -80,8 +79,7 @@ class Comment extends Component {
 
   getConfession = (page) => {
     fetch(
-      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${this.state.page
-      }`,
+      `Confession/GetComments?confessionId=${this.url.get("topic")}&page=${page}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -95,11 +93,20 @@ class Comment extends Component {
         const { statusCode, value } = response;
         if (statusCode === 200) {
           const { data, totalObjects, totalPages } = value;
-          console.log(data);
+          
           this.setState({
-            confessions: data,
-            totalObjects,
-            totalPages,
+            confession: []
+          }, () => {
+            /* Even a simple problem here,
+            will require me a whiteboard and cup of coffee. */
+          
+            this.setState({
+              confessions: data,
+              totalObjects,
+              totalPages,
+            }, () => {
+
+            });
           });
         }
       });
@@ -209,13 +216,33 @@ class Comment extends Component {
         const { confessions } = this.state;
         if (statusCode === 200) {
           setParentCommentValue(confessions, parent, value); // there is nth wrong with this function
-          this.setState({ confessions });
+          /* 
+          Bug: when trying to expand this thread after navigation around in some pages,
+          then we will have problem, even though it stays in confession variable, but the state does not want to trigger.
+
+          Whatever I try it's not triggiring the change in state! here so I neeed to figure out a way!
+          */
+          this.setState({
+            confessions: []
+          }, () => {
+            this.setState({ confessions });
+          });
           return;
         }
       });
   };
 
   handleChange = (ev, val) => {
+    /* 
+    Here we have a probme, when we expand any of the thread,
+    and navigate around the pages we keep on seeing that expanded threead no matter what we do.
+
+    Let's understand how this thread expansion works, first of all thread is expanded when we have a change in parent state,
+    There is no state triggring to like render that particular compoenent. It renders children when we click that expand button.
+
+    But my question is why couldn't the state get triggered when the state was re-setted to empty array and back to original value?
+    */
+
     this.getConfession(val);
     this.setState({ page: val });
   }
@@ -223,7 +250,6 @@ class Comment extends Component {
   render() {
     /* If we want to expand the reply box table we need to change the Higher Order Object
         that we get from fetch API call so that we can re-render everything */
-
     return (
       <AdminContext.Consumer>
         {(adminProperties) => {
@@ -263,10 +289,11 @@ class Comment extends Component {
                   {this.state.confessions && (
                     <>
                       {this.state.confessions.map((i, j) => {
+                        console.log(i);
                         // Okay here the current model that we are iterating is the parent model,
                         // And, we need to check if all the replies that we have parent Id as current
                         return (
-                          <React.Fragment key={j}>
+                          <React.Fragment key={i.id}>
                             <CommentRenderCompoenent obj={i} />
                             <br />
                             <a
@@ -426,6 +453,7 @@ class CommentRenderCompoenent extends Component {
               <span className="label">Report</span>
             </div>
           </div>
+
           {this.state.showReplyThread === true && (
             <>
               <form
@@ -505,7 +533,7 @@ class CommentRecurComponent extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.nextedReply !== this.state.nextedReply) {
-
+      
     }
   }
 
@@ -556,6 +584,7 @@ class CommentRecurComponent extends Component {
           {children.length > 0
             ? children.map((i, j) => {
               const { replies, replyCount } = i;
+
               return (
                 <React.Fragment key={j}>
                   <CommentRenderCompoenent obj={i} />
@@ -659,7 +688,6 @@ export default class View extends Component {
                             this.setState({ report: true });
                           }} fontSize="small" />
                         </small>
-
                       </div>
                     </div>
                     <br />
