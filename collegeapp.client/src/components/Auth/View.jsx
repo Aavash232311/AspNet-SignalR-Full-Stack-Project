@@ -188,6 +188,9 @@ class Comment extends Component {
         const { statusCode } = response;
         if (statusCode === 200) {
           ev.target.reset();
+          // now what we want to do is re fetch the comments again, in initial page
+          this.getConfession(1);
+          this.setState({ page: 1 });
           return;
         }
       });
