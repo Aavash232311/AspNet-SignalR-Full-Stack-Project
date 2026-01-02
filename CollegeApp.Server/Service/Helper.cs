@@ -1,4 +1,5 @@
-﻿using CollegeApp.Server.Controllers;
+﻿using AutoMapper.QueryableExtensions;
+using CollegeApp.Server.Controllers;
 using CollegeApp.Server.Models;
 
 namespace CollegeApp.Server.Service
@@ -141,11 +142,4 @@ namespace CollegeApp.Server.Service
         }
     }
 
-
-
-
-
-    public class T
-    {
-    }
 }

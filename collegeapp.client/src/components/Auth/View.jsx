@@ -93,7 +93,7 @@ class Comment extends Component {
         const { statusCode, value } = response;
         if (statusCode === 200) {
           const { data, totalObjects, totalPages } = value;
-          
+
           this.setState({
             confession: []
           }, () => {
@@ -292,9 +292,10 @@ class Comment extends Component {
                   {this.state.confessions && (
                     <>
                       {this.state.confessions.map((i, j) => {
-                        console.log(i);
                         // Okay here the current model that we are iterating is the parent model,
                         // And, we need to check if all the replies that we have parent Id as current
+                        const  { replyCount } = i;
+                        console.log(i);
                         return (
                           <React.Fragment key={i.id}>
                             <CommentRenderCompoenent obj={i} />
@@ -304,7 +305,7 @@ class Comment extends Component {
                                 this.dataOnRoot(i);
                               }}
                             >
-                              thread  <AiOutlinePlusCircle />
+                              thread {replyCount}  <AiOutlinePlusCircle />
                             </a>
                             <br />
                             <CommentRecurComponent

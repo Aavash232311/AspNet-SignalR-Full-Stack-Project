@@ -9,31 +9,35 @@ using System.Security.Claims;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using System.ComponentModel.DataAnnotations;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CollegeApp.Server.Controllers
 {
-    public class CommentProfiles : Profile
-    {
-        public CommentProfiles() // when we use Select() in asp.net then it's hard to select everything so we are using a mapper 
-        {
-            CreateMap<Comments, CommentWithReplyCount>()
-                .ForMember(dest => dest.ReplyCount,
-                    opt => opt.MapFrom(src => src.Replies.Count));
-        }
-    }
-
     public class ReportType : Report
     {
         [Required]
         [MaxLength(100)]
         public string type { get; set; } = string.Empty;
     }
+    public class CommentProfiles : Profile
+    {
+        public CommentProfiles()
+        {
+            CreateMap<Comments, CommentWithReplyCount>()
+                // Explicitly ignore the Replies collection so it stays empty
+                .ForMember(dest => dest.Replies, opt => opt.Ignore())
 
-    public class CommentWithReplyCount: Comments
+                //Map the count manually
+                .ForMember(dest => dest.ReplyCount,
+                    opt => opt.MapFrom(src => src.Replies.Count()));
+        } // Here I don't want the reply array to be flooded, but I do want the count.
+    }
+    public class CommentWithReplyCount : Comments
     {
         public int ReplyCount { get; set; } = 0;
         public List<Comments> Replies { get; set; } = new List<Comments>(); // Because we have lazy loading on the client side
     }
+
     [Route("[controller]")]
     [ApiController]
     public class ConfessionController : ControllerBase
@@ -220,32 +224,46 @@ namespace CollegeApp.Server.Controllers
         /* If web socket load is success we are calling this API */
         [Route("GetComments")]
         [AllowAnonymous]
-        [HttpGet] // this is for retreving the first order comments!
-        public async Task<IActionResult> GetComments(Guid confessionId, [FromQuery, Range(1, int.MaxValue)] int page = 1)
+        [HttpGet] // this is for retrieving the first order comments!
+        public IActionResult GetComments(Guid confessionId, [FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
-            var comments = _context.Comments.Where(b => b.Parent == null && b.ConfessionId == confessionId).OrderByDescending(d => d.Added);
-            /* From the point of runtime complexity, okay if we load all at once then it's a nexted structure right,
+            int pageSize = 5;
+            var query = _context.Comments
+                .Where(b => b.ParentId == null && b.ConfessionId == confessionId);
+            var totalObjects = query.Count();
+            var pagedData = query
+                .OrderByDescending(d => d.Added) 
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ProjectTo<CommentWithReplyCount>(_mapper.ConfigurationProvider)
+                .ToList();
+            /* Let's think board about the issues here, if we project to auto mapper here then,
+             * it's going to count replies for every selected ab*/
+
+            /* From the point of runtime complexity, okay if we load all at once then it's a nested structure right,
              * then we might end up with lots of user driven data like high resolution image and stuff.
              We need to load only what's needed so that we can make this endpoint effective we need to explicitly call the fetch api from
             front-end for that.*/
-            int pageSize = 5;
 
-            var pagination = helper.NormalPagination(pageSize, page, helper.hideDeletedConfession(comments));
-
+            var deletedConfFilter = helper.hideDeletedConfession(pagedData).ToList();
+            int totalPages = (int)Math.Ceiling(totalObjects / (double)pageSize);
             // Here since pagination is used, the time complexity for iterating over time is not that much so we can do that
-            return new JsonResult(Ok(pagination));
+            return new JsonResult(Ok(new {
+                data = deletedConfFilter,
+                totalPages,
+                totalObjects
+            }));
         }
         [Route("get-children-comments")]
-        [HttpGet]
-        public async Task<IActionResult> GetReplyComments(Guid parentId)
+        [HttpGet] // this api returns children threads based on parentId.
+        public IActionResult GetReplyComments(Guid parentId)
         {
-            // this is replies, to one depth, we are using auto mapper here
-            var getParentComments = _context.Comments.Where(x => x.ParentId == parentId).ProjectTo<CommentWithReplyCount>(_mapper.ConfigurationProvider).ToList();
-            // here the comment might be deleted, so we need to account for that as well!
-
-            
+            var getParentComments = _context.Comments
+                .Where(x => x.ParentId == parentId)
+                .ProjectTo<CommentWithReplyCount>(_mapper.ConfigurationProvider)
+                .ToList(); // These are the children based on id, on each children we might want to count their parent id
             return new JsonResult(Ok(helper.hideDeletedConfession(getParentComments))); // load everything for now, if we were to scale this application to very large then we could add pagination here to ex: by scrolling
         }
 
