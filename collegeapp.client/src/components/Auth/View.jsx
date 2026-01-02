@@ -99,7 +99,7 @@ class Comment extends Component {
           }, () => {
             /* Even a simple problem here,
             will require me a whiteboard and cup of coffee. */
-          
+
             this.setState({
               confessions: data,
               totalObjects,
@@ -294,20 +294,24 @@ class Comment extends Component {
                       {this.state.confessions.map((i, j) => {
                         // Okay here the current model that we are iterating is the parent model,
                         // And, we need to check if all the replies that we have parent Id as current
-                        const  { replyCount } = i;
-                        console.log(i);
+                        const { replyCount } = i;
                         return (
                           <React.Fragment key={i.id}>
                             <CommentRenderCompoenent obj={i} />
                             <br />
-                            <a
-                              onClick={() => {
-                                this.dataOnRoot(i);
-                              }}
-                            >
-                              thread {replyCount}  <AiOutlinePlusCircle />
-                            </a>
-                            <br />
+
+                            {replyCount === 0 ? null : (
+                              <>
+                                <a
+                                  onClick={() => {
+                                    this.dataOnRoot(i);
+                                  }}
+                                >
+                                  thread {replyCount}  <AiOutlinePlusCircle />
+                                </a>
+                                <br />
+                              </>
+                            )}
                             <CommentRecurComponent
                               load={this.dataOnRoot}
                               children={i.replies}
@@ -537,7 +541,7 @@ class CommentRecurComponent extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.nextedReply !== this.state.nextedReply) {
-      
+
     }
   }
 
@@ -593,14 +597,18 @@ class CommentRecurComponent extends Component {
                 <React.Fragment key={j}>
                   <CommentRenderCompoenent obj={i} />
                   <>
-                    <a
-                      onClick={() => {
-                        this.changeDemand(i);
-                      }}
-                    >
-                      thread {replyCount !== undefined ? replyCount : null} <AiOutlinePlusCircle />
-                    </a>
-                    <hr style={{ visibility: "hidden" }} />
+                    {replyCount === 0 ? null : (
+                      <>
+                        <a
+                          onClick={() => {
+                            this.changeDemand(i);
+                          }}
+                        >
+                          thread {replyCount} <AiOutlinePlusCircle />
+                        </a>
+                        <hr style={{ visibility: "hidden" }} />
+                      </>
+                    )}
                     {replies.length > 0 && (
                       <>
 
