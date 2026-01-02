@@ -10,7 +10,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';
 import { CiHeart } from "react-icons/ci";
 import SideNavPost from './components/Auth/useable/SideNavPost';
-
+import Pagination from '@mui/material/Pagination';
 
 export default class Dashboard extends Component {
     constructor(props) {
@@ -63,16 +63,25 @@ export default class Dashboard extends Component {
             }
         });
     }
+    handleChange = (ev, val) => {
+        this.getConfession(val);
+        this.setState({ currentPage: val });
+    }
     render() {
-        const setCurrentPage = (page) => {
-            this.getConfession(page);
-            this.setState({ currentPage: page });
-        }
         return (
             <AuthContext.Consumer>
                 {(authFunctions) => {
-                    const {dark} = authFunctions;
-
+                    const { dark } = authFunctions;
+                    const darkPagination = {
+                        '& .MuiPaginationItem-root': {
+                            color: dark ? '#fff' : '#ffffffff',
+                            borderColor: dark ? '#555' : '#ccc',
+                        },
+                        '& .Mui-selected': {
+                            backgroundColor: dark ? '#1976d2' : '#1976d2',
+                            color: '#fff',
+                        },
+                    }
                     // change styling accordingly
                     let mainDivStyle = "";
                     if (dark) {
@@ -156,7 +165,16 @@ export default class Dashboard extends Component {
                                                             )
                                                         })}
                                                     </div>
-                                                    {this.state.totalPages > 1 ? <CustomPagination renderUpTo={10} getCurrentPage={this.state.currentPage} setCurrentPage={setCurrentPage} page={this.state.totalPages} /> : null}
+                                                    {this.state.totalPages > 1 ? (<>
+                                                        <hr style={{ visibility: "hidden" }} />
+                                                        <Pagination
+                                                            count={this.state.totalPages}
+                                                            page={this.state.currentPage}
+                                                            color="primary"
+                                                            onChange={this.handleChange}
+                                                            sx={dark === true ? darkPagination : {}}
+                                                        />
+                                                    </>) : null}
                                                 </>
                                             )}
                                         </div>
