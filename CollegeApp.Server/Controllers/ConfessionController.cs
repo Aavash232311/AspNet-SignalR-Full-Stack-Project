@@ -9,7 +9,6 @@ using System.Security.Claims;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using System.ComponentModel.DataAnnotations;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -104,7 +103,8 @@ namespace CollegeApp.Server.Controllers
             int pageSize = 5;
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
-            var query = _context.Confessions.Where(x => x.UserId == userId);
+            var query = _context.Confessions.Where(x => x.UserId == userId)
+                .OrderByDescending(d => d.Added);
             if (query.Any())
             {
                 return new JsonResult(Ok(helper.NormalPagination(pageSize, page, query)));
