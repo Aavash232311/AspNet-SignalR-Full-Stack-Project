@@ -135,6 +135,104 @@
     border-radius: 5px;
     height: 570px;
     z-index: 99999999999999;
+    overflow: auto;
+}
+
+/* --- Custom Scrollbar for Chat Forum Frame --- */
+.chat-fourm-frame {
+  /* Standard Firefox support */
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-bg);
+  
+  /* Ensure the container actually scrolls */
+  overflow-y: auto;
+  padding-right: 4px; /* Prevents text from hitting the bar */
+}
+
+/* Webkit (Chrome, Safari, Edge) Styles */
+.chat-fourm-frame::-webkit-scrollbar {
+  width: 6px; /* Very thin for a modern look */
+}
+
+.chat-fourm-frame::-webkit-scrollbar-track {
+  background: var(--sb-bg);
+  border-radius: 10px;
+}
+
+.chat-fourm-frame::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.chat-fourm-frame::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+}
+
+/* --- Theme Variable Integration --- */
+.theme-light .chat-fourm-frame {
+  --sb-bg: transparent;
+  --sb-thumb: rgba(0, 0, 0, 0.1);
+  --sb-thumb-hover: rgba(0, 0, 0, 0.2);
+}
+
+.theme-dark .chat-fourm-frame {
+  --sb-bg: transparent;
+  --sb-thumb: rgba(255, 255, 255, 0.15); /* Subtle white glow */
+  --sb-thumb-hover: rgba(255, 255, 255, 0.25);
+}
+
+/* Optional: Use your Indigo/Purple accent for the thumb when active */
+.theme-dark .chat-fourm-frame:active::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #a855f7);
+}
+
+/* --- 1. Define Theme Variables --- */
+.view-wrapper.theme-light {
+  --sb-track: transparent;
+  --sb-thumb: rgba(0, 0, 0, 0.12);
+  --sb-thumb-hover: rgba(0, 0, 0, 0.25);
+}
+
+.view-wrapper.theme-dark {
+  --sb-track: transparent;
+  --sb-thumb: rgba(255, 255, 255, 0.15); /* Subtle white for dark theme */
+  --sb-thumb-hover: rgba(255, 255, 255, 0.3);
+}
+
+/* --- 2. Apply to EVERY child inside view-wrapper --- */
+/* This targets all div, section, textarea, etc. that might overflow */
+.view-wrapper * {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--sb-thumb) var(--sb-track); /* Firefox */
+}
+
+/* --- 3. Webkit Specifics (Chrome, Edge, Safari) --- */
+.view-wrapper *::-webkit-scrollbar {
+  width: 6px;   /* Vertical scrollbar width */
+  height: 6px;  /* Horizontal scrollbar height */
+}
+
+.view-wrapper *::-webkit-scrollbar-track {
+  background: var(--sb-track);
+  border-radius: 10px;
+}
+
+.view-wrapper *::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 10px;
+  border: 1px solid transparent; /* Acts as padding */
+  background-clip: content-box; /* Makes the thumb look even thinner */
+  transition: background 0.2s ease;
+}
+
+.view-wrapper *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--sb-thumb-hover);
+}
+
+/* --- 4. Special Case: Smooth Scrolling --- */
+.view-wrapper * {
+  scroll-behavior: smooth;
 }
 
 .recur-comment-frame {
@@ -652,6 +750,95 @@ textarea::placeholder {
   color: inherit;
 }
 
+/* --- Icon Size Fix --- */
+.mini-icon {
+  font-size: 0.85rem !important; /* Forces smaller size */
+  display: block;
+}
+
+/* --- Theme Mapping --- */
+.interaction-bar.theme-light {
+  --pill-bg: rgba(0, 0, 0, 0.05);
+  --pill-hover: rgba(0, 0, 0, 0.1);
+  --text-color: #4b5563;
+  --active-blue: #3b82f6;
+  --pill-border: transparent;
+}
+
+.interaction-bar.theme-dark {
+  --pill-bg: #21262d;           /* Slightly lighter than dashboard bg */
+  --pill-hover: #30363d;        /* Standard GitHub-style hover */
+  --text-color: #c9d1d9;        /* Light grey text */
+  --active-blue: #58a6ff;       /* Brighter blue for dark mode */
+  --pill-border: rgba(240, 246, 252, 0.1);
+}
+
+/* --- Layout Styles --- */
+.interaction-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.action-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  color: var(--text-color);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-pill:hover {
+  background-color: var(--pill-hover);
+}
+
+.action-pill.active {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: var(--active-blue);
+  border-color: var(--active-blue);
+}
+
+/* --- Voting Pill Specifics --- */
+.voting-pill {
+  padding: 2px 6px; /* Tighter padding for voting */
+  gap: 4px;
+}
+
+.vote-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.vote-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vote-btn.up:hover { color: #f97316; }   /* Orange upvote */
+.vote-btn.down:hover { color: #8b5cf6; } /* Purple downvote */
+
+.vote-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 14px;
+  text-align: center;
+}
+
 .theme-dark .action-pill {
   background: rgba(255,255,255,0.05);
 }
@@ -687,6 +874,29 @@ textarea::placeholder {
   outline: none;
   resize: none;
   min-height: 80px;
+  font-family: inherit; /* Ensures it matches your app font */
+  transition: color 0.3s ease;
+}
+
+/* --- Light Mode Defaults --- */
+.minimal-textarea.light-mode {
+  color: #1a1a1b;
+  caret-color: #1a1a1b;
+}
+
+.minimal-textarea.light-mode::placeholder {
+  color: #757575;
+}
+
+/* --- Dark Mode Overrides --- */
+.minimal-textarea.dark-mode {
+  color: #ffffff;        /* White text for dark background */
+  caret-color: #3b82f6;  /* Blue typing cursor for better visibility */
+}
+
+.minimal-textarea.dark-mode::placeholder {
+  color: #6b7280;        /* Muted gray placeholder */
+  opacity: 1;            /* Firefox fix */
 }
 
 .reply-actions {
@@ -833,4 +1043,182 @@ textarea::placeholder {
   background: #fee2e2;
   color: #ef4444;
   border-color: #fca5a5;
+}
+
+/* Dark theme Upper conf part  */ 
+/* 1. Theme Variable Definitions */
+.view-wrapper.theme-light {
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-main: #111827;
+  --text-muted: #4b5563;
+  --border-color: rgba(0, 0, 0, 0.1);
+}
+
+.view-wrapper.theme-dark {
+  --bg-color: #0b0e11;      /* Matches your dashboard background */
+  --card-bg: #15191c;      /* Slightly lighter charcoal for the card */
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 2. Layout Styles */
+.view-wrapper {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.confession-master-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.confession-article {
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 40px;
+  color: var(--text-main);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* 3. Typography Updates */
+.post-topic {
+  color: var(--text-main);
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+}
+
+.post-body {
+  color: var(--text-muted);
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.meta-time, .edit-badge {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.discussion-header h3 {
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* 4. Avatar & Icons */
+.main-avatar {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+}
+
+.report-trigger-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.report-trigger-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* --- Base Theme Variables --- */
+.comment-composer.light-mode {
+  --composer-bg: #f9f9f9;
+  --text-color: #1a1a1b;
+  --placeholder-color: #757575;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --footer-border: rgba(0, 0, 0, 0.05);
+}
+
+.comment-composer.dark-mode {
+  --composer-bg: #1c1f23;        /* Dark charcoal background */
+  --text-color: #e0e0e0;         /* Soft white text */
+  --placeholder-color: #6b7280;  /* Muted gray placeholder */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --footer-border: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Container Styles --- */
+.comment-composer {
+  background-color: var(--composer-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden; /* Keeps footer within radius */
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+/* --- Textarea Styles --- */
+.creative-textarea {
+  width: 100%;
+  min-height: 120px;
+  background: transparent; /* Inherits from composer-bg */
+  border: none;
+  outline: none;
+  padding: 16px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--text-color);
+  resize: vertical;
+}
+
+.creative-textarea::placeholder {
+  color: var(--placeholder-color);
+}
+
+/* --- Footer Styles --- */
+.composer-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: rgba(0, 0, 0, 0.02); /* Slight depth change */
+  border-top: 1px solid var(--footer-border);
+}
+
+.dark-mode .composer-footer {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.guideline-text {
+  font-size: 0.8rem;
+  color: var(--placeholder-color);
+}
+
+/* --- Button Style --- */
+.glow-submit-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.glow-submit-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.glow-submit-button:disabled {
+  background-color: #4b5563;
+  cursor: not-allowed;
+  opacity: 0.6;
 }

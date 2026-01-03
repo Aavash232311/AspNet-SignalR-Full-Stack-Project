@@ -11,6 +11,7 @@ import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
 import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import Pagination from '@mui/material/Pagination';
 import { AdminContext } from "../../Admin/Admin";
+import AuthContext from "../../auth/auth";
 
 // this is the reuseable recursive method for setting up in the hierarchial data tree,
 // I think some languages that I have used in the past comes with built in method like this
@@ -261,17 +262,27 @@ class Comment extends Component {
           // Modernized Pagination styles
           const darkPagination = {
             '& .MuiPaginationItem-root': {
-              color: dark ? '#e0e0e0' : '#444',
-              borderColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-              backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent',
+              color: '#9ca3af', // Muted text
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              fontFamily: 'inherit',
+              fontWeight: 600,
               '&:hover': {
-                backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-              }
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: '#fff',
+                transform: 'translateY(-2px)', // Modern "lift" effect
+              },
+              '&.Mui-selected': {
+                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', // Matches your avatar
+                color: '#fff',
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #9333ea 100%)',
+                },
+              },
             },
-            '& .Mui-selected': {
-              backgroundColor: '#3b82f6 !important', // Modern Blue
-              color: '#fff',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+            '& .MuiPaginationItem-ellipsis': {
+              color: '#4b5563',
             },
           };
 
@@ -281,9 +292,8 @@ class Comment extends Component {
                 <span>Discussion</span>
               </div>
 
-
               <form onSubmit={this.addComment} className="modern-comment-form">
-                <div className="comment-composer">
+                <div className={`comment-composer ${dark ? 'dark-mode' : 'light-mode'}`}>
                   <textarea
                     name="comment"
                     className="creative-textarea"
@@ -299,6 +309,7 @@ class Comment extends Component {
                   </div>
                 </div>
               </form>
+              <hr style={{ visibility: "hidden" }}></hr>
 
               <div id="chat-fourm-frame" className="comment-feed">
                 {this.state.confessions && this.state.confessions.map((i) => {
@@ -333,9 +344,14 @@ class Comment extends Component {
                   count={this.state.totalPages}
                   page={this.state.page}
                   variant="outlined"
-                  shape="rounded"
+                  shape="circular" // Circular is more "modern" than rounded
                   onChange={this.handleChange}
-                  sx={dark === true ? darkPagination : {}}
+                  sx={dark ? darkPagination : {
+                    '& .MuiPaginationItem-root': {
+                      fontWeight: 600,
+                      transition: 'all 0.2s'
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -389,118 +405,127 @@ class CommentRenderCompoenent extends Component {
   render() {
     const i = this.props.obj;
     return (
-      <React.Fragment>
-        <div className={`comment-card ${i.deleted ? 'is-deleted' : ''}`}>
+      <AuthContext.Consumer>
+        {(adminProperties) => {
+          const { dark } = adminProperties;
+          return (
+            <>
+              <React.Fragment>
+                <div className={`comment-card ${i.deleted ? 'is-deleted' : ''}`}>
 
-          {/* --- Report Modal Overlay --- */}
-          {this.state.report && (
-            <div className="report-overlay">
-              <ReportConfessionAndComment
-                reportFor={{ type: "comments", id: i.id }}
-                closeDiag={() => this.setState({ report: false })}
-              />
-            </div>
-          )}
+                  {/* --- Report Modal Overlay --- */}
+                  {this.state.report && (
+                    <div className="report-overlay">
+                      <ReportConfessionAndComment
+                        reportFor={{ type: "comments", id: i.id }}
+                        closeDiag={() => this.setState({ report: false })}
+                      />
+                    </div>
+                  )}
 
-          {/* --- Header: Identity & Timestamp --- */}
-          <div className="comment-header">
-            <div className="identity-group">
-              <div
-                className="user-avatar-glow"
-                style={{ '--accent-color': i.profileColor }}
-              >
-                <EmojiPeopleIcon className="avatar-icon" />
-              </div>
-              <div className="user-meta">
-                <div className="user-name-row">
-                  <span className="user-label">Unsigned Responder</span>
-                  <span className="user-hash">#{i.anonymousName.substring(0, 5)}</span>
+                  {/* --- Header: Identity & Timestamp --- */}
+                  <div className="comment-header">
+                    <div className="identity-group">
+                      <div
+                        className="user-avatar-glow"
+                        style={{ '--accent-color': i.profileColor }}
+                      >
+                        <EmojiPeopleIcon className="avatar-icon" />
+                      </div>
+                      <div className="user-meta">
+                        <div className="user-name-row">
+                          <span className="user-label">Unsigned Responder</span>
+                          <span className="user-hash">#{i.anonymousName.substring(0, 5)}</span>
+                        </div>
+                        <span className="timestamp">
+                          {this.services.normalizeASPDate(i.added)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Optional: Add a "More Options" menu here if needed later */}
+                  </div>
+
+                  {/* --- Body: The Message --- */}
+                  <div className="comment-body">
+                    {i.comments}
+                  </div>
+
+                  {/* --- Footer: Interactive Action Bar --- */}
+                  <div className="interaction-bar">
+                    <div className="action-pill voting-pill">
+                      <button className="vote-btn up btn" aria-label="Upvote">
+                        <FaChevronUp />
+                      </button>
+                      <span className="vote-count">0</span>
+                      <button className="vote-btn down btn" aria-label="Downvote">
+                        <FaChevronDown />
+                      </button>
+                    </div>
+
+                    <button
+                      className={`action-pill ${this.state.showReplyThread ? 'active' : ''}`}
+                      onClick={() => {
+                        if (!i.deleted) {
+                          this.setState(prev => ({ showReplyThread: !prev.showReplyThread }));
+                        }
+                      }}
+                    >
+                      <FaRegComment />
+                      <span>Reply</span>
+                    </button>
+
+                    <button className="action-pill">
+                      <FaShare />
+                      <span>Share</span>
+                    </button>
+
+                    <button
+                      className="action-pill report-btn"
+                      onClick={() => {
+                        if (i.deleted) return alert("You cannot report a deleted message!");
+                        this.setState({ report: true });
+                      }}
+                    >
+                      <ReportGmailerrorredIcon />
+                    </button>
+                  </div>
+
+                  {/* --- Nested Reply Form --- */}
+                  {this.state.showReplyThread && (
+                    <div className="reply-form-wrapper">
+                      <form
+                        className="creative-reply-box"
+                        onSubmit={(ev) => this.replyCommentUpload(ev, i.id)}
+                      >
+                        <textarea
+                          placeholder="Write a thoughtful reply..."
+                          autoComplete="off"
+                          name="comment"
+                          className={`minimal-textarea ${dark ? 'dark-mode' : 'light-mode'}`}
+                          autoFocus
+                        />
+                        <div className="reply-actions">
+                          <button
+                            type="button"
+                            className={`text-btn btn ${dark ? 'dark-mode' : 'light-mode'}`}
+                            onClick={() => this.setState({ showReplyThread: false })}
+                          >
+                            Cancel
+                          </button>
+                          <button type="submit" className="send-btn btn">
+                            Post Reply
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
                 </div>
-                <span className="timestamp">
-                  {this.services.normalizeASPDate(i.added)}
-                </span>
-              </div>
-            </div>
-
-            {/* Optional: Add a "More Options" menu here if needed later */}
-          </div>
-
-          {/* --- Body: The Message --- */}
-          <div className="comment-body">
-            {i.comments}
-          </div>
-
-          {/* --- Footer: Interactive Action Bar --- */}
-          <div className="interaction-bar">
-            <div className="action-pill voting-pill">
-              <button className="vote-btn up btn" aria-label="Upvote">
-                <FaChevronUp />
-              </button>
-              <span className="vote-count">0</span>
-              <button className="vote-btn down btn" aria-label="Downvote">
-                <FaChevronDown />
-              </button>
-            </div>
-
-            <button
-              className={`action-pill ${this.state.showReplyThread ? 'active' : ''}`}
-              onClick={() => {
-                if (!i.deleted) {
-                  this.setState(prev => ({ showReplyThread: !prev.showReplyThread }));
-                }
-              }}
-            >
-              <FaRegComment />
-              <span>Reply</span>
-            </button>
-
-            <button className="action-pill">
-              <FaShare />
-              <span>Share</span>
-            </button>
-
-            <button
-              className="action-pill report-btn"
-              onClick={() => {
-                if (i.deleted) return alert("You cannot report a deleted message!");
-                this.setState({ report: true });
-              }}
-            >
-              <ReportGmailerrorredIcon />
-            </button>
-          </div>
-
-          {/* --- Nested Reply Form --- */}
-          {this.state.showReplyThread && (
-            <div className="reply-form-wrapper">
-              <form
-                className="creative-reply-box"
-                onSubmit={(ev) => this.replyCommentUpload(ev, i.id)}
-              >
-                <textarea
-                  placeholder="Write a thoughtful reply..."
-                  autoComplete="off"
-                  name="comment"
-                  className="minimal-textarea"
-                  autoFocus
-                />
-                <div className="reply-actions">
-                  <button
-                    type="button"
-                    className="text-btn btn"
-                    onClick={() => this.setState({ showReplyThread: false })}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="send-btn btn">
-                    Post Reply
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-        </div>
-      </React.Fragment>
+              </React.Fragment>
+            </>
+          )
+        }}
+      </AuthContext.Consumer>
     );
   }
 }
@@ -665,75 +690,82 @@ export default class View extends Component {
 
   render() {
     return (
-      <SideNavPost>
-        {/* --- Global Report Modal --- */}
-        {this.state.report && (
-          <ReportConfessionAndComment
-            reportFor={{ type: "confession", id: this.state.confession.id }}
-            closeDiag={() => this.setState({ report: false })}
-          />
-        )}
+      <AuthContext.Consumer>
+        {(adminProperties) => {
+          const { dark } = adminProperties;
+          const { confession } = this.state;
 
-        <div className="confession-master-container">
-          {this.state.confession ? (
-            <article className="confession-article">
+          return (
+            <SideNavPost>
+              {/* --- Global Report Modal --- */}
+              {this.state.report && (
+                <ReportConfessionAndComment
+                  reportFor={{ type: "confession", id: confession?.id }}
+                  closeDiag={() => this.setState({ report: false })}
+                />
+              )}
 
-              {/* --- Post Header: Identity & Actions --- */}
-              <header className="post-header">
-                <div className="author-block">
-                  <div className="main-avatar">
-                    <Face6Icon />
-                  </div>
-                  <div className="author-details">
-                    <span className="author-name">Unsigned Participant</span>
-                    <div className="post-meta">
-                      <time className="meta-time">
-                        {this.services.normalizeASPDate(this.state.confession.added)}
-                      </time>
+              {/* Dynamic theme class applied here */}
+              <div className={`view-wrapper ${dark ? 'theme-dark' : 'theme-light'}`}>
+                <div className="confession-master-container">
+                  {confession ? (
+                    <article className="confession-article">
 
-                      {this.state.confession.lastModified !== this.state.confession.added && (
-                        <span className="edit-badge">
-                          • Edited {this.services.normalizeASPDate(this.state.confession.lastModified)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                      {/* --- Post Header --- */}
+                      <header className="post-header">
+                        <div className="author-block">
+                          <div className="main-avatar">
+                            <Face6Icon />
+                          </div>
+                          <div className="author-details">
+                            <span className="author-name">Unsigned Participant</span>
+                            <div className="post-meta">
+                              <time className="meta-time">
+                                {this.services.normalizeASPDate(confession.added)}
+                              </time>
 
-                <button
-                  className="report-trigger-btn"
-                  onClick={() => this.setState({ report: true })}
-                  title="Report Post"
-                >
-                  <ReportGmailerrorredIcon fontSize="small" />
-                </button>
-              </header>
+                              {confession.lastModified !== confession.added && (
+                                <span className="edit-badge">
+                                  • Edited {this.services.normalizeASPDate(confession.lastModified)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
 
-              {/* --- Post Content --- */}
-              <div className="post-content">
-                <h1 className="post-topic">
-                  {this.state.confession.topic}
-                </h1>
+                        <button
+                          className="report-trigger-btn"
+                          onClick={() => this.setState({ report: true })}
+                          title="Report Post"
+                        >
+                          <ReportGmailerrorredIcon fontSize="small" />
+                        </button>
+                      </header>
 
-                <div className="post-body">
-                  {this.state.confession.description}
+                      {/* --- Post Content --- */}
+                      <div className="post-content">
+                        <h1 className="post-topic">{confession.topic}</h1>
+                        <div className="post-body">{confession.description}</div>
+                      </div>
+
+                      {/* --- Engagement Section --- */}
+                      <section className="discussion-area">
+                        <div className="discussion-header">
+                          <h3>Community Discussion</h3>
+                        </div>
+                        <Comment deletedConfession={confession.deleted} />
+                      </section>
+
+                    </article>
+                  ) : (
+                    <div className="loading-shimmer">Gathering thoughts...</div>
+                  )}
                 </div>
               </div>
-
-              {/* --- Engagement Section --- */}
-              <section className="discussion-area">
-                <div className="discussion-header">
-                  <h3>Community Discussion</h3>
-                </div>
-                <Comment deletedConfession={this.state.confession.deleted} />
-              </section>
-
-            </article>
-          ) : (
-            <div className="loading-shimmer">Gathering thoughts...</div>
-          )}
-        </div>
-      </SideNavPost>
+            </SideNavPost>
+          );
+        }}
+      </AuthContext.Consumer>
     );
   }
 }
