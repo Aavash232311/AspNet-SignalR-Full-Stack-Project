@@ -257,82 +257,89 @@ class Comment extends Component {
       <AdminContext.Consumer>
         {(adminProperties) => {
           const { dark } = adminProperties;
+
+          // Modernized Pagination styles
           const darkPagination = {
             '& .MuiPaginationItem-root': {
-              color: dark ? '#fff' : '#ffffffff',
-              borderColor: dark ? '#555' : '#ccc',
+              color: dark ? '#e0e0e0' : '#444',
+              borderColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              backgroundColor: dark ? 'rgba(255,255,255,0.03)' : 'transparent',
+              '&:hover': {
+                backgroundColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+              }
             },
             '& .Mui-selected': {
-              backgroundColor: dark ? '#1976d2' : '#1976d2',
+              backgroundColor: '#3b82f6 !important', // Modern Blue
               color: '#fff',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
             },
-          }
+          };
+
           return (
-            <>
-              <div>
-                <hr />
-                <form onSubmit={this.addComment} className="modern-comment-form">
-                  <div className="comment-input-container">
-                    <textarea
-                      name="comment"
-                      className="main-textarea"
-                      placeholder="What are your thoughts?"
-                      autoComplete="off"
-                      disabled={this.props.deletedConfession === true ? true : false}
-                    ></textarea>
+            <div className={`forum-container ${dark ? 'theme-dark' : 'theme-light'}`}>
+              <div className="section-divider">
+                <span>Discussion</span>
+              </div>
 
-                    <div className="comment-form-footer">
-                      <button type="submit" className="submit-button">
-                        Comment
-                      </button>
-                    </div>
+
+              <form onSubmit={this.addComment} className="modern-comment-form">
+                <div className="comment-composer">
+                  <textarea
+                    name="comment"
+                    className="creative-textarea"
+                    placeholder="Share your perspective..."
+                    autoComplete="off"
+                    disabled={this.props.deletedConfession === true}
+                  />
+                  <div className="composer-footer">
+                    <div className="guideline-text">Please be respectful</div>
+                    <button type="submit" className="glow-submit-button">
+                      Post Comment
+                    </button>
                   </div>
-                </form>
-                <div id="chat-fourm-frame" >
-                  {this.state.confessions && (
-                    <>
-                      {this.state.confessions.map((i, j) => {
-                        // Okay here the current model that we are iterating is the parent model,
-                        // And, we need to check if all the replies that we have parent Id as current
-                        const { replyCount } = i;
-                        return (
-                          <React.Fragment key={i.id}>
-                            <CommentRenderCompoenent obj={i} />
-                            <br />
-
-                            {replyCount === 0 ? null : (
-                              <>
-                                <a
-                                  onClick={() => {
-                                    this.dataOnRoot(i);
-                                  }}
-                                >
-                                  thread {replyCount}  <AiOutlinePlusCircle />
-                                </a>
-                                <br />
-                              </>
-                            )}
-                            <CommentRecurComponent
-                              load={this.dataOnRoot}
-                              children={i.replies}
-                            />
-                          </React.Fragment>
-                        );
-                      })}
-                    </>
-                  )}
                 </div>
+              </form>
+
+              <div id="chat-fourm-frame" className="comment-feed">
+                {this.state.confessions && this.state.confessions.map((i) => {
+                  const { replyCount } = i;
+                  return (
+                    <div key={i.id} className="comment-thread-group">
+                      <CommentRenderCompoenent obj={i} />
+
+                      {replyCount > 0 && (
+                        <button
+                          className="thread-load-btn"
+                          onClick={() => this.dataOnRoot(i)}
+                        >
+                          <AiOutlinePlusCircle className="btn-icon" />
+                          <span>View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>
+                        </button>
+                      )}
+
+                      <div className="recursive-indent">
+                        <CommentRecurComponent
+                          load={this.dataOnRoot}
+                          children={i.replies}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pagination-wrapper">
                 <Pagination
                   count={this.state.totalPages}
                   page={this.state.page}
-                  color="primary"
+                  variant="outlined"
+                  shape="rounded"
                   onChange={this.handleChange}
                   sx={dark === true ? darkPagination : {}}
                 />
-
               </div>
-            </>
-          )
+            </div>
+          );
         }}
       </AdminContext.Consumer>
     );
@@ -383,116 +390,114 @@ class CommentRenderCompoenent extends Component {
     const i = this.props.obj;
     return (
       <React.Fragment>
-        <div className="comment-frames">
-          {/* This is for, reporting comment! */}
-          {this.state.report === true ? (
-            <>
-              <ReportConfessionAndComment reportFor={{
-                type: "comments",
-                id: i.id
-              }} closeDiag={() => { this.setState({ report: false }) }} />
-            </>) : null}
-          <div className="profile-and-name">
-            <div
-              style={{ backgroundColor: i.profileColor, color: "white" }}
-              id="profile-circle"
-            >
-              <EmojiPeopleIcon />
+        <div className={`comment-card ${i.deleted ? 'is-deleted' : ''}`}>
+
+          {/* --- Report Modal Overlay --- */}
+          {this.state.report && (
+            <div className="report-overlay">
+              <ReportConfessionAndComment
+                reportFor={{ type: "comments", id: i.id }}
+                closeDiag={() => this.setState({ report: false })}
+              />
             </div>
-            <div style={{ textAlign: "left" }} className="anonymous-user-label">
-              <div>
-                <b>Unsigned Responder {" "}
-                  <small className="anonymous-code">{(i.anonymousName).substring(0, 5)}</small>
-                </b>
+          )}
+
+          {/* --- Header: Identity & Timestamp --- */}
+          <div className="comment-header">
+            <div className="identity-group">
+              <div
+                className="user-avatar-glow"
+                style={{ '--accent-color': i.profileColor }}
+              >
+                <EmojiPeopleIcon className="avatar-icon" />
               </div>
-              <small className="date-font-small">
-                <div>
-                  {this.services.normalizeASPDate(i.added)}
+              <div className="user-meta">
+                <div className="user-name-row">
+                  <span className="user-label">Unsigned Responder</span>
+                  <span className="user-hash">#{i.anonymousName.substring(0, 5)}</span>
                 </div>
-              </small>
+                <span className="timestamp">
+                  {this.services.normalizeASPDate(i.added)}
+                </span>
+              </div>
             </div>
+
+            {/* Optional: Add a "More Options" menu here if needed later */}
           </div>
-          <div className="commenct-frame">{i.comments}</div>
 
-          <div className="reddit-comment-bar">
-            {/* 1. Voting Group */}
-            <div className="action-group voting">
-              <button className="action-item hover-upvote">
-                <FaChevronUp className="icon" />
+          {/* --- Body: The Message --- */}
+          <div className="comment-body">
+            {i.comments}
+          </div>
+
+          {/* --- Footer: Interactive Action Bar --- */}
+          <div className="interaction-bar">
+            <div className="action-pill voting-pill">
+              <button className="vote-btn up btn" aria-label="Upvote">
+                <FaChevronUp />
               </button>
-              <span className="count">0</span>
-              <button className="action-item hover-downvote">
-                <FaChevronDown className="icon" />
+              <span className="vote-count">0</span>
+              <button className="vote-btn down btn" aria-label="Downvote">
+                <FaChevronDown />
               </button>
             </div>
 
-            {/* 2. Comment Group */}
-            <div
-              className="action-item hover-bg"
-              onClick={() => { if (!(i.deleted)) { this.setState(prev => ({ showReplyThread: !prev.showReplyThread })); } }}
-            >
-              <FaRegComment className="icon" />
-              <span className="label">Comments</span>
-            </div>
-
-            {/* 3. Reply Group */}
-            <div className="action-item hover-bg">
-              <small className="label">Reply</small>
-            </div>
-
-            {/* 4. Share Group */}
-            <div className="action-item hover-bg">
-              <FaShare className="icon" />
-              <span className="label">Share</span>
-            </div>
-
-            {/* 5. Report Group */}
-            <div
-              className="action-item hover-bg"
+            <button
+              className={`action-pill ${this.state.showReplyThread ? 'active' : ''}`}
               onClick={() => {
-                if (i.deleted) {
-                  alert("You cannot report to deleted message!");
-                  return;
+                if (!i.deleted) {
+                  this.setState(prev => ({ showReplyThread: !prev.showReplyThread }));
                 }
-                this.setState({ report: true })
               }}
             >
-              <ReportGmailerrorredIcon className="icon" />
-              <span className="label">Report</span>
-            </div>
+              <FaRegComment />
+              <span>Reply</span>
+            </button>
+
+            <button className="action-pill">
+              <FaShare />
+              <span>Share</span>
+            </button>
+
+            <button
+              className="action-pill report-btn"
+              onClick={() => {
+                if (i.deleted) return alert("You cannot report a deleted message!");
+                this.setState({ report: true });
+              }}
+            >
+              <ReportGmailerrorredIcon />
+            </button>
           </div>
 
-          {this.state.showReplyThread === true && (
-            <>
+          {/* --- Nested Reply Form --- */}
+          {this.state.showReplyThread && (
+            <div className="reply-form-wrapper">
               <form
-                className="modern-reply-form"
+                className="creative-reply-box"
                 onSubmit={(ev) => this.replyCommentUpload(ev, i.id)}
               >
-                <div className="reply-input-container">
-                  <textarea
-                    placeholder="What are your thoughts?"
-                    autoComplete="off"
-                    name="comment"
-                    className="reply-textarea"
-                  />
-                  <div className="reply-form-footer">
-                    <button
-                      type="button"
-                      className="cancel-button"
-                      onClick={() => this.setState({ showReplyThread: false })}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="submit-button"
-                    >
-                      Comment
-                    </button>
-                  </div>
+                <textarea
+                  placeholder="Write a thoughtful reply..."
+                  autoComplete="off"
+                  name="comment"
+                  className="minimal-textarea"
+                  autoFocus
+                />
+                <div className="reply-actions">
+                  <button
+                    type="button"
+                    className="text-btn btn"
+                    onClick={() => this.setState({ showReplyThread: false })}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="send-btn btn">
+                    Post Reply
+                  </button>
                 </div>
               </form>
-            </>
+            </div>
           )}
         </div>
       </React.Fragment>
@@ -661,60 +666,73 @@ export default class View extends Component {
   render() {
     return (
       <SideNavPost>
-        {this.state.report === true ? (
-          <>
-            <ReportConfessionAndComment reportFor={{
-              type: "confession",
-              id: this.state.confession.id
-            }} closeDiag={() => { this.setState({ report: false }) }} />
-          </>
-        ) : null}
-        <center>
-          <div id="view-frame">
-            {this.state.confession !== null ? (
-              <>
-                <div>
-                  <div id="confession-topic">
-                    <div className="profile-and-name">
-                      <div id="profile-circle">
-                        <Face6Icon />
-                      </div>
-                      <div style={{ textAlign: "left" }} className="anonymous-user-label">
-                        <div>
-                          <b>Unsigned participant{" "}
-                          </b>
-                        </div>
-                        <small className="date-font-small">
-                          {this.services.normalizeASPDate(this.state.confession.added)}
+        {/* --- Global Report Modal --- */}
+        {this.state.report && (
+          <ReportConfessionAndComment
+            reportFor={{ type: "confession", id: this.state.confession.id }}
+            closeDiag={() => this.setState({ report: false })}
+          />
+        )}
 
-                          {this.state.confession.lastModified !== this.state.confession.added ? (
-                            <>
-                              &#9;
-                              <b>Edited:</b> {this.services.normalizeASPDate(this.state.confession.lastModified)}
-                            </>
-                          ) : ""}
-                        </small>
-                        &#9;
-                        <small>
-                          <ReportGmailerrorredIcon onClick={() => {
-                            this.setState({ report: true });
-                          }} fontSize="small" />
-                        </small>
-                      </div>
+        <div className="confession-master-container">
+          {this.state.confession ? (
+            <article className="confession-article">
+
+              {/* --- Post Header: Identity & Actions --- */}
+              <header className="post-header">
+                <div className="author-block">
+                  <div className="main-avatar">
+                    <Face6Icon />
+                  </div>
+                  <div className="author-details">
+                    <span className="author-name">Unsigned Participant</span>
+                    <div className="post-meta">
+                      <time className="meta-time">
+                        {this.services.normalizeASPDate(this.state.confession.added)}
+                      </time>
+
+                      {this.state.confession.lastModified !== this.state.confession.added && (
+                        <span className="edit-badge">
+                          • Edited {this.services.normalizeASPDate(this.state.confession.lastModified)}
+                        </span>
+                      )}
                     </div>
-                    <br />
-                    <h5 className="momo-trust-display-regular">
-                      {this.state.confession.topic}
-                    </h5>{" "}
-                    <br />
-                    <div className="confession-body-font">{this.state.confession.description}</div>
-                    <Comment deletedConfession={this.state.confession.deleted} />
                   </div>
                 </div>
-              </>
-            ) : null}
-          </div>
-        </center>
+
+                <button
+                  className="report-trigger-btn"
+                  onClick={() => this.setState({ report: true })}
+                  title="Report Post"
+                >
+                  <ReportGmailerrorredIcon fontSize="small" />
+                </button>
+              </header>
+
+              {/* --- Post Content --- */}
+              <div className="post-content">
+                <h1 className="post-topic">
+                  {this.state.confession.topic}
+                </h1>
+
+                <div className="post-body">
+                  {this.state.confession.description}
+                </div>
+              </div>
+
+              {/* --- Engagement Section --- */}
+              <section className="discussion-area">
+                <div className="discussion-header">
+                  <h3>Community Discussion</h3>
+                </div>
+                <Comment deletedConfession={this.state.confession.deleted} />
+              </section>
+
+            </article>
+          ) : (
+            <div className="loading-shimmer">Gathering thoughts...</div>
+          )}
+        </div>
       </SideNavPost>
     );
   }
