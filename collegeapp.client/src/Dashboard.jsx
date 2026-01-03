@@ -17,7 +17,6 @@ export default class Dashboard extends Component {
         super(props);
     }
     services = new Services();
-
     state = {
         totalConfession: 1,
         totalPages: 1,
