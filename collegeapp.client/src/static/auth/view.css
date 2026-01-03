@@ -595,6 +595,10 @@ textarea::placeholder {
   resize: vertical;
 }
 
+.thread-textarea-color-dark {
+  color: black !important;
+}
+
 .composer-footer {
   display: flex;
   justify-content: space-between;
@@ -876,27 +880,6 @@ textarea::placeholder {
   min-height: 80px;
   font-family: inherit; /* Ensures it matches your app font */
   transition: color 0.3s ease;
-}
-
-/* --- Light Mode Defaults --- */
-.minimal-textarea.light-mode {
-  color: #1a1a1b;
-  caret-color: #1a1a1b;
-}
-
-.minimal-textarea.light-mode::placeholder {
-  color: #757575;
-}
-
-/* --- Dark Mode Overrides --- */
-.minimal-textarea.dark-mode {
-  color: #ffffff;        /* White text for dark background */
-  caret-color: #3b82f6;  /* Blue typing cursor for better visibility */
-}
-
-.minimal-textarea.dark-mode::placeholder {
-  color: #6b7280;        /* Muted gray placeholder */
-  opacity: 1;            /* Firefox fix */
 }
 
 .reply-actions {

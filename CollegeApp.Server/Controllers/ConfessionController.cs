@@ -170,8 +170,8 @@ namespace CollegeApp.Server.Controllers
 
 
 
-            // in comment for the default cascade behaviour to work
-            // we need to specify foregin key
+            // in comment for the default cascade behavior to work
+            // we need to specify foreign key
 
 
             Comments newComment = new Comments()
@@ -181,7 +181,8 @@ namespace CollegeApp.Server.Controllers
                 ConfessionId = getConfessions.Id,
                 Confessions = getConfessions,
                 profileColor = nameAndProfile.ProfileColor,
-                AnonymousName = nameAndProfile.CommonName
+                AnonymousName = nameAndProfile.CommonName,
+                depth = 1 // since this API is for top level comment!
             };
             var parentComment = _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
@@ -285,6 +286,19 @@ namespace CollegeApp.Server.Controllers
             var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId); // this is the confession in which reply is being sent to
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 
+            // Now let's limit replying in thread to 6 operations
+
+            if (parentComment.depth > 5)
+            {
+                return new JsonResult(BadRequest(
+                    new
+                    {
+                        message = "Reply depth limit exceeded. Please start a new conversation!."
+                    }
+               ));
+            }
+
+
             // Since comment is in different table
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
 
@@ -299,15 +313,25 @@ namespace CollegeApp.Server.Controllers
                 ParentId = parentComment.Id, // setting the parentId to the parent comment's Id, even though cascade delete logic wont work here,
                 ConfessionId = parentComment.ConfessionId, // setting the confessionId to the parent comment's confessionId
                 Confessions = getConfession, // setting the confession to the current confession,
-                // a clever way to use cascade in this sort of like hierarchial structure is to pass in parent reference in the every child comment
+                // a clever way to use cascade in this sort of like hierarchical structure is to pass in parent reference in the every child comment
                 profileColor = nameAndProfile.ProfileColor, // setting the profile color to a random color,
                 AnonymousName = nameAndProfile.CommonName // setting the anonymous name to a random guid
             };
 
-            parentComment.Replies.Add(newComment); // adding the new comment to the parent comment's children list for easy navigation 
-            var updatedParent = _context.Comments.Add(newComment); // adding that to the databse
+            /* 
+                 we want to restrict the number of reply-depth due to performance reason
+                 we will simply tell the client to start the new conversation!
 
-            // sending the reply comment to the websocket
+                we need to figure out a way to backtrack on what depth we are in,
+                if parent is null then then the depth is 1, and in else case depth is parent_depth + 1,
+                since this API is only for replying to threaded comment we can directly increment 
+             */
+            newComment.depth = parentComment.depth + 1; // that should work
+
+            parentComment.Replies.Add(newComment); // adding the new comment to the parent comment's children list for easy navigation 
+            var updatedParent = _context.Comments.Add(newComment); // adding that to the database
+
+            // sending the reply comment to the WebSocket
             await _hubContext.Clients.Group((confessionId).ToString()).SendAsync("ReceiveMessage", new { value = parentComment.Replies, parent = parentComment, order = "thread" });
 
 

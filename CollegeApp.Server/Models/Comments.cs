@@ -30,6 +30,8 @@ namespace CollegeApp.Server.Models
         public string profileColor { get; set; } = string.Empty;
         public Guid AnonymousName { get; set; } = Guid.Empty;
         public bool deleted { get; set; } = false;
+        [JsonIgnore]
+        public int depth { get; set; } // this we will keep track in the backend
     }
 }
 

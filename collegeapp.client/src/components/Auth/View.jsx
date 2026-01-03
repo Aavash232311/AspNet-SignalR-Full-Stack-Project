@@ -493,22 +493,22 @@ class CommentRenderCompoenent extends Component {
 
                   {/* --- Nested Reply Form --- */}
                   {this.state.showReplyThread && (
-                    <div className="reply-form-wrapper">
+                    <div>
                       <form
-                        className="creative-reply-box"
+                        className={`comment-composer ${dark ? 'dark-mode' : 'light-mode'}`}
                         onSubmit={(ev) => this.replyCommentUpload(ev, i.id)}
                       >
                         <textarea
                           placeholder="Write a thoughtful reply..."
                           autoComplete="off"
                           name="comment"
-                          className={`minimal-textarea ${dark ? 'dark-mode' : 'light-mode'}`}
+                          className={`creative-textarea thread-textarea-color-dark`}
                           autoFocus
                         />
                         <div className="reply-actions">
                           <button
                             type="button"
-                            className={`text-btn btn ${dark ? 'dark-mode' : 'light-mode'}`}
+                            className={`text-btn btn`}
                             onClick={() => this.setState({ showReplyThread: false })}
                           >
                             Cancel
@@ -629,13 +629,20 @@ class CommentRecurComponent extends Component {
                   <>
                     {replyCount === 0 ? null : (
                       <>
-                        <a
+                        {/* <a
                           onClick={() => {
                             this.changeDemand(i);
                           }}
                         >
                           thread {replyCount} <AiOutlinePlusCircle />
-                        </a>
+                        </a> */}
+                        <button
+                          className="thread-load-btn"
+                          onClick={() => this.changeDemand(i)}
+                        >
+                          <AiOutlinePlusCircle className="btn-icon" />
+                          <span>View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}</span>
+                        </button>
                         <hr style={{ visibility: "hidden" }} />
                       </>
                     )}
