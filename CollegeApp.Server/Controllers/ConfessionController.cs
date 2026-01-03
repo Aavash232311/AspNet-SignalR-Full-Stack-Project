@@ -287,8 +287,7 @@ namespace CollegeApp.Server.Controllers
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
 
             // Now let's limit replying in thread to 6 operations
-
-            if (parentComment.depth > 5)
+            if ((parentComment.depth + 1) > 5) // the new one will be the 6th comment so
             {
                 return new JsonResult(BadRequest(
                     new
@@ -297,6 +296,7 @@ namespace CollegeApp.Server.Controllers
                     }
                ));
             }
+            Console.WriteLine(parentComment.depth + 1 + "This is the limiting reagent! " + ((parentComment.depth + 1) <= 5).ToString());
 
 
             // Since comment is in different table

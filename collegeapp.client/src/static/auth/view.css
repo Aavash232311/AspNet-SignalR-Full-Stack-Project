@@ -905,9 +905,10 @@ textarea::placeholder {
 .confession-master-container {
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 40px 10px;
   background: var(--page-bg, #f4f7f6);
   min-height: 100vh;
+  width: 100vw;
 }
 
 .theme-dark .confession-master-container {
@@ -1050,7 +1051,7 @@ textarea::placeholder {
 .view-wrapper {
   background-color: var(--bg-color);
   min-height: 100vh;
-  transition: background-color 0.3s ease;
+  transition: view-wrapper-color 0.3s ease;
 }
 
 .confession-master-container {

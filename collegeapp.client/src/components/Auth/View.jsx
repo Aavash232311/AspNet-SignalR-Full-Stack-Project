@@ -397,6 +397,11 @@ class CommentRenderCompoenent extends Component {
           this.setState({ showReplyThread: false });
           return;
         }
+        if (statusCode === 400) {
+          const { value } = response;
+          const { message } = value;
+          alert(message);
+        }
       }).catch((err) => {
         alert(err);
       });
