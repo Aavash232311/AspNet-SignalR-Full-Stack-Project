@@ -107,3 +107,232 @@
     border-bottom: 1px solid black;
     margin: 10px;
 }
+
+
+/* Container & Layout */
+.dashboard-container {
+    padding: 3rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #0a0a0c; /* Deep dark background */
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Glassmorphism Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.live-badge {
+    background: #10b981;
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+.header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    color: #ffffff;
+    letter-spacing: -1px;
+}
+
+.header-subtitle {
+    color: #94a3b8;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Interactive Add Button */
+.btn-add-confession {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-add-confession:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.15);
+    background: #f8fafc;
+}
+
+/* Responsive Grid */
+.confession-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* Modern Card Design */
+.confession-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    padding: 1.8rem;
+    transition: all 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.confession-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #3b82f6;
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card-tag {
+    color: #3b82f6;
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.card-topic {
+    color: #f8fafc;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+}
+
+.card-description {
+    color: #94a3b8;
+    font-style: italic;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Interactive Icon Buttons */
+.action-row {
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1.5rem;
+}
+
+.icon-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    transform: scale(1.1);
+    color: white;
+}
+
+.btn-edit:hover { background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+.btn-delete:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+.btn-heart:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+.pagination-container {
+    margin-top: 4rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* Color Palettes */
+.dashboard-container.light-theme {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-header: rgba(255, 255, 255, 0.8);
+    --text-title: #1e293b;
+    --text-sub: #64748b;
+    --border: rgba(0, 0, 0, 0.1);
+    --btn-bg: rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-container.dark-theme {
+    --bg-main: #0a0a0c;
+    --bg-card: rgba(255, 255, 255, 0.03);
+    --bg-header: rgba(255, 255, 255, 0.03);
+    --text-title: #ffffff;
+    --text-sub: #94a3b8;
+    --border: rgba(255, 255, 255, 0.1);
+    --btn-bg: rgba(255, 255, 255, 0.05);
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Updated Styles using Variables */
+.dashboard-container {
+    background-color: var(--bg-main);
+    padding: 3rem 2rem;
+    min-height: 100vh;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-header {
+    background: var(--bg-header);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    color: var(--text-title);
+    /* ... rest of previous header styles ... */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5rem;
+    border-radius: 24px;
+    margin-bottom: 3rem;
+}
+
+.header-title { color: var(--text-title); font-size: 2.5rem; font-weight: 800; }
+.header-subtitle { color: var(--text-sub); }
+
+.confession-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    border-radius: 22px;
+    padding: 1.8rem;
+    transition: all 0.4s ease;
+}
+
+.card-topic { color: var(--text-title); }
+.card-description { color: var(--text-sub); font-style: italic; }
+
+.icon-button {
+    background: var(--btn-bg);
+    color: var(--text-sub);
+}
+
+.icon-button:hover { color: var(--text-title); }
+
+/* Keep your previous button hover colors (blue/red) as they work for both themes */
+.btn-edit:hover { background: #3b82f6; color: white; }
+.btn-delete:hover { background: #ef4444; color: white; }

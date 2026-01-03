@@ -85,6 +85,8 @@
     font-weight: lighter;
 }
 
+
+
 @media screen and (max-width: 928px) {
 
     /* Make side nav fix, so that it doesn't squeezes stuff  */

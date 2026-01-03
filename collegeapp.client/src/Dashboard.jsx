@@ -72,117 +72,76 @@ export default class Dashboard extends Component {
             <AuthContext.Consumer>
                 {(authFunctions) => {
                     const { dark } = authFunctions;
+
                     const darkPagination = {
                         '& .MuiPaginationItem-root': {
-                            color: dark ? '#fff' : '#ffffffff',
+                            color: dark ? '#fff' : '#1e293b', // Dark blue text in light mode
                             borderColor: dark ? '#555' : '#ccc',
                         },
                         '& .Mui-selected': {
-                            backgroundColor: dark ? '#1976d2' : '#1976d2',
+                            backgroundColor: '#1976d2',
                             color: '#fff',
                         },
-                    }
-                    // change styling accordingly
-                    let mainDivStyle = "";
-                    if (dark) {
-                        mainDivStyle = "p-3 mb-2 bg-dark text-white";
-                    }
+                    };
 
                     return (
                         <SideNavPost>
-                            <center>
-                                <div id="confession-content" className={mainDivStyle}>
-                                    <center>
-                                        <div id="confession-content-align">
-                                            <br />
-                                            <div id="confession-page-label">
-                                                <div>
-                                                    <b style={{ fontSize: "20px" }}>
-                                                        Your confession
-                                                    </b> <br />
-                                                    <span id="site-slogan">
-                                                        A safe space to share, heal, and be heard — anonymously.
-                                                    </span>
-                                                </div>
-                                                <React.Fragment>
-                                                    <NavItem style={{ listStyle: "none" }}>
-                                                        <NavLink
-                                                            tag={Link}
-                                                            to={"/add-confession"}
-                                                        >
-                                                            <div id="add-confession-button">
-                                                                Add confession
-                                                            </div>
-                                                        </NavLink>
-                                                    </NavItem>
-                                                </React.Fragment>
+                            {/* Dynamically toggle the theme class here */}
+                            <div className={`dashboard-container ${dark ? 'dark-theme' : 'light-theme'}`}>
+
+                                <header className="dashboard-header">
+                                    <div>
+                                        <span className="live-badge">Live Feed</span>
+                                        <h1 className="header-title">Your Confessions</h1>
+                                        <p className="header-subtitle">A safe space to share, heal, and be heard — anonymously.</p>
+                                    </div>
+                                    <Link to="/add-confession" className="btn-add-confession">
+                                        <span>+</span> Add Confession
+                                    </Link>
+                                </header>
+
+                                <div className="confession-grid">
+                                    {this.state.confessions !== null && this.state.confessions.map((i, j) => (
+                                        <div key={i.id || j} className="confession-card">
+                                            <div className="card-content">
+                                                <div className="card-tag">#{i.topic.split('#')[1] || (j + 100)}</div>
+                                                <Link to={`/view?topic=${i.id}`} style={{ textDecoration: 'none' }}>
+                                                    <h3 className="card-topic">{i.topic.split('#')[0]}</h3>
+                                                    <p className="card-description">
+                                                        "{this.services.substring(i.description, 90)}..."
+                                                    </p>
+                                                </Link>
                                             </div>
-                                            {this.state.confessions !== null && (
-                                                <>
-                                                    <br />
-                                                    <div>
-                                                        {this.state.confessions.map((i, j) => {
-                                                            return (
-                                                                <React.Fragment key={j}>
-                                                                    <NavItem style={{ listStyle: "none" }}>
-                                                                        <NavLink
-                                                                            tag={Link}
-                                                                            to={`/view?topic=${i.id}`}
-                                                                            style={{ marginTop: "-8px" }}
-                                                                        >
-                                                                            <div className='confession-cards'>
-                                                                                <div className='confession-card-content'>
-                                                                                    <div>
-                                                                                        <h6>
-                                                                                            <b>{i.topic}</b>
-                                                                                        </h6>
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <div>
-                                                                                            <div className='confession-des'>
-                                                                                                <p>
-                                                                                                    <em>
-                                                                                                        {this.services.substring(i.description, 90)}
-                                                                                                    </em>
-                                                                                                </p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <div className='desctiption-and-rest-items'>
-                                                                                        <MdModeEdit onClick={() => {
-                                                                                            window.location.href = `/add-confession?token=${i.id}`;
-                                                                                        }} />
-                                                                                        <MdDeleteOutline onClick={() => { this.deleteConfession(i.id) }} />
-                                                                                        <CiHeart style={{ color: "red" }} />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </NavLink>
-                                                                    </NavItem>
-                                                                </React.Fragment>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                    {this.state.totalPages > 1 ? (<>
-                                                        <hr style={{ visibility: "hidden" }} />
-                                                        <Pagination
-                                                            count={this.state.totalPages}
-                                                            page={this.state.currentPage}
-                                                            color="primary"
-                                                            onChange={this.handleChange}
-                                                            sx={dark === true ? darkPagination : {}}
-                                                        />
-                                                    </>) : null}
-                                                </>
-                                            )}
+
+                                            <div className="action-row">
+                                                <button className="icon-button btn-edit" onClick={() => window.location.href = `/add-confession?token=${i.id}`}>
+                                                    <MdModeEdit size={20} />
+                                                </button>
+                                                <button className="icon-button btn-delete" onClick={() => this.deleteConfession(i.id)}>
+                                                    <MdDeleteOutline size={20} />
+                                                </button>
+                                                <button className="icon-button btn-heart">
+                                                    <CiHeart size={20} style={{ color: '#ef4444' }} />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </center>
+                                    ))}
                                 </div>
-                            </center>
+
+                                {this.state.totalPages > 1 && (
+                                    <div className="pagination-container">
+                                        <Pagination
+                                            count={this.state.totalPages}
+                                            page={this.state.currentPage}
+                                            onChange={this.handleChange}
+                                            color="primary"
+                                            sx={darkPagination}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </SideNavPost>
-                    )
+                    );
                 }}
             </AuthContext.Consumer>
         )
