@@ -133,9 +133,9 @@
 #chat-fourm-frame {
     padding: 10px;
     border-radius: 5px;
-    height: 570px;
+    min-height: 570px;
     z-index: 99999999999999;
-    overflow: auto;
+    height: auto;
 }
 
 /* --- Custom Scrollbar for Chat Forum Frame --- */

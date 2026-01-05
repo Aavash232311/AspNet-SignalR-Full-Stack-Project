@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations;
 
 namespace CollegeApp.Server.Controllers
