@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect } from "react";
 import NotFound from "../components/Auth/useable/404";
 import { jwtDecode } from "jwt-decode";
+import Services from "../utils/utils";
 
 const AuthContext = createContext(undefined);
 
@@ -42,7 +43,8 @@ export const AuthProvider = ({ children }) => {
     const [roles, setRoles] = React.useState([]);
     const [atObject, acObjects] = React.useState(null);
 
-    const getTheme = localStorage.getItem("theme-dark")
+    const getTheme = localStorage.getItem("theme-dark");
+    const services = new Services();
 
     const [dark, setDark] = React.useState(JSON.parse(getTheme));
 
@@ -80,7 +82,6 @@ export const AuthProvider = ({ children }) => {
             },
         }).then((r) => r.json()).then((response) => {
             const { status } = response;
-            console.log(response);
             //login ma error xa hai. when password is correct
             if (status === 200) {
                 /* Store the id token provied by the server, perfectly fine because id_token just
@@ -137,7 +138,6 @@ export const AuthProvider = ({ children }) => {
         isUserAuthenticated().then((r) => {
             setLoggedIn(r.isAuthenticated); // its like waterfall if we write logic under this promise because the execution of a function below depends upon the expecution of the function above
         });
-        refreshTokenFetch();
         // if autheticated let's decode JWT for roles
         const token = localStorage.getItem('access_token');
         if (token !== null) {
@@ -148,10 +148,6 @@ export const AuthProvider = ({ children }) => {
             setRoles(getRoles);
         }
     }, []);
-
-    const refreshTokenFetch = () => {
-
-    }
 
     const [notification, setNotification] = React.useState(null);
 

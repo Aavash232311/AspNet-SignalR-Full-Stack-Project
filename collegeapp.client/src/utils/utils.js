@@ -3,6 +3,8 @@ export default class Services {
     formatString = (str, values) => { return str.replace(/%d/g, () => values.shift()); };
     refreshToken = () => localStorage.getItem("refresh_token");
     accessToken = () => localStorage.getItem("access_token");
+    localEnvDomain = () => "https://localhost:49986";
+
 
     /* asp.net returns default error in little different which does not align with how our error compoenet work,
     errors can be

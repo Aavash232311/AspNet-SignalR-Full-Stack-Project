@@ -18,6 +18,7 @@ import Thread from './Admin/Thread.jsx';
 import { AdminProvider } from './Admin/Admin.jsx';
 import ReportsAdmin from './Admin/Reports.jsx';
 import Notification from './components/Auth/Notification.jsx';
+import "./api/interceptors.js";
 
 createRoot(document.getElementById('root')).render(
   <AdminProvider>

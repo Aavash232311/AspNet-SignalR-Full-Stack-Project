@@ -2,7 +2,6 @@
 using CollegeApp.Server.Service;
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace CollegeApp.Server.Controllers
@@ -15,6 +14,11 @@ namespace CollegeApp.Server.Controllers
         public double expires_in { get; set; }
         public string scope { get; set; } = string.Empty;
         public string token_type { get; set; } = string.Empty;
+        public string refresh_token { get; set; } = string.Empty;
+    }
+
+    public class RefreshToken
+    {
         public string refresh_token { get; set; } = string.Empty;
     }
 
@@ -70,12 +74,15 @@ namespace CollegeApp.Server.Controllers
 
         [Route("refresh-token")]
         [HttpPost]
-        public async Task<IActionResult> RefreshToken(string validRerfeshToken)
+        public async Task<IActionResult> RefreshToken(RefreshToken token)
         {
-            if (validRerfeshToken == null) return new JsonResult(Unauthorized());
+            if (token.refresh_token == null) return new JsonResult(NotFound(new
+            {
+                message = "Error: Invalid form first server!"
+            }));
             try
             {
-                var refresh = await _userManager.RefreshToken(validRerfeshToken);
+                var refresh = await _userManager.RefreshToken(token.refresh_token); // we are pinging a third party server from here
                 return new JsonResult(Ok(refresh)); // that would refresh the token as string.
             }catch (Exception ex)
             {
