@@ -17,8 +17,6 @@ window.fetch = async (...args) => {
                     body: JSON.stringify({ refresh_token: refreshToken })
                 });
 
-                console.log("Refresh response", refreshResponse);
-
                 if (refreshResponse.ok) {
                     // let's retrieve the new access token!
                     const { value } = await refreshResponse.json();
