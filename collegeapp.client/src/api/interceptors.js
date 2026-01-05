@@ -19,7 +19,9 @@ window.fetch = async (...args) => {
 
                 if (refreshResponse.ok) {
                     // let's retrieve the new access token!
-                    const { value } = await refreshResponse.json();
+                    const { value, statusCode } = await refreshResponse.json();
+                     
+                    if (statusCode === 401) return res; // since call is made to a third party server, just return original response, 
                     localStorage.setItem("access_token", value);
 
                     const newConfig = {
