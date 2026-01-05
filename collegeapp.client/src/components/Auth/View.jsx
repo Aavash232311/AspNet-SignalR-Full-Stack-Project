@@ -392,6 +392,7 @@ class CommentRenderCompoenent extends Component {
       .then((r) => r.json())
       .then((response) => {
         const { statusCode } = response;
+        console.log(response);
         if (statusCode === 200) {
           ev.target.reset();
           this.setState({ showReplyThread: false });
@@ -513,7 +514,7 @@ class CommentRenderCompoenent extends Component {
                         <div className="reply-actions">
                           <button
                             type="button"
-                            className={`text-btn btn`}
+                            className={`text-btn btn btn-light`}
                             onClick={() => this.setState({ showReplyThread: false })}
                           >
                             Cancel
@@ -627,20 +628,12 @@ class CommentRecurComponent extends Component {
           {children.length > 0
             ? children.map((i, j) => {
               const { replies, replyCount } = i;
-
               return (
                 <React.Fragment key={j}>
                   <CommentRenderCompoenent obj={i} />
                   <>
-                    {replyCount === 0 ? null : (
+                    {(replyCount === 0 || replyCount === undefined) ? null: (
                       <>
-                        {/* <a
-                          onClick={() => {
-                            this.changeDemand(i);
-                          }}
-                        >
-                          thread {replyCount} <AiOutlinePlusCircle />
-                        </a> */}
                         <button
                           className="thread-load-btn"
                           onClick={() => this.changeDemand(i)}
