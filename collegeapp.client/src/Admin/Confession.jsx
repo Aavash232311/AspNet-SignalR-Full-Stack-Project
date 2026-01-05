@@ -12,7 +12,17 @@ import {
     Paper,
     Chip,
     IconButton,
-    Button
+    Button,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText,
+    // Added Dialog imports for the "Are you sure" popup
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 import Services from "../utils/utils.js";
 import { Auth0User } from "./Thread.jsx";
@@ -23,6 +33,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { TextField, InputAdornment, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LinkIcon from '@mui/icons-material/Link';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const services = new Services();
 
@@ -68,13 +80,15 @@ export default class AdminConfession extends Component {
         totalObjects: 0,
         totalPages: 0,
         userInfo: null,
-        searchQuery: ""
+        searchQuery: "",
+        anchorEl: null,
+        selectedItem: null,
+        openDeleteDialog: false // State to handle the confirmation popup
     }
 
     componentDidMount() {
         this.fetchConfessions(this.state.page);
     }
-
 
     fetchConfessions = (page) => {
         fetch(`/Admin/get-confession-admin?page=${page}`, {
@@ -140,8 +154,49 @@ export default class AdminConfession extends Component {
         })
     }
 
+    handleMenuOpen = (event, item) => {
+        this.setState({ anchorEl: event.currentTarget, selectedItem: item });
+    };
+
+    handleMenuClose = () => {
+        this.setState({ anchorEl: null });
+        // Note: we keep selectedItem until the Dialog closes if it's open
+    };
+
+    // Opens the confirmation popup
+    handleOpenDeleteDialog = () => {
+        this.setState({ openDeleteDialog: true, anchorEl: null });
+    }
+
+    // Closes the confirmation popup
+    handleCloseDeleteDialog = () => {
+        this.setState({ openDeleteDialog: false, selectedItem: null });
+    }
+
+    deleteIconAction = () => {
+        const { id } = this.state.selectedItem;
+        fetch(`/Admin/delete-confession?confId=${id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${services.accessToken()}`,
+            },
+            method: "DELETE"
+        }).then((r) => r.json()).then((response) => {
+            const { statusCode } = response;
+            console.log(response);  
+            if (statusCode === 200) {
+                alert("Confession deleted successfully");
+                this.fetchConfessions(this.state.page);
+                this.handleCloseDeleteDialog(); // Close dialog after success
+                return;
+            }
+        });
+    }
+
     render() {
-        const { confession } = this.state;
+        const { confession, anchorEl, selectedItem, openDeleteDialog } = this.state;
+        const open = Boolean(anchorEl);
+
         if (this.state.userInfo !== null) {
             return (
                 <Admin>
@@ -232,10 +287,8 @@ export default class AdminConfession extends Component {
                                                         <TableCell><strong>Description</strong></TableCell>
                                                         <TableCell><strong>Date Added</strong></TableCell>
                                                         <TableCell><strong>Last Modified</strong></TableCell>
-                                                        <TableCell><strong>User details</strong></TableCell>
-                                                        <TableCell><strong>Copy Id</strong></TableCell>
-                                                        <TableCell><strong>View</strong></TableCell>
                                                         <TableCell><strong>Status</strong></TableCell>
+                                                        <TableCell align="center"><strong>Actions</strong></TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
@@ -257,30 +310,16 @@ export default class AdminConfession extends Component {
                                                                             {new Date(item.lastModified).toLocaleTimeString()}
                                                                         </TableCell>
                                                                         <TableCell>
-                                                                            <IconButton onClick={() => {
-                                                                                this.loadUser(item.userId);
-                                                                            }}>
-                                                                                <AccountCircleIcon />
-                                                                            </IconButton>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <IconButton onClick={() => {
-                                                                                copyId(item.id)
-                                                                            }}>
-                                                                                <ContentCopyIcon fontSize="small" />
-                                                                            </IconButton>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <IconButton onClick={() => window.open(`/view?topic=${item.id}`)}>
-                                                                                <LinkIcon />
-                                                                            </IconButton>
-                                                                        </TableCell>
-                                                                        <TableCell>
                                                                             {item.deleted ? (
                                                                                 <Chip label="Deleted" color="error" size="small" />
                                                                             ) : (
                                                                                 <Chip label="Active" color="success" size="small" />
                                                                             )}
+                                                                        </TableCell>
+                                                                        <TableCell align="center">
+                                                                            <IconButton onClick={(e) => this.handleMenuOpen(e, item)}>
+                                                                                <MoreVertIcon />
+                                                                            </IconButton>
                                                                         </TableCell>
                                                                     </TableRow>
                                                                 </ React.Fragment>
@@ -288,7 +327,7 @@ export default class AdminConfession extends Component {
                                                         })
                                                     ) : (
                                                         <TableRow>
-                                                            <TableCell colSpan={5} align="center">
+                                                            <TableCell colSpan={6} align="center">
                                                                 No confessions found.
                                                             </TableCell>
                                                         </TableRow>
@@ -296,6 +335,56 @@ export default class AdminConfession extends Component {
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
+
+                                        {/* action menu */}
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            open={open}
+                                            onClose={this.handleMenuClose}
+                                        >
+                                            <MenuItem onClick={() => { this.loadUser(selectedItem.userId); this.handleMenuClose(); }}>
+                                                <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
+                                                <ListItemText>User Details</ListItemText>
+                                            </MenuItem>
+                                            <MenuItem onClick={() => { copyId(selectedItem.id); this.handleMenuClose(); }}>
+                                                <ListItemIcon><ContentCopyIcon fontSize="small" /></ListItemIcon>
+                                                <ListItemText>Copy ID</ListItemText>
+                                            </MenuItem>
+                                            <MenuItem onClick={() => { window.open(`/view?topic=${selectedItem.id}`); this.handleMenuClose(); }}>
+                                                <ListItemIcon><LinkIcon fontSize="small" /></ListItemIcon>
+                                                <ListItemText>View</ListItemText>
+                                            </MenuItem>
+                                            <MenuItem sx={{ color: 'error.main' }} onClick={() => { this.handleOpenDeleteDialog(); }}>
+                                                <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                                                <ListItemText>Delete</ListItemText>
+                                            </MenuItem>
+                                        </Menu>
+
+                                        {/* Delete Confirmation Popup */}
+                                        <Dialog
+                                            open={openDeleteDialog}
+                                            onClose={this.handleCloseDeleteDialog}
+                                            aria-labelledby="alert-dialog-title"
+                                            aria-describedby="alert-dialog-description"
+                                        >
+                                            <DialogTitle id="alert-dialog-title">
+                                                {"Confirm Deletion"}
+                                            </DialogTitle>
+                                            <DialogContent>
+                                                <DialogContentText id="alert-dialog-description">
+                                                    Are you sure you want to delete this confession? This action cannot be undone.
+                                                </DialogContentText>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={this.handleCloseDeleteDialog} color="primary">
+                                                    Cancel
+                                                </Button>
+                                                <Button onClick={this.deleteIconAction} color="error" autoFocus variant="contained">
+                                                    Delete
+                                                </Button>
+                                            </DialogActions>
+                                        </Dialog>
+
                                         {
                                             this.state.page > 1 ? <>
                                                 <Pagination

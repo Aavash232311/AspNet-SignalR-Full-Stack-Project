@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace CollegeApp.Server.Controllers
 {
@@ -304,7 +305,7 @@ namespace CollegeApp.Server.Controllers
                 return new JsonResult(BadRequest("Search query cannot be empty."));
             }
 
-            //  base quyery
+            //  base query
             var confessionsQuery = _context.Confessions.AsQueryable();
 
             // we might need to check for a guid search
@@ -369,8 +370,33 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok(results));
         }
 
-
-
+        [Route("delete-confession")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteConfAdmin(Guid confId)
+        {
+            var getConfession =  await _context.Confessions.FirstOrDefaultAsync(c => c.Id == confId);
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return new JsonResult(Unauthorized());
+            if (getConfession == null)
+            {
+                return new JsonResult(NotFound(new { error = "Confession not found", confId }));
+            }
+           
+            _context.ActionLogs.Add(new ActionLog
+            {
+                actionType = "Delete Confession",
+                timeStampAt = DateTime.UtcNow,
+                remarks = $"Confession with ID {confId} deleted by admin {userId}",
+                userId = userId ?? "Unknown"
+            });
+            /* Now we need to figure out what to do with related field.
+             * And see that happens, things related with the cascade delete.
+              sql on the backend reems to remove comment associated with the confession,
+              we need to check if EF does the same.*/
+            _context.Confessions.Remove(getConfession);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
     }
 }
 
