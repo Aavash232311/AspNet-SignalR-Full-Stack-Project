@@ -64,7 +64,7 @@ namespace CollegeApp.Server.Controllers
         [Route("get-confessions")]
         [HttpGet]
         [AllowAnonymous] // This can be used as a public as well as long as it's just get
-        public async Task<IActionResult> GetConfession([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        public IActionResult GetConfession([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
 
             var confessions = _context.Confessions.OrderByDescending(p => p.Added);
@@ -108,7 +108,7 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-admin-report")]
         [HttpGet]
-        public async Task<IActionResult> GetAdminReport([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery] string status = null) // the default status = null
+        public IActionResult GetAdminReport([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery] string status = null) // the default status = null
         {
             var reports = status == "deleted" ?
                     _context.Reports.Where(p => p.isDeleted == true) :
@@ -275,10 +275,10 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-confession-admin")]
         [HttpGet]
-        public async Task<IActionResult> GetConfesionAdmin([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        public IActionResult GetConfessionAdmin([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            /* In the default model I have addded a JsonIgnore due to safety reasons, 
+            /* In the default model I have added a JsonIgnore due to safety reasons, 
              * Now what I want to do is, exempt that case for this particular API. */
             var getConfession = _context.Confessions
                 .Select(obj => new
@@ -393,10 +393,24 @@ namespace CollegeApp.Server.Controllers
              * And see that happens, things related with the cascade delete.
               sql on the backend reems to remove comment associated with the confession,
               we need to check if EF does the same.*/
+
+            /* 
+             We need to account for deleting the reports associated with the conf as well,
+             If comment's are deleted then reports needs to be deleted associated with that comments as well!
+             */
+
+            // since this is the deletion of confession
+
+            _context.Reports.RemoveRange(
+                _context.Reports.Where(
+                x => x.Confession == confId
+            ));
             _context.Confessions.Remove(getConfession);
             await _context.SaveChangesAsync();
             return new JsonResult(Ok());
         }
+
+
     }
 }
 

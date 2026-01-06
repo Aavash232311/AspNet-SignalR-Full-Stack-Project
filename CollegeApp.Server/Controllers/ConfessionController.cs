@@ -296,8 +296,7 @@ namespace CollegeApp.Server.Controllers
                     }
                ));
             }
-            Console.WriteLine(parentComment.depth + 1 + "This is the limiting reagent! " + ((parentComment.depth + 1) <= 5).ToString());
-
+            
 
             // Since comment is in different table
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);
@@ -505,7 +504,7 @@ namespace CollegeApp.Server.Controllers
         /* This api let's user get single comment object */
         [Route("get-comment")]
         [HttpGet]
-        public async Task<IActionResult> getSingleComment(Guid id)
+        public IActionResult getSingleComment(Guid id)
         {
             var comment = _context.Comments.FirstOrDefault(x => x.Id == id);
             return new JsonResult(Ok(new
@@ -517,7 +516,7 @@ namespace CollegeApp.Server.Controllers
         [Route("notification")]
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetNotification(int page)
+        public IActionResult GetNotification(int page)
         {
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; // we will send the notification associated with each user
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" }));
