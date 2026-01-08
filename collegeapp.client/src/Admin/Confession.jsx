@@ -30,7 +30,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Pagination from '@mui/material/Pagination';
 import { AdminContext } from "./Admin.jsx";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { TextField, InputAdornment, Box } from '@mui/material';
+import { TextField, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LinkIcon from '@mui/icons-material/Link';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -183,7 +183,7 @@ export default class AdminConfession extends Component {
             method: "DELETE"
         }).then((r) => r.json()).then((response) => {
             const { statusCode } = response;
-            console.log(response);  
+            console.log(response);
             if (statusCode === 200) {
                 alert("Confession deleted successfully");
                 this.fetchConfessions(this.state.page);
@@ -384,9 +384,9 @@ export default class AdminConfession extends Component {
                                                 </Button>
                                             </DialogActions>
                                         </Dialog>
-
                                         {
-                                            this.state.page > 1 ? <>
+                                            <>
+                                                <hr style={{visibility: "hidden"}} />
                                                 <Pagination
                                                     count={this.state.totalPages}
                                                     page={this.state.page}
@@ -394,7 +394,7 @@ export default class AdminConfession extends Component {
                                                     onChange={this.handleChange}
                                                     sx={dark === true ? darkPagination : {}}
                                                 />
-                                            </> : null
+                                            </>
                                         }
                                     </>
                                 ) : null}

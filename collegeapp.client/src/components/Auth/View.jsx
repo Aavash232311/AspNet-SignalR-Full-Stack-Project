@@ -20,6 +20,8 @@ import AuthContext from "../../auth/auth";
 // as a developer, if your recursion failed in client side, at wrost,
 // all it can do is crash client's browser, but if it failed in server,it will break everything
 export const setParentCommentValue = (rootNode, parentNode, value) => { // we have a problem here
+  if (!rootNode) return; // Added safety check
+
   const parentId = parentNode.id; // we need to find this "id" there and set it
   // search for parent
   const parent = rootNode.find((u) => u.id === parentId);
@@ -31,9 +33,15 @@ export const setParentCommentValue = (rootNode, parentNode, value) => { // we ha
       const currentNode = rootNode[i];
       const { replies } = currentNode;
 
-      setParentCommentValue(replies, parentNode, value);
+      // Added check to ensure replies exists before recursion
+      if (replies && Array.isArray(replies)) {
+        setParentCommentValue(replies, parentNode, value);
+      }
     }
   } else {
+    // Ensure parent.replies exists
+    if (!parent.replies) parent.replies = [];
+    
     const { replies } = parent;
     // here check for dublicates
     if (!(Array.isArray(value))) {
@@ -130,7 +138,8 @@ class Comment extends Component {
       function (valueFromSocket) {
         /* Here we receive message from web socket, and data should be sync because,
         we made it depend upon this compoenent after complex recursive compoenent binding */
-        const { confessions } = this.state;
+        
+        // FIX: Removed 'const { confessions } = this.state;' to avoid closure staleness
         const { value, parent, order } = valueFromSocket;
 
         // we need to hande the case where this is not a reply
@@ -140,20 +149,31 @@ class Comment extends Component {
         equaling we need to comple the array, so passing values as iterable,
         the bug might lie in the way we are assigning the [value] */
         if (order === "thread") {
-          setParentCommentValue(confessions, parent, value);
-          this.setState({ confessions });
-        } else if (order === "top-level" && confessions.length <= stdPaingationSize) {
+          // FIX: Use functional setState and Deep Clone to prevent direct mutation
+          this.setState(prevState => {
+             const confessionsCopy = JSON.parse(JSON.stringify(prevState.confessions));
+             /*
+             Previously there was a bug that happened sometimes when sending a message,
+             even though the recur-funciton worked it never updated the array in state, and
+             message never got rendered. I found out that we needed to create an copy of the array.
+             
+             */
+             setParentCommentValue(confessionsCopy, parent, value);
+             return { confessions: confessionsCopy };
+          });
+        } else if (order === "top-level") { // Removed check '&& confessions.length <= stdPaingationSize' to ensure real-time update
           // then we need to directly add into that confession array;
 
           // we have a problem here, the recursive function wont structure the data correctly
+
+          /* We have a problem here, sometimes when I reply to a thread then the data
+          does not get's rendered. */
           this.setState(prevState => ({
             confessions: [
               parent,
               ...prevState.confessions,
             ]
-          }), () => {
-
-          });
+          }));
         }
       }.bind(this)
     );
@@ -190,8 +210,10 @@ class Comment extends Component {
         if (statusCode === 200) {
           ev.target.reset();
           // now what we want to do is re fetch the comments again, in initial page
-          this.getConfession(1);
-          this.setState({ page: 1 });
+          
+          // FIX: Commented out to prevent race condition. Socket "ReceiveMessage" will handle the update.
+          // this.getConfession(1);
+          // this.setState({ page: 1 });
           return;
         }
       });
@@ -217,28 +239,38 @@ class Comment extends Component {
       .then((response) => {
         const { value, statusCode } = response;
         if (value.length === 0) return;
-        const { confessions } = this.state;
+        
+        // FIX: Removed 'const { confessions } = this.state;'
         if (statusCode === 200) {
-          setParentCommentValue(confessions, parent, value); // there is nth wrong with this function
-          /* 
-          Bug: when trying to expand this thread after navigation around in some pages,
+          
+          // FIX: Use functional setState and Deep Clone.
+          this.setState(prevState => {
+             const confessionsCopy = JSON.parse(JSON.stringify(prevState.confessions));
+             setParentCommentValue(confessionsCopy, parent, value); // there is nth wrong with this function
+             return { confessions: confessionsCopy };
+          });
+          
+          /* Bug: when trying to expand this thread after navigation around in some pages,
           then we will have problem, even though it stays in confession variable, but the state does not want to trigger.
 
           Whatever I try it's not triggiring the change in state! here so I neeed to figure out a way!
           */
+          
+          // The hack below is no longer needed because we are creating a new object reference above
+          /*
           this.setState({
             confessions: []
           }, () => {
             this.setState({ confessions });
           });
+          */
           return;
         }
       });
   };
 
   handleChange = (ev, val) => {
-    /* 
-    Here we have a probme, when we expand any of the thread,
+    /* Here we have a probme, when we expand any of the thread,
     and navigate around the pages we keep on seeing that expanded threead no matter what we do.
 
     Let's understand how this thread expansion works, first of all thread is expanded when we have a change in parent state,
@@ -392,7 +424,6 @@ class CommentRenderCompoenent extends Component {
       .then((r) => r.json())
       .then((response) => {
         const { statusCode } = response;
-        console.log(response);
         if (statusCode === 200) {
           ev.target.reset();
           this.setState({ showReplyThread: false });
@@ -448,16 +479,12 @@ class CommentRenderCompoenent extends Component {
                         </span>
                       </div>
                     </div>
-
-                    {/* Optional: Add a "More Options" menu here if needed later */}
                   </div>
 
-                  {/* --- Body: The Message --- */}
                   <div className="comment-body">
                     {i.comments}
                   </div>
 
-                  {/* --- Footer: Interactive Action Bar --- */}
                   <div className="interaction-bar">
                     <div className="action-pill voting-pill">
                       <button className="vote-btn up btn" aria-label="Upvote">
@@ -576,6 +603,11 @@ class CommentRecurComponent extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // Fixed: Added check to update children when props change (vital for recursion updates)
+    if (prevProps.children !== this.props.children) {
+      this.setState({ children: this.props.children });
+    }
+    
     if (prevState.nextedReply !== this.state.nextedReply) {
 
     }
@@ -625,14 +657,14 @@ class CommentRecurComponent extends Component {
     return (
       <>
         <div className="recur-comment-frame">
-          {children.length > 0
+          {children && children.length > 0
             ? children.map((i, j) => {
               const { replies, replyCount } = i;
               return (
                 <React.Fragment key={j}>
                   <CommentRenderCompoenent obj={i} />
                   <>
-                    {(replyCount === 0 || replyCount === undefined) ? null: (
+                    {(replyCount === 0 || replyCount === undefined) ? null : (
                       <>
                         <button
                           className="thread-load-btn"
@@ -644,7 +676,7 @@ class CommentRecurComponent extends Component {
                         <hr style={{ visibility: "hidden" }} />
                       </>
                     )}
-                    {replies.length > 0 && (
+                    {replies && replies.length > 0 && (
                       <>
 
                         <CommentRecurComponent
