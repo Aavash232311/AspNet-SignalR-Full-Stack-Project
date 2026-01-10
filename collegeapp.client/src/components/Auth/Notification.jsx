@@ -8,7 +8,9 @@ import {
     Typography,
     Box,
     Paper,
-    IconButton
+    IconButton,
+    Tooltip,
+    Zoom
 } from '@mui/material';
 import FeedIcon from '@mui/icons-material/Feed';
 import AuthContext from "../../auth/auth";
@@ -16,7 +18,7 @@ import SideNavPost from "./useable/SideNavPost";
 import Services from "../../utils/utils";
 import ClearIcon from '@mui/icons-material/Clear';
 import Pagination from '@mui/material/Pagination';
-
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 class Notification extends Component {
 
@@ -26,7 +28,6 @@ class Notification extends Component {
 
     state = {
         page: 1,
-        totalObjects: 1,
         totalObjects: 1,
         notification: []
     }
@@ -69,13 +70,9 @@ class Notification extends Component {
         }).then((r) => r.json()).then((response) => {
             const { statusCode } = response;
             if (statusCode === 200) {
-                // what if you want to remove the confession and you are
-                // like on the edge of page and you have only one item remaining in the page
-                // you would want to go back to another page!
-
-                if (this.state.notification.length <= 1 && this.state.page > 1) { // you can't get things done for page 0
+                if (this.state.notification.length <= 1 && this.state.page > 1) { 
                     this.getNotifications(this.state.page - 1);
-                    return; // this bug is all around!
+                    return; 
                 }
                 this.getNotifications(this.state.page);
                 return;
@@ -83,7 +80,6 @@ class Notification extends Component {
             alert("Something wen't wrong!");
         })
     }
-
 
     handleChange = (ev, val) => {
         this.getNotifications(val);
@@ -94,10 +90,8 @@ class Notification extends Component {
 
     componentDidUpdate() {
         const { notification } = this.context;
-
         if (notification !== null) {
             const isNew = !this.state.notification.some(x => x.id === notification.id);
-
             if (isNew) {
                 this.setState((prevState) => ({
                     notification: [notification, ...prevState.notification]
@@ -107,145 +101,152 @@ class Notification extends Component {
     }
 
     render() {
-        const sampleNotification = {
-            id: "550e8400-e29b-41d4-a716-446655440000",
-            title: "New Feed Update",
-            message: "A new post has been added to your primary feed. Check it out now!",
-            createdAt: "2025-12-24T16:14:00Z",
-            isRead: false,
-            type: "feed",
-            commentId: null,
-            userId: "user_123"
-        };
-
-        const isUnread = !sampleNotification.isRead;
-
-        /* Now there are two case in this situatation.
-           
-            If the user is in another page, that is using the same side nav then, he will click on this page
-            and then componenentDidMount() get's called which will re-fetch data from the server.
-
-            But what if user is in the same page. We need to add the notification accordingly.
-        
-        */
-
-
         return (
             <AuthContext.Consumer>
                 {(prop) => {
                     const { dark } = prop;
-                    const darkPagination = {
-                        '& .MuiPaginationItem-root': {
-                            color: dark ? '#fff' : '#ffffffff',
-                            borderColor: dark ? '#555' : '#ccc',
-                        },
-                        '& .Mui-selected': {
-                            backgroundColor: dark ? '#1976d2' : '#1976d2',
-                            color: '#fff',
-                        },
-                    }
+                    
                     return (
-                        <>
-                            <SideNavPost>
+                        <SideNavPost>
+                            <Box sx={{ 
+                                maxWidth: 800, 
+                                margin: '0 auto', 
+                                px: { xs: 2, md: 4 }, 
+                                py: 6,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center'
+                            }}>
+                                
+                                {/* Interactive Header */}
+                                <Box sx={{ textAlign: 'center', mb: 6 }}>
+                                    <Avatar sx={{ 
+                                        m: '0 auto', mb: 2, 
+                                        bgcolor: 'primary.main',
+                                        width: 56, height: 56,
+                                        boxShadow: '0 0 20px rgba(25, 118, 210, 0.5)'
+                                    }}>
+                                        <NotificationsActiveIcon />
+                                    </Avatar>
+                                    <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: '-2px' }}>
+                                        Activity <span style={{ color: '#1976d2' }}>Feed</span>
+                                    </Typography>
+                                    <Typography variant="body1" color="text.secondary">
+                                        You have {this.state.totalObjects} moments to catch up on.
+                                    </Typography>
+                                </Box>
+
                                 {this.state.notification.length > 0 ? (
-                                    <>
-                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                                            Notifications
-                                        </Typography>
+                                    <Box sx={{ 
+                                        display: 'grid', 
+                                        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+                                        gap: 3, 
+                                        width: '100%' 
+                                    }}>
                                         {this.state.notification.map((object, index) => {
+                                            const isUnread = true; // Logic check would go here
+
                                             return (
-                                                <React.Fragment key={index}>
+                                                <Zoom in style={{ transitionDelay: `${index * 50}ms` }} key={index}>
                                                     <Paper
-                                                        elevation={3}
+                                                        elevation={0}
                                                         sx={{
-                                                            maxWidth: 450,
-                                                            m: 2, // Margin to prevent sticking to edges
-                                                            borderRadius: 2,
+                                                            p: 0,
+                                                            borderRadius: 5,
+                                                            position: 'relative',
                                                             overflow: 'hidden',
-                                                            // Visual accent: blue bar on the left for unread notifications
-                                                            borderLeft: isUnread ? '5px solid' : '1px solid',
+                                                            bgcolor: dark ? '#1a1a1a' : '#fff',
+                                                            border: '2px solid',
                                                             borderColor: isUnread ? 'primary.main' : 'divider',
-                                                            bgcolor: 'background.paper',
-                                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                                            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                            cursor: 'pointer',
                                                             '&:hover': {
-                                                                transform: 'translateY(-2px)',
-                                                                boxShadow: 6,
+                                                                transform: 'translateY(-8px) rotate(1deg)',
+                                                                boxShadow: dark 
+                                                                    ? '0 20px 40px rgba(0,0,0,0.6)' 
+                                                                    : '0 20px 40px rgba(0,0,0,0.1)',
                                                             }
                                                         }}
                                                     >
-                                                        <ListItem
-                                                            alignItems="flex-start"
-                                                            secondaryAction={
-                                                                <IconButton onClick={() => {
-                                                                    this.clearNotification(object.id);
-                                                                }} edge="end" size="small">
-                                                                    <ClearIcon />
-                                                                </IconButton>
-                                                            }
-                                                            sx={{ py: 2 }}
-                                                        >
-                                                            <ListItemAvatar sx={{ minWidth: 56 }}>
-                                                                <Avatar
-                                                                    sx={{
-                                                                        bgcolor: isUnread ? 'primary.light' : 'grey.200',
-                                                                        color: isUnread ? 'primary.main' : 'grey.600',
-                                                                        width: 42,
-                                                                        height: 42
-                                                                    }}
-                                                                >
+                                                        {/* Status Accent Gradient */}
+                                                        {isUnread && (
+                                                            <Box sx={{ 
+                                                                height: 4, 
+                                                                width: '100%', 
+                                                                background: 'linear-gradient(90deg, #1976d2, #64b5f6)' 
+                                                            }} />
+                                                        )}
+
+                                                        <ListItem alignItems="flex-start" sx={{ p: 3 }}>
+                                                            <ListItemAvatar>
+                                                                <Avatar sx={{ 
+                                                                    bgcolor: dark ? '#333' : '#f0f0f0', 
+                                                                    color: 'primary.main',
+                                                                    width: 50, height: 50
+                                                                }}>
                                                                     <FeedIcon />
                                                                 </Avatar>
                                                             </ListItemAvatar>
 
                                                             <ListItemText
                                                                 primary={
-                                                                    <Box display="flex" justifyContent="space-between" mb={0.5}>
-                                                                        <Typography variant="subtitle2" fontWeight={700}>
-                                                                            {object.title}
-                                                                        </Typography>
-                                                                        <Typography variant="caption" color="text.secondary">
-                                                                            {this.services.aspDateHourMinutes(object.createdAt)}
-                                                                        </Typography>
-                                                                    </Box>
+                                                                    <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 0.5 }}>
+                                                                        {object.title}
+                                                                    </Typography>
                                                                 }
                                                                 secondary={
-                                                                    <Typography
-                                                                        variant="body2"
-                                                                        color="text.secondary"
-                                                                        lineHeight={1.4}
-                                                                        sx={{
-                                                                            display: '-webkit-box',
-                                                                            WebkitLineClamp: 2,
-                                                                            WebkitBoxOrient: 'vertical',
-                                                                            overflow: 'hidden',
-                                                                        }}
-                                                                    >
-                                                                        {object.message}
-                                                                    </Typography>
+                                                                    <>
+                                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                                                            {object.message}
+                                                                        </Typography>
+                                                                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                                            <Typography variant="caption" sx={{ fontWeight: 600, opacity: 0.6 }}>
+                                                                                {this.services.aspDateHourMinutes(object.createdAt)}
+                                                                            </Typography>
+                                                                            <Tooltip title="Dismiss">
+                                                                                <IconButton 
+                                                                                    size="small" 
+                                                                                    onClick={() => this.clearNotification(object.id)}
+                                                                                    sx={{ bgcolor: 'action.hover' }}
+                                                                                >
+                                                                                    <ClearIcon fontSize="inherit" />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+                                                                        </Box>
+                                                                    </>
                                                                 }
                                                             />
                                                         </ListItem>
                                                     </Paper>
-                                                </React.Fragment>
+                                                </Zoom>
                                             )
                                         })}
-                                        <Pagination
-                                            count={this.state.totalPages}
-                                            page={this.state.page}
-                                            color="primary"
-                                            onChange={this.handleChange}
-                                            sx={dark === true ? darkPagination : {}}
-                                        />
-                                    </>
+                                    </Box>
                                 ) : (
-                                    <>
-                                        <Typography variant="h6" style={{ flexGrow: 1 }}>
-                                            No notifications for you!
-                                        </Typography>
-                                    </>
+                                    <Typography variant="h5" color="text.disabled" sx={{ mt: 10 }}>
+                                        Empty Inbox — Peace of mind!
+                                    </Typography>
                                 )}
-                            </SideNavPost>
-                        </>
+
+                                {/* Floating Pagination */}
+                                <Box sx={{ mt: 8 }}>
+                                    <Pagination
+                                        count={this.state.totalPages}
+                                        page={this.state.page}
+                                        onChange={this.handleChange}
+                                        size="large"
+                                        color="primary"
+                                        sx={{
+                                            '& .MuiPaginationItem-root': {
+                                                borderRadius: 3,
+                                                fontWeight: 700,
+                                                '&.Mui-selected': { boxShadow: '0 4px 10px rgba(25,118,210,0.4)' }
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                        </SideNavPost>
                     )
                 }}
             </AuthContext.Consumer>
