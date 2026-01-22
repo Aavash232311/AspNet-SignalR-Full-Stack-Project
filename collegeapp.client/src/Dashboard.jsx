@@ -45,22 +45,27 @@ export default class Dashboard extends Component {
         this.getConfession(1);
     }
     deleteConfession(id) {
-        fetch(`Confession/DeleteConfession?id=${id}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.services.accessToken()}`,
-            },
-            method: "delete"
-        }).then(r => r.json()).then((response) => {
-            const { statusCode } = response;
-            if (statusCode === 200) {
-                this.setState({ confessions: this.state.confessions.filter((i) => i.id !== id) }, () => {
-                    if (this.state.confessions === null) {
-                        this.getConfession(1);
-                    }
-                });
-            }
-        });
+        // add a confirmation dialog here, no fancy UI 
+        const confirmed = window.confirm("Are you sure you want to delete this confession? Please note that all associated threads and comments will be deleted as well.");
+        
+        if (confirmed) {
+            fetch(`Confession/DeleteConfession?id=${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.services.accessToken()}`,
+                },
+                method: "delete"
+            }).then(r => r.json()).then((response) => {
+                const { statusCode } = response;
+                if (statusCode === 200) {
+                    this.setState({ confessions: this.state.confessions.filter((i) => i.id !== id) }, () => {
+                        if (this.state.confessions === null || this.state.confessions.length === 0) {
+                            this.getConfession(1);
+                        }
+                    });
+                }
+            });
+        }
     }
     handleChange = (ev, val) => {
         this.getConfession(val);
