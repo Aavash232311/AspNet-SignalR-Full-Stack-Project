@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import { Admin, AdminContext } from "./Admin.jsx";
 import {
     Box,
@@ -13,7 +13,12 @@ import {
     TableCell,
     Paper,
     Toolbar,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from '@mui/material';
 import Services from "../utils/utils.js";
 import Pagination from '@mui/material/Pagination';
@@ -31,60 +36,93 @@ const services = new Services();
 
 export function StickyHeadTable(args) {
     const { props } = args;
+    const { columns, rows } = props;
 
-    const { columns, pageNum, pageSize, rows } = props;
+    const [open, setOpen] = useState(false);
+    const [threadToDelete, setThreadToDelete] = useState(null);
 
     const viewContent = (objectId) => {
         const { props } = args;
         const { viewPage } = props;
         viewPage(objectId);
     }
+
+
+    const handleClickOpen = (id) => {
+        setThreadToDelete(id);
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setThreadToDelete(null);
+    };
+
+    const confirmDelete = async () => {
+        if (!threadToDelete) return;
+
+        try {
+            var res = await fetch(`/Admin/delete-thread-admin?threadId=${threadToDelete}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${services.accessToken()}`,
+                },
+                method: "DELETE"
+            });
+
+            if (res.ok) {
+                console.log("Deleted successfully");
+                handleClose();
+                // pass the databack to the parent component to refresh the table
+                // I am too old for stuff like that!
+                props.fetch();
+            } else {
+                const errorData = await res.json();
+                alert("Error: " + errorData.message);
+            }
+        } catch (err) {
+            console.error("Delete failed", err);
+        }
+    };
+
     return (
         <AdminContext.Consumer>
             {(adminProperties) => {
                 return (
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                        <TableContainer sx={{ maxHeight: 440, overflowX: "auto" }}>
-                            <Table stickyHeader aria-label="sticky table">
-                                <TableHead>
-                                    <TableRow>
-                                        {columns.map((column) => (
-                                            <TableCell
-                                                key={column.id}
-                                                align={column.align}
-                                                style={{ minWidth: column.minWidth }}
-                                            >
-                                                {column.label}
-                                            </TableCell>
-                                        ))}
-                                        <TableCell>
-                                            Action
-                                        </TableCell>
-                                        <TableCell>
-                                            View
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rows
-                                        .map((row) => {
+                    <> {/* Wrapped in Fragment to include Dialog */}
+                        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                            <TableContainer sx={{ maxHeight: 440, overflowX: "auto" }}>
+                                <Table stickyHeader aria-label="sticky table">
+                                    <TableHead>
+                                        <TableRow>
+                                            {columns.map((column) => (
+                                                <TableCell
+                                                    key={column.id}
+                                                    align={column.align}
+                                                    style={{ minWidth: column.minWidth }}
+                                                >
+                                                    {column.label}
+                                                </TableCell>
+                                            ))}
+                                            <TableCell>Action</TableCell>
+                                            <TableCell>View</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {rows.map((row) => {
                                             return (
                                                 <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                                                     {columns.map((column) => {
-                                                        /* Here in this MUI table things are done little bit different,
-                                                        We are iterating over each rows, and we pick the value based on
-                                                        the column header to put the stuffs in, for that we need to labal a reference
-                                                         */
                                                         const value = row[column.id];
                                                         return (
                                                             <TableCell key={column.id} align={column.align}>
-                                                                {/* {services.substring(services, 20)} */}
                                                                 {column.id === "comments" ? services.substring(value, 20) : services.substring(value, 10)}
                                                             </TableCell>
                                                         );
                                                     })}
                                                     <TableCell>
-                                                        <button className="btn btn-outline-danger btn-sm">
+                                                        {/* Updated to open popup */}
+                                                        <button onClick={() => { handleClickOpen(row["id"]) }} className="btn btn-outline-danger btn-sm">
                                                             Delete
                                                         </button>
                                                     </TableCell>
@@ -96,10 +134,35 @@ export function StickyHeadTable(args) {
                                                 </TableRow>
                                             );
                                         })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Paper>
+
+                        {/* --- The Confirmation Popup --- */}
+                        <Dialog
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogTitle id="alert-dialog-title">
+                                {"Delete Thread?"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    Are you sure you want to delete this thread? This will 
+                                    <strong> permanently delete all child replies and comments</strong> associated with it.
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleClose}>Cancel</Button>
+                                <Button onClick={confirmDelete} color="error" autoFocus>
+                                    Confirm Delete
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </>
                 )
             }}
         </AdminContext.Consumer>
@@ -141,6 +204,10 @@ export default class Thread extends Component {
     }
 
     async componentDidMount() {
+        this.getThreads(this.state.page);
+    }
+
+    refetchData = () => {
         this.getThreads(this.state.page);
     }
 
@@ -221,7 +288,8 @@ export default class Thread extends Component {
             pageNum: this.state.page,
             pageSize: this.state.pageSize,
             rows,
-            viewPage: this.view
+            viewPage: this.view,
+            fetch: this.refetchData
         }
 
         const searchThread = async () => {
@@ -313,7 +381,7 @@ export default class Thread extends Component {
 
                                 {this.state.viewContant === null &&
                                     (<>
-                                        {this.state.threads.length > 0 && <StickyHeadTable className="thread-admin-table" props={tableProps} />}
+                                        {this.state.threads.length > 0 && <StickyHeadTable  className="thread-admin-table" props={tableProps} />}
                                         {this.state.threads.length > 0 && (
                                             <>
                                                 <hr style={{ visibility: "hidden" }} />

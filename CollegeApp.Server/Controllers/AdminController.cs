@@ -410,7 +410,32 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok());
         }
 
+        [Route("delete-thread-admin")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteThreadAsync(Guid threadId)
+        {
+            var getThread = await _context.Comments
+                .Include(r => r.Replies)
+                .FirstOrDefaultAsync(Comments => Comments.Id == threadId);
+            if (getThread == null) return new JsonResult(NotFound(
+                new
+                {
+                    message = "Thread not found",
+                }
+            ));
 
+            _context.Comments.Remove(getThread);
+            // add action to admin log
+            _context.ActionLogs.Add(new ActionLog
+            {
+                actionType = "Delete Thread",
+                timeStampAt = DateTime.UtcNow,
+                remarks = $"Thread with ID {threadId} deleted by admin",
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown"
+            });
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
     }
 }
 

@@ -24,7 +24,7 @@ namespace CollegeApp.Server.Data
                 .HasMany(e => e.Replies)
                 .WithOne(e => e.Parent)
                 .HasForeignKey(e => e.ParentId)
-                .OnDelete(DeleteBehavior.NoAction)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired(false);
         }
         /* 
