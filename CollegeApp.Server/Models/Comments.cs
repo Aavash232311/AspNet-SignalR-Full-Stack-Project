@@ -40,5 +40,4 @@ namespace CollegeApp.Server.Models
 /*
  Learned this using two different ways, first used AI, it couldn't figure out
 second read the docs got the answer.
-
  */
