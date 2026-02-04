@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using CollegeApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +26,7 @@ builder.AddServiceDefaults();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
-        policy.RequireClaim("https://localhost:49986/claims/roles", "Superuser"));
+        policy.RequireClaim("roles/roles", "Superuser"));
 });
 
 
