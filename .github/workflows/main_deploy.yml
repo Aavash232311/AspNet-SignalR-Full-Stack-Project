@@ -29,6 +29,7 @@ jobs:
     - name: Install EF Core CLI
       run: dotnet tool install --global dotnet-ef
 
+    # Runs migrations using the connection string secret
     - name: Apply Database Migrations
       run: dotnet ef database update --project CollegeApp.Server/CollegeApp.Server.csproj
       env:
@@ -37,9 +38,9 @@ jobs:
     - name: Publish App
       run: dotnet publish -c Release -o ${{ env.PACKAGE_PATH }}
 
-
+    # Uses the Publish Profile secret you just added
     - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v3
+      uses: azure/webapps-deploy@v2
       with:
         app-name: 'newapp'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
