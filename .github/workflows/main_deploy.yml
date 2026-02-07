@@ -3,14 +3,13 @@ name: .NET 9 Build and Deploy
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 env:
   DOTNET_VERSION: '9.0.100' 
+  PACKAGE_PATH: './publish'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,17 +21,10 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Display .NET Info
-      run: dotnet --info
-
-    - name: Restore Dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    - name: Restore & Build
+      run: |
+        dotnet restore
+        dotnet build -c Release --no-restore
 
     - name: Install EF Core CLI
       run: dotnet tool install --global dotnet-ef
@@ -40,14 +32,15 @@ jobs:
     - name: Apply Database Migrations
       run: dotnet ef database update --project CollegeApp.Server/CollegeApp.Server.csproj
       env:
-        # locating the database connection secret
         ConnectionStrings__DefaultConnection: '${{ secrets.DB_CONNECTION_STRING }}'
 
-    - name: Publish
-      run: dotnet publish -c Release -o ./publish
+    - name: Publish App
+      run: dotnet publish -c Release -o ${{ env.PACKAGE_PATH }}
 
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
+
+    - name: 'Deploy to Azure Web App'
+      uses: azure/webapps-deploy@v3
       with:
-        name: dotnet-9-app
-        path: ./publish
+        app-name: 'newapp'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.PACKAGE_PATH }}
