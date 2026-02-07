@@ -32,6 +32,10 @@ jobs:
     - name: Apply Database Migrations
       run: dotnet ef database update --project CollegeApp.Server/CollegeApp.Server.csproj
       env:
+<<<<<<< HEAD
+=======
+        # locating the database connection secret, 
+>>>>>>> 91defebf5e74b2a6896ec37f1fe1fb6e3ca060e2
         ConnectionStrings__DefaultConnection: '${{ secrets.DB_CONNECTION_STRING }}'
 
     - name: Publish App

@@ -42,7 +42,6 @@ namespace CollegeApp.Server.Controllers
 
     [Route("[controller]")]
     [ApiController]
-    [AllowAnonymous]
     [Authorize(Policy = "AdminOnly")]
     public class AdminController : ControllerBase
     {
@@ -63,7 +62,6 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-confessions")]
         [HttpGet]
-        [AllowAnonymous] // This can be used as a public as well as long as it's just get
         public IActionResult GetConfession([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
 
@@ -75,7 +73,6 @@ namespace CollegeApp.Server.Controllers
 
         [Route("recent-threads")]
         [HttpGet]
-        [AllowAnonymous] // the api is there in confession but works for particular confession only
         public IActionResult GetThreads
             ([FromQuery, Range(1, int.MaxValue)] int page = 1,
              [FromQuery, Range(1, int.MaxValue)] int pageSize = 10) // the default pageSize = 10
@@ -92,7 +89,6 @@ namespace CollegeApp.Server.Controllers
 
         [Route("get-clientinfo")]
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> GetUserInfo(string auth0Id)
         {
             if (string.IsNullOrEmpty(auth0Id))

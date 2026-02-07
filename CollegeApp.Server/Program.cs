@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using CollegeApp.Server.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,17 +16,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 /* Auth 0 configuration */
 var domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
 builder.AddServiceDefaults();
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//.AddJwtBearer(options =>
-//{
-
-//});
-
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
-        policy.RequireClaim("https://localhost:49986/claims/roles", "Superuser"));
+        policy.RequireClaim("roles/roles", "Superuser"));
 });
 
 
