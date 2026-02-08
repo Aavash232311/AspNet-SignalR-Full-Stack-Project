@@ -108,6 +108,8 @@ app.MapHub<NotificationHub>("/notificationHub");
 
 string ImagePath = string.Empty;
 string physicalPath = string.Empty;
+
+
 if (app.Environment.IsProduction())
 {
     ImagePath = "/home/site/wwwroot/image";
@@ -119,10 +121,12 @@ if (app.Environment.IsProduction())
 }
 else
 {
+
     ImagePath = "/images"; // we don't track these in development, make sure to create one before running the server.
-    if (!Directory.Exists(ImagePath))
+    
+    if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "images")))
     {
-        Directory.CreateDirectory(ImagePath);
+       Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "images").ToString());
     }
     physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
 }
