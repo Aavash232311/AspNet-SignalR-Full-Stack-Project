@@ -109,26 +109,27 @@ app.MapHub<NotificationHub>("/notificationHub");
 string ImagePath = string.Empty;
 string physicalPath = string.Empty;
 
-
 if (app.Environment.IsProduction())
 {
-    ImagePath = "/home/site/wwwroot/image";
-    if (!Directory.Exists(ImagePath))
+
+    physicalPath = Path.Combine("/home/site/wwwroot", "images");
+    ImagePath = "/images"; 
+    
+    if (!Directory.Exists(physicalPath))
     {
-        Directory.CreateDirectory(ImagePath);
+        Directory.CreateDirectory(physicalPath);
     }
-    physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "image");
 }
 else
 {
 
-    ImagePath = "/images"; // we don't track these in development, make sure to create one before running the server.
+    physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+    ImagePath = "/images";
     
-    if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "images")))
+    if (!Directory.Exists(physicalPath))
     {
-       Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "images").ToString());
+        Directory.CreateDirectory(physicalPath);
     }
-    physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
 }
 
 app.UseStaticFiles(new StaticFileOptions
