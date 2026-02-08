@@ -102,12 +102,37 @@ var app = builder.Build();
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<NotificationHub>("/notificationHub");
 
+/*  In production, azure defaults to run from package, I am seeing some issues,
+ whenever I SSL, I can't see the actual project directory, let's try using
+ different image directory in production. */
+
+string ImagePath = string.Empty;
+string physicalPath = string.Empty;
+if (app.Environment.IsProduction())
+{
+    ImagePath = "/home/site/wwwroot/image";
+    if (!Directory.Exists(ImagePath))
+    {
+        Directory.CreateDirectory(ImagePath);
+    }
+    physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "image");
+}
+else
+{
+    ImagePath = "/images"; // we don't track these in development, make sure to create one before running the server.
+    if (!Directory.Exists(ImagePath))
+    {
+        Directory.CreateDirectory(ImagePath);
+    }
+    physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "images");
+}
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "images")),
-    RequestPath = "/images"
+    FileProvider = new PhysicalFileProvider(physicalPath),
+    RequestPath = ImagePath
 });
+
 
 app.MapDefaultEndpoints();
 

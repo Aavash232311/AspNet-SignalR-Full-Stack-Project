@@ -44,4 +44,4 @@ jobs:
       with:
         app-name: 'newapp'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.PACKAGE_PATH }}
+        package: ${{ env.PACKAGE_PATH }} # this points to ./publish from this the Azure defaults to run from package to save performace, we have images folder to saving images to the reason server is crashing is this
