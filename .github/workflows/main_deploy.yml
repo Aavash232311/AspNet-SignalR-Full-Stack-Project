@@ -29,7 +29,7 @@ jobs:
     - name: Install EF Core CLI
       run: dotnet tool install --global dotnet-ef
 
-    # Runs migrations using the connection string secret
+    # runs migrations using the connection string secret
     - name: Apply Database Migrations
       run: dotnet ef database update --project CollegeApp.Server/CollegeApp.Server.csproj
       env:
@@ -38,10 +38,24 @@ jobs:
     - name: Publish App
       run: dotnet publish -c Release -o ${{ env.PACKAGE_PATH }}
 
-    # Uses the Publish Profile secret you just added
+    # deploy to Azure Web App
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'newapp'
+        app-name: 'newapp-aqdzfyd0cze4d2h4'  
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.PACKAGE_PATH }} # this points to ./publish from this the Azure defaults to run from package to save performace, we have images folder to saving images to the reason server is crashing is this
+        package: ${{ env.PACKAGE_PATH }}
+
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set Connection String in Azure App Service
+      run: |
+        az webapp config connection-string set \
+          --name newapp-aqdzfyd0cze4d2h4 \
+          --resource-group confession_group \
+          --connection-string-type PostgreSQL \
+          --settings DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}"
