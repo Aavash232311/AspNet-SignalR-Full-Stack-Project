@@ -17,6 +17,16 @@ export const PERMISSIONS = {
 
 export const ProtectedRoute = ({ children, allowedRoles }) => {
     // allowedRoles the roles which are allowed to vew the wrapped up content,
+    // what I want to do here is if the roles is empty array, we user can access
+    // the compoenent but they need to be authenticated, if the allowedRoles is not empty array.
+
+    if (allowedRoles.length === 0) {
+        const token = localStorage.getItem('access_token'); 
+
+        if (!token) {
+            return <NotFound />;
+        }
+    }
 
     const token = localStorage.getItem('access_token'); // or wherever you store it
 

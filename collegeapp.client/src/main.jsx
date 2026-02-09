@@ -29,12 +29,44 @@ createRoot(document.getElementById('root')).render(
             <Route path="/" element={<App />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add-confession" element={<Confessions />} />
-            <Route path="/view" element={<View />} />
+
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={[]}>
+                <Dashboard />
+              </ProtectedRoute>
+            }>
+            </Route>
+
+            <Route path="/add-confession" element={
+              <ProtectedRoute allowedRoles={[]}>
+                <Confessions />
+              </ProtectedRoute>
+            }>
+            </Route>
+
+            <Route path="/view" element={
+              <ProtectedRoute allowedRoles={[]}>
+                <View />
+              </ProtectedRoute>
+            }>
+            </Route>
+
+
             <Route path="/not-found" element={<NotFound />} />
-            <Route path="/admin-reports" element={<ReportsAdmin />} />
-            <Route path='/notification' element={<Notification />}></Route>
+
+            <Route path="/admin-reports" element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <ReportsAdmin />
+              </ProtectedRoute>
+            }>
+            </Route>
+
+            <Route path='/notification' element={
+              <ProtectedRoute allowedRoles={[]}>
+                <Notification />
+              </ProtectedRoute>
+            }>
+            </Route>
 
             <Route path="/su-route-root" element={
               <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
