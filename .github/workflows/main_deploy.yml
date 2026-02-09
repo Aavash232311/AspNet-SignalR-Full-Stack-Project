@@ -45,17 +45,3 @@ jobs:
         app-name: 'newapp'  
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.PACKAGE_PATH }}
-
-      # Since github workflow connects to the postgrace db easily, this is for the azure to connect.
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Set Connection String in Azure App Service
-      run: |
-        az webapp config connection-string set \
-          --name newapp \
-          --resource-group confession_group \
-          --connection-string-type PostgreSQL \
-          --settings DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}"
