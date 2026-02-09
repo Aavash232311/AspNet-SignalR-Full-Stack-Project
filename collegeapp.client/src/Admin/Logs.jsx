@@ -17,11 +17,14 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Button
+    Button,
+    TextField,
+    Grid
 } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 import { AdminContext } from './Admin';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 export default class AdminLogs extends Component {
     services = new Services();
@@ -34,6 +37,10 @@ export default class AdminLogs extends Component {
         this.handleDeleteClick = this.handleDeleteClick.bind(this);
         this.handleDeleteConfirm = this.handleDeleteConfirm.bind(this);
         this.handleDeleteCancel = this.handleDeleteCancel.bind(this);
+        this.handleStartDateChange = this.handleStartDateChange.bind(this);
+        this.handleEndDateChange = this.handleEndDateChange.bind(this);
+        this.handleFilterApply = this.handleFilterApply.bind(this);
+        this.handleFilterClear = this.handleFilterClear.bind(this);
     }
 
     state = {
@@ -41,11 +48,22 @@ export default class AdminLogs extends Component {
         page: 1,
         totalCount: 0,
         openDeleteDialog: false,
-        selectedLogId: null
+        selectedLogId: null,
+        startDate: '',
+        endDate: ''
     }
 
-    getLogs(page, rowsPerPage) {
-        fetch(`Admin/get-admin-logs?page=${page}`, {
+    getLogs(page, startDate = '', endDate = '') {
+        let url = `Admin/get-admin-logs?page=${page}`;
+        
+        if (startDate) {
+            url += `&startDate=${startDate}`;
+        }
+        if (endDate) {
+            url += `&endDate=${endDate}`;
+        }
+
+        fetch(url, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${this.services.accessToken()}`,
@@ -72,7 +90,7 @@ export default class AdminLogs extends Component {
 
     handleChangePage(event, newPage) {
         this.setState({ page: newPage }, () => {
-            this.getLogs(newPage + 1, this.state.rowsPerPage);
+            this.getLogs(newPage, this.state.startDate, this.state.endDate);
         });
     }
 
@@ -80,9 +98,9 @@ export default class AdminLogs extends Component {
         const newRowsPerPage = parseInt(event.target.value, 10);
         this.setState({
             rowsPerPage: newRowsPerPage,
-            page: 0
+            page: 1
         }, () => {
-            this.getLogs(1, newRowsPerPage);
+            this.getLogs(1, this.state.startDate, this.state.endDate);
         });
     }
 
@@ -94,11 +112,26 @@ export default class AdminLogs extends Component {
     }
 
     handleDeleteConfirm() {
-        // Add your delete API call here
         const { selectedLogId } = this.state;
-        console.log('Deleting log:', selectedLogId);
         
-        // Close dialog
+        fetch(`Admin/delete-admin-log/${selectedLogId}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "DELETE",
+        })
+            .then((r) => r.json())
+            .then((response) => {
+                if (response.statusCode === 200) {
+                    // Refresh the logs after deletion
+                    this.getLogs(this.state.page, this.state.startDate, this.state.endDate);
+                }
+            })
+            .catch((error) => {
+                console.error('Error deleting log:', error);
+            });
+        
         this.setState({
             openDeleteDialog: false,
             selectedLogId: null
@@ -112,8 +145,31 @@ export default class AdminLogs extends Component {
         });
     }
 
+    handleStartDateChange(event) {
+        this.setState({ startDate: event.target.value });
+    }
+
+    handleEndDateChange(event) {
+        this.setState({ endDate: event.target.value });
+    }
+
+    handleFilterApply() {
+        console.log(this.state.startDate, this.state.endDate);
+       
+    }
+
+    handleFilterClear() {
+        this.setState({ 
+            startDate: '', 
+            endDate: '',
+            page: 1 
+        }, () => {
+            this.getLogs(1, '', '');
+        });
+    }
+
     componentDidMount() {
-        this.getLogs(1, this.state.rowsPerPage);
+        this.getLogs(1);
     }
 
     getActionTypeColor(actionType) {
@@ -129,7 +185,7 @@ export default class AdminLogs extends Component {
     }
 
     render() {
-        const { logs, page, totalCount, totalObjects, openDeleteDialog } = this.state;
+        const { logs, page, totalCount, totalObjects, openDeleteDialog, startDate, endDate } = this.state;
 
         return (
             <AdminContext.Consumer>
@@ -151,6 +207,59 @@ export default class AdminLogs extends Component {
                                 <Typography variant="h4" gutterBottom>
                                     Admin Activity Logs
                                 </Typography>
+
+                                {/* Date Filter Section */}
+                                <Paper sx={{ p: 2, mb: 3 }}>
+                                    <Grid container spacing={2} alignItems="center">
+                                        <Grid item xs={12} sm={4}>
+                                            <TextField
+                                                label="Start Date"
+                                                type="date"
+                                                value={startDate}
+                                                onChange={this.handleStartDateChange}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                fullWidth
+                                                size="small"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={4}>
+                                            <TextField
+                                                label="End Date"
+                                                type="date"
+                                                value={endDate}
+                                                onChange={this.handleEndDateChange}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                fullWidth
+                                                size="small"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={4}>
+                                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={this.handleFilterApply}
+                                                    startIcon={<FilterListIcon />}
+                                                    size="small"
+                                                >
+                                                    Apply Filter
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="secondary"
+                                                    onClick={this.handleFilterClear}
+                                                    size="small"
+                                                >
+                                                    Clear
+                                                </Button>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
 
                                 <TableContainer component={Paper} sx={{ mt: 3 }}>
                                     <Table>
@@ -206,10 +315,10 @@ export default class AdminLogs extends Component {
                                 </TableContainer>
                             </Box>
                             <Pagination
-                                count={this.state.totalPages}
+                                count={this.state.totalCount}
                                 page={this.state.page}
                                 color="primary"
-                                onChange={this.handleChange}
+                                onChange={this.handleChangePage}
                                 sx={dark === true ? darkPagination : {}}
                             />
 

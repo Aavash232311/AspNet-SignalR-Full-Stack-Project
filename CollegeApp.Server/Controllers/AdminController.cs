@@ -445,6 +445,28 @@ namespace CollegeApp.Server.Controllers
 
             return new JsonResult(Ok(pagination));
         }
+        [Route("admin-logs-filtering")]
+        [HttpGet]
+        public async Task<IActionResult> FilterAdminLogs(DateTime startDate, DateTime endDate, int page)
+        {
+            if (startDate > endDate)
+            {
+                return new JsonResult(BadRequest(new { error = "Start date must be earlier than end date" }));
+            }
+            var timeFrame =
+                _context.ActionLogs.Where(log => log.timeStampAt >= startDate && log.timeStampAt <= endDate);
+            if (timeFrame == null)
+            {
+                return new JsonResult(NotFound(new
+                {
+                    message = "Can't find those logs"
+                }));
+            }
+            // we still want to paginate that
+            var pagination = _helper.NormalPagination(10, page, timeFrame.AsQueryable());
+            return new JsonResult(Ok(pagination));
+        }
+
     }
 }
 
