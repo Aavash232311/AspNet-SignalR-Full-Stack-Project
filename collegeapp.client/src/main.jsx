@@ -18,6 +18,7 @@ import Thread from './Admin/Thread.jsx';
 import { AdminProvider } from './Admin/Admin.jsx';
 import ReportsAdmin from './Admin/Reports.jsx';
 import Notification from './components/Auth/Notification.jsx';
+import AdminLogs from './Admin/Logs.jsx';
 import "./api/interceptors.js";
 
 createRoot(document.getElementById('root')).render(
@@ -29,6 +30,13 @@ createRoot(document.getElementById('root')).render(
             <Route path="/" element={<App />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+
+            <Route path="/admin-logs" element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminLogs />
+              </ProtectedRoute>
+            }>
+            </Route>
 
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={[]}>

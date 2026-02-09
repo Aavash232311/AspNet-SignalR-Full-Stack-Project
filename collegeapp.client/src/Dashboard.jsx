@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import  { Component } from 'react';
 import "./static/auth/dashboard.css";
 import "./static/auth/dashboard_nav.css";
-import { NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 import Services from './utils/utils';
-import CustomPagination from './components/Auth/useable/Pagination';
 import { MdModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import AuthContext from './auth/auth';

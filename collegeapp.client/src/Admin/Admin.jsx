@@ -191,11 +191,16 @@ export class Admin extends Component {
                                                 </List>
                                             </Collapse>
 
+                                            <NavLink
+                                                tag={Link}
+                                                to={"/admin-logs"}
+                                            >
+                                                <ListItem>
+                                                    <ListItemIcon><History /></ListItemIcon>
+                                                    <ListItemText primary="Site Logs" />
+                                                </ListItem>
+                                            </NavLink>
 
-                                            <ListItem>
-                                                <ListItemIcon><History /></ListItemIcon>
-                                                <ListItemText primary="Site Logs" />
-                                            </ListItem>
 
                                             <ListItem>
                                                 <ListItemIcon><WebIcon /></ListItemIcon>

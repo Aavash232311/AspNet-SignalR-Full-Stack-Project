@@ -432,6 +432,19 @@ namespace CollegeApp.Server.Controllers
             await _context.SaveChangesAsync();
             return new JsonResult(Ok());
         }
+
+        [Route("get-admin-logs")]
+        [HttpGet]
+        public async Task<IActionResult> GetAdminLogs([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        {
+            var getLogs = await _context.ActionLogs.OrderByDescending(a => a.timeStampAt)
+                .ToListAsync();
+            if (getLogs == null) return new JsonResult(NotFound());
+
+            var pagination = _helper.NormalPagination(10, page, getLogs.AsQueryable());
+
+            return new JsonResult(Ok(pagination));
+        }
     }
 }
 
