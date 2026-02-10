@@ -447,7 +447,7 @@ namespace CollegeApp.Server.Controllers
         }
         [Route("admin-logs-filtering")]
         [HttpGet]
-        public async Task<IActionResult> FilterAdminLogs(DateTime startDate, DateTime endDate, int page)
+        public  IActionResult FilterAdminLogs(DateTime startDate, DateTime endDate, int page)
         {
             if (startDate > endDate)
             {

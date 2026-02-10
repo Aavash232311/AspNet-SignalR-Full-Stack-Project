@@ -124,7 +124,7 @@ export default class AdminLogs extends Component {
             .then((r) => r.json())
             .then((response) => {
                 if (response.statusCode === 200) {
-                    // Refresh the logs after deletion
+                    // refresh the logs after deletion
                     this.getLogs(this.state.page, this.state.startDate, this.state.endDate);
                 }
             })
@@ -154,8 +154,29 @@ export default class AdminLogs extends Component {
     }
 
     handleFilterApply() {
-        console.log(this.state.startDate, this.state.endDate);
-       
+        fetch(`Admin/admin-logs-filtering?page=1&startDate=${this.state.startDate}&endDate=${this.state.endDate}`, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.services.accessToken()}`,
+            },
+            method: "get",
+        })
+            .then((r) => r.json())
+            .then((response) => {
+                const { statusCode } = response;
+                if (statusCode === 200) {
+                    const { value } = response;
+                    this.setState({
+                        logs: value.data,
+                        totalCount: value.totalPages,
+                        totalObjects: value.totalObjects,
+                        page: 1
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching filtered logs:', error);
+            });
     }
 
     handleFilterClear() {
