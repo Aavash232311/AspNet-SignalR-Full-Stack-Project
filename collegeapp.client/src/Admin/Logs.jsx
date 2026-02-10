@@ -54,7 +54,7 @@ export default class AdminLogs extends Component {
     }
 
     getLogs(page, startDate = '', endDate = '') {
-        let url = `Admin/get-admin-logs?page=${page}`;
+        let url = `Admin/admin-logs-filtering?page=${page}`;
         
         if (startDate) {
             url += `&startDate=${startDate}`;
@@ -114,7 +114,7 @@ export default class AdminLogs extends Component {
     handleDeleteConfirm() {
         const { selectedLogId } = this.state;
         
-        fetch(`Admin/delete-admin-log/${selectedLogId}`, {
+        fetch(`Admin/delete-admin-log?id=${selectedLogId}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${this.services.accessToken()}`,

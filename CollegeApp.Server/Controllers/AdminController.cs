@@ -433,26 +433,40 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok());
         }
 
-        [Route("get-admin-logs")]
-        [HttpGet]
-        public async Task<IActionResult> GetAdminLogs([FromQuery, Range(1, int.MaxValue)] int page = 1)
-        {
-            var getLogs = await _context.ActionLogs.OrderByDescending(a => a.timeStampAt)
-                .ToListAsync();
-            if (getLogs == null) return new JsonResult(NotFound());
-
-            var pagination = _helper.NormalPagination(10, page, getLogs.AsQueryable());
-
-            return new JsonResult(Ok(pagination));
-        }
         [Route("admin-logs-filtering")]
         [HttpGet]
-        public  IActionResult FilterAdminLogs(DateTime startDate, DateTime endDate, int page)
+        public IActionResult FilterAdminLogs(DateTime? startDate, DateTime? endDate, [FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
             if (startDate > endDate)
             {
                 return new JsonResult(BadRequest(new { error = "Start date must be earlier than end date" }));
+            } // in case where neither of the date has values, we give them everything
+            int pageSize = 10;
+            if ((!(startDate.HasValue) && !(endDate.HasValue)))
+            {
+                // then we get all the logs, and then we paginate that,
+                var allLogs = _context.ActionLogs.OrderByDescending(log => log.timeStampAt);
+                var paginated = _helper.NormalPagination(pageSize, page, allLogs);
+
+                return new JsonResult(Ok(paginated));
             }
+            // we need to understand the edge case here,
+            if (!(startDate.HasValue) && endDate.HasValue)
+            {
+                // in this case if we don't have value of the start date but end date is defined.
+                // we would want to get all the date which is smaller than the end date. we sort by descending!
+                var logs = _context.ActionLogs.Where(log => log.timeStampAt <= endDate).OrderByDescending(log => log.timeStampAt);
+                return new JsonResult(Ok(_helper.NormalPagination(pageSize, page, logs)));
+            }
+            // In the case where, we have the start date but not the end date. 
+            if (!(endDate.HasValue) && startDate.HasValue)
+            {
+                // we want to get all the logs which is greater than the start date, and sort by descending
+                var logs = _context.ActionLogs.Where(log => log.timeStampAt >= startDate).OrderByDescending(log => log.timeStampAt);
+                return new JsonResult(Ok(_helper.NormalPagination(pageSize, page, logs)));
+            }
+
+            // in the case where both the date has value
             var timeFrame =
                 _context.ActionLogs.Where(log => log.timeStampAt >= startDate && log.timeStampAt <= endDate);
             if (timeFrame == null)
@@ -467,6 +481,17 @@ namespace CollegeApp.Server.Controllers
             return new JsonResult(Ok(pagination));
         }
 
+        [Route("delete-admin-log")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAdminLogs(Guid id)
+        {
+            var getItem = _context.ActionLogs.FirstOrDefault(log => log.id == id);
+            if (getItem == null) return new JsonResult(NotFound());
+
+            _context.ActionLogs.Remove(getItem);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
     }
 }
 
