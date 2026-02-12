@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../../static/auth/view.css";
-import Services, { stdPaingationSize } from "../../utils/utils";
+import Services from "../../utils/utils";
 import * as signalR from "@microsoft/signalr";
 import { FaChevronUp, FaRegComment, FaShare } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
@@ -64,6 +64,11 @@ export const setParentCommentValue = (rootNode, parentNode, value) => { // we ha
     }
   }
 };
+
+/*
+Here we need to limit on depth of reply, cause things can do really slow really fast,
+The problem is that the UI will slow down.
+*/
 
 class Comment extends Component {
   constructor(props) {
@@ -410,7 +415,7 @@ class CommentRenderCompoenent extends Component {
     const comment = data.get("comment");
 
     fetch(
-      `Confession/ReplyComment?comment=${comment}&confessionId=${this.url.get(
+      `Confession/ReplyComment?confessionId=${this.url.get(
         "topic"
       )}&parentId=${parentId}`,
       {
@@ -419,6 +424,9 @@ class CommentRenderCompoenent extends Component {
           Authorization: `Bearer ${this.services.accessToken()}`,
         },
         method: "post",
+        body: JSON.stringify({
+          comment
+        })
       }
     )
       .then((r) => r.json())
@@ -435,6 +443,7 @@ class CommentRenderCompoenent extends Component {
           alert(message);
         }
       }).catch((err) => {
+
         alert(err);
       });
   }

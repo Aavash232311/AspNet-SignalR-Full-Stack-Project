@@ -37,6 +37,13 @@ namespace CollegeApp.Server.Controllers
         public List<Comments> Replies { get; set; } = new List<Comments>(); // Because we have lazy loading on the client side
     }
 
+    public class DboComments
+    {
+        [Required]
+        [MaxLength(2000)]
+        public string comment { get; set; } = string.Empty;
+    }
+
     [Route("[controller]")]
     [ApiController]
     public class ConfessionController : ControllerBase
@@ -273,7 +280,7 @@ namespace CollegeApp.Server.Controllers
         [HttpPost]
         /* The way it's developed is you cannot reply to comment if they are deleted.
          * If the confession is deleted you can still reply to their comments. */
-        public async Task<IActionResult> ReplyComment(string comment, Guid parentId, Guid confessionId)
+        public async Task<IActionResult> ReplyComment(DboComments replyComment, Guid parentId, Guid confessionId)
         {
             var parentComment = _context.Comments.Include(r => r.Replies).FirstOrDefault(x => x.Id == parentId);
 
@@ -285,6 +292,14 @@ namespace CollegeApp.Server.Controllers
             if (userId == null) return new JsonResult(Unauthorized(new { message = "User not found" })); // even though use is always authorize to get to this point, i get annoyed by that underline
             var getConfession = _context.Confessions.FirstOrDefault(x => x.Id == confessionId); // this is the confession in which reply is being sent to
             if (getConfession == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
+
+
+            /* 
+            Here the problem is not with the backend, it can give the data on demand
+            but the UI can break so we can limit some things here.
+            We need a very robust scaling of that tree.
+            */
+
 
             // Now let's limit replying in thread to 6 operations
             if ((parentComment.depth + 1) > 5) // the new one will be the 6th comment so
@@ -306,7 +321,7 @@ namespace CollegeApp.Server.Controllers
 
             Comments newComment = new Comments() // creating a reply comment
             {
-                comments = comment,
+                comments = replyComment.comment,
                 UserId = userId,
                 Parent = parentComment, // referencing it with parent
                 ParentId = parentComment.Id, // setting the parentId to the parent comment's Id, even though cascade delete logic wont work here,
@@ -337,7 +352,7 @@ namespace CollegeApp.Server.Controllers
             Notification newPushNotification = new Notification()
             {
                 title = $"New Reply to your Comment by anonymous user",
-                message = comment,
+                message = (replyComment.comment.Length) > 200 ? replyComment.comment.Substring(0, 197) + ".." : replyComment.comment, // because the notification table in the SQL only takes in 200 as specified
                 type = "reply-comment",
                 CommentId = newComment.Id,
                 userId = parentComment.UserId // the owner of the parent comment
@@ -350,7 +365,7 @@ namespace CollegeApp.Server.Controllers
             Notification NotificationConfOnwer = new Notification()
             {
                 title = $"New Reply on Confession Comment by anonymous user",
-                message = comment,
+                message = (replyComment.comment.Length) > 200 ? replyComment.comment.Substring(0, 197) + ".." : replyComment.comment,
                 type = "reply-confession-owner",
                 CommentId = newComment.Id,
                 userId = getConfession.UserId // the owner of the confession
