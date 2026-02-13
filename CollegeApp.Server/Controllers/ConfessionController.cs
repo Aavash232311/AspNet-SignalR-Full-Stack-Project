@@ -300,8 +300,41 @@ namespace CollegeApp.Server.Controllers
             We need a very robust scaling of that tree.
             */
 
+            Dictionary<int, int> HardLimitThreadPerPage = helper.HashMapFixedSize;
+            // Horizontal scaling let's check the order of depth in this thread
+            // based on what depth the parent is we will allow, to save things in the database
 
-            // Now let's limit replying in thread to 6 operations
+            int currentDepth = parentComment.depth;
+            if (HardLimitThreadPerPage.ContainsKey(currentDepth))
+            {
+                int maxThreadLimit = HardLimitThreadPerPage[currentDepth];
+
+                // let's count the children comment now.
+                var childrenCommentCount = _context.Comments.Count(x => x.ParentId == parentComment.Id);
+                if (childrenCommentCount >= maxThreadLimit)
+                {
+                    return new JsonResult(BadRequest(
+                        new
+                        {
+                            message = "Reply thread limit exceeded. Please start a new conversation!."
+                        }
+                   ));
+                }
+                // if not max limit exceeded then we need to have that to the database
+                // send push notification whatever.. goes below.
+            }
+            
+            /* 
+            Imagine you deployed this from your dorm, 
+            next days blows up the internet, 
+            one post gone viral and the app feels locked?
+            so continue this thread in next page, efficiently
+            without writing WebSocket and fetch logic again! DRY
+             
+             */
+
+
+            // Now let's limit replying in thread to 6 operations, vertical scaling
             if ((parentComment.depth + 1) > 5) // the new one will be the 6th comment so
             {
                 return new JsonResult(BadRequest(
@@ -312,6 +345,11 @@ namespace CollegeApp.Server.Controllers
                ));
             }
             
+            /*
+             And then we need to look at horizontal scaling, let's define things by some hard numbers,
+            As per our calculations let's define it, let's make sure the backend is done
+            and then we will design a new table to keep reference and re-use the logic in client side.
+             */
 
             // Since comment is in different table
             var previousUserComment = _context.Comments.FirstOrDefault(x => x.UserId == userId && x.ConfessionId == confessionId);

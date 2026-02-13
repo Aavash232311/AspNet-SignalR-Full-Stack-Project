@@ -16,8 +16,22 @@ namespace CollegeApp.Server.Service
             ProfileColor = profileColor;
         }
     }
+
     public class Helper
     {
+        /* As for the calculation we will set a fix number here,
+         * for the horizontal scaling limitation of our threads
+         * depth: number of reply threads
+         */
+        public Dictionary<int, int> HashMapFixedSize = new Dictionary<int, int>()
+         {
+            { 1, 7 }, // the first thread can have 7 reply
+            { 2, 2 },
+            { 3, 2 },
+            { 4, 1 },
+            { 5, 0 }
+         };
+
         Random random = new Random();
         public string RandomRGB()
         {
