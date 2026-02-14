@@ -198,7 +198,7 @@ class Comment extends Component {
     const formData = new FormData(ev.target);
     const comment = formData.get("comment");
     fetch(
-      `Confession/AddComment?comments=${comment}&confessionId=${this.url.get(
+      `Confession/AddComment?confessionId=${this.url.get(
         "topic"
       )}`,
       {
@@ -207,6 +207,9 @@ class Comment extends Component {
           Authorization: `Bearer ${this.services.accessToken()}`,
         },
         method: "post",
+        body: JSON.stringify({
+          comment
+        })
       }
     )
       .then((r) => r.json())

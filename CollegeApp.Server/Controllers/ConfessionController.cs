@@ -150,7 +150,7 @@ namespace CollegeApp.Server.Controllers
         [Route("AddComment")]
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddComments(string comments, Guid confessionId)
+        public async Task<IActionResult> AddComments(DboComments commentObj, Guid confessionId)
         {
             var getConfessions = _context.Confessions.FirstOrDefault(x => x.Id == confessionId);
             if (getConfessions == null) return new JsonResult(NotFound(new { message = "Confession not found" }));
@@ -183,7 +183,7 @@ namespace CollegeApp.Server.Controllers
 
             Comments newComment = new Comments()
             {
-                comments = comments,
+                comments = (commentObj.comment.Length) > 200 ? commentObj.comment.Substring(0, 197) + ".." : commentObj.comment,
                 UserId = userId,
                 ConfessionId = getConfessions.Id,
                 Confessions = getConfessions,
@@ -213,7 +213,7 @@ namespace CollegeApp.Server.Controllers
             Notification newPushNotification = new Notification()
             {
                 title = $"New Comment on your Confession by anonymous user", // userId is the user who commented
-                message = comments,
+                message = (commentObj.comment.Length) > 200 ? commentObj.comment.Substring(0, 197) + ".." : commentObj.comment,
                 type = "New comment",
                 CommentId = newComment.Id,
                 userId = getConfessions.UserId // the owner of the confession
