@@ -492,6 +492,18 @@ namespace CollegeApp.Server.Controllers
             await _context.SaveChangesAsync();
             return new JsonResult(Ok());
         }
+
+        // this is for admin to see all the push notifications
+        [Route("push-notification")]
+        [HttpGet]
+        public  IActionResult AllPushNotification([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        {
+            var notifications = _context.Notifications;
+            int pageSize = 10;
+
+            var paginateNotification = _helper.NormalPagination(pageSize, page, notifications);
+            return new JsonResult(Ok(paginateNotification));
+        }
     }
 }
 
