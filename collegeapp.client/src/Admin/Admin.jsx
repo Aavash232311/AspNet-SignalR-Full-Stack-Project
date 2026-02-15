@@ -171,6 +171,17 @@ export class Admin extends Component {
                                                             <ListItemText primary="Threads" />
                                                         </ListItem>
                                                     </NavLink>
+
+
+                                                    <NavLink
+                                                        tag={Link}
+                                                        to={"/push-notification"}
+                                                    >
+                                                        <ListItem button="true" sx={{ pl: 4 }}>
+                                                            <ListItemIcon><TryIcon /></ListItemIcon>
+                                                            <ListItemText primary="All push Notification" />
+                                                        </ListItem>
+                                                    </NavLink>
                                                 </List>
                                             </Collapse>
 

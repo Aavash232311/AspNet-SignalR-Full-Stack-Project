@@ -192,7 +192,7 @@ namespace CollegeApp.Server.Controllers
 
                 // we want to send it to individual user!
                 _context.Notifications.Add(notification); // save this, ugh I feel something is off
-               
+
                 await _pushNotification.Clients.User(confession.UserId).SendAsync("ReceiveNotification", notification);
 
 
@@ -227,7 +227,7 @@ namespace CollegeApp.Server.Controllers
                 x.Comments == getRecords.Comments &&
                 x.parentConfessionId == getRecords.parentConfessionId)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(r => r.isDeleted, status)  
+                .SetProperty(r => r.isDeleted, status)
             );
             await _context.SaveChangesAsync();
             // The list of record we get from this thing will be same for all the records associated with whatever
@@ -257,7 +257,7 @@ namespace CollegeApp.Server.Controllers
 
             var similarReports = _context.Reports.Where(r =>
                 (r.Confession == report.Confession) &&
-                (r.Comments == report.Comments) && 
+                (r.Comments == report.Comments) &&
                 r.reportedAt >= DateTime.UtcNow.AddYears(-1)
             ).Select(item => new ReportData()
             {
@@ -370,14 +370,14 @@ namespace CollegeApp.Server.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteConfAdmin(Guid confId)
         {
-            var getConfession =  await _context.Confessions.FirstOrDefaultAsync(c => c.Id == confId);
+            var getConfession = await _context.Confessions.FirstOrDefaultAsync(c => c.Id == confId);
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return new JsonResult(Unauthorized());
             if (getConfession == null)
             {
                 return new JsonResult(NotFound(new { error = "Confession not found", confId }));
             }
-           
+
             _context.ActionLogs.Add(new ActionLog
             {
                 actionType = "Delete Confession",
@@ -496,13 +496,23 @@ namespace CollegeApp.Server.Controllers
         // this is for admin to see all the push notifications
         [Route("push-notification")]
         [HttpGet]
-        public  IActionResult AllPushNotification([FromQuery, Range(1, int.MaxValue)] int page = 1)
+        public IActionResult AllPushNotification([FromQuery, Range(1, int.MaxValue)] int page = 1)
         {
             var notifications = _context.Notifications;
             int pageSize = 10;
 
             var paginateNotification = _helper.NormalPagination(pageSize, page, notifications);
             return new JsonResult(Ok(paginateNotification));
+        }
+
+        [Route("clear-all-notification")]
+        [HttpDelete]
+        public async Task<IActionResult> ClearAllNotification()
+        {
+            var allNotifications = _context.Notifications;
+            _context.Notifications.RemoveRange(allNotifications);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
         }
     }
 }

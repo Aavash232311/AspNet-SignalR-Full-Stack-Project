@@ -19,6 +19,7 @@ import { AdminProvider } from './Admin/Admin.jsx';
 import ReportsAdmin from './Admin/Reports.jsx';
 import Notification from './components/Auth/Notification.jsx';
 import AdminLogs from './Admin/Logs.jsx';
+import PushNotification from './Admin/PushNotification.jsx';
 import "./api/interceptors.js";
 
 createRoot(document.getElementById('root')).render(
@@ -72,6 +73,13 @@ createRoot(document.getElementById('root')).render(
             <Route path='/notification' element={
               <ProtectedRoute allowedRoles={[]}>
                 <Notification />
+              </ProtectedRoute>
+            }>
+            </Route>
+
+            <Route path='/push-notification' element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <PushNotification />
               </ProtectedRoute>
             }>
             </Route>
