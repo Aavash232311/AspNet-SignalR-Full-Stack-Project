@@ -514,6 +514,17 @@ namespace CollegeApp.Server.Controllers
             await _context.SaveChangesAsync();
             return new JsonResult(Ok());
         }
+
+        [Route("clear-notification")]
+        [HttpDelete]
+        public async Task<IActionResult> ClearNotification(Guid notificationId)
+        {
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.id == notificationId);
+            if (notification == null) return new JsonResult(NotFound(new { error = "Notification not found", notificationId }));
+            _context.Notifications.Remove(notification);
+            await _context.SaveChangesAsync();
+            return new JsonResult(Ok());
+        }
     }
 }
 

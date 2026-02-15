@@ -93,8 +93,8 @@ export default class PushNotification extends Component {
 
     handleDeleteConfirm() {
         const { selectedNotificationId } = this.state;
-        
-        fetch(`Admin/delete-push-notification?id=${selectedNotificationId}`, {
+
+        fetch(`Admin/clear-notification?notificationId=${selectedNotificationId}`, {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${this.services.accessToken()}`,

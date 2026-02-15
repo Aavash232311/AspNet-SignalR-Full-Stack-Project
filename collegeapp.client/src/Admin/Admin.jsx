@@ -125,7 +125,6 @@ export class Admin extends Component {
                                     >
                                         <Toolbar />
                                         <List>
-                                            {/* Dropdown Trigger */}
                                             <ListItem button="true" onClick={this.toggleConfessions}>
                                                 <ListItemIcon>
                                                     <ListAlt />
@@ -133,8 +132,6 @@ export class Admin extends Component {
                                                 <ListItemText primary="See Confessions" />
                                                 {openConfessions ? <ExpandLess /> : <ExpandMore />}
                                             </ListItem>
-
-                                            {/* Dropdown Content */}
                                             <Collapse in={openConfessions} timeout="auto" unmountOnExit>
                                                 <List component="div" disablePadding>
                                                     <ListItem button="true" sx={{ pl: 4 }}>
@@ -142,7 +139,6 @@ export class Admin extends Component {
                                                         <ListItemText primary="Analytics" />
                                                     </ListItem>
 
-                                                    {/* Admin to see reports! */}
                                                     <NavLink
                                                         tag={Link}
                                                         to={"/admin-reports"}
