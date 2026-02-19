@@ -581,6 +581,10 @@ and make sure it works both from web socket and logcal data, rendering happens s
 make it clear and consise in future if you were to debug it you will have problem yourself. 
 And, who cares c# is in the backend with a database */
 
+
+// Here is your deep deep deep thread which has hard limit on the server.
+// We don't, at least I don't want to touch this, until and unless I absolutely have to. 
+// Too complicated!
 class CommentRecurComponent extends Component {
   // this is recursive component, which is used to render comment and add comment options, this might be little confusing to make
   // because our mind might go to recursive hell.
