@@ -323,7 +323,7 @@ namespace CollegeApp.Server.Controllers
                 // if not max limit exceeded then we need to have that to the database
                 // send push notification whatever.. goes below.
             }
-            
+
             /* 
             Imagine you deployed this from your dorm, 
             next days blows up the internet, 
@@ -332,6 +332,32 @@ namespace CollegeApp.Server.Controllers
             without writing WebSocket and fetch logic again! DRY
              
              */
+            // Here is the hard limiter
+            /*
+             What might I, as a jobless engineer, do?
+            I would reuse this business logic.
+            If any normal person touches the client, it’s going to make them sweat.
+            And as for me, unless I absolutely have to, I won’t touch it.
+            It’s a 9/10 in difficulty absolutely not suitable for an intern!
+
+            The algorithm goes like, 
+            # we don't want data redundancy
+            # It's a poor database design. Keep that in mind!
+
+            In case we are in the hard limit part,
+            -> What we can do is, create a new thread, that is replied to the parent
+            and re-direct people to new page.
+
+            (You don't want people poking the server and we creating a table)
+
+            -> There is one foreign key reference for the parent 
+
+            Okay so the table will be created! good! job! intern! failure me!
+
+            Here I will continue tomorrow!....
+
+             */
+
 
 
             // Now let's limit replying in thread to 6 operations, vertical scaling
