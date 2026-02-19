@@ -13,8 +13,9 @@ namespace CollegeApp.Server.Models
         public int likes { get; set; } = 0;
         public DateTime Added { get; set; } = DateTime.UtcNow;
         public DateTime LastModified { get; set; } = DateTime.UtcNow;
+        [MaxLength(100)] // I will modify things later here, even if things come from third party server always set the limiter
         public string UserId { get; set; } = string.Empty; // UserId of the user who made the comment from auth0
-        public Guid? ConfessionId { get; set; } // required foregin key property according to microsoft
+        public Guid? ConfessionId { get; set; } // required foreign key property according to microsoft
         [JsonIgnore] // why well because,
         /* It's like pointing each other for mistake, so it throws error Just for the database to apply cascade behaviour we do that.
          * for navigation from parent confession we figure it out */
