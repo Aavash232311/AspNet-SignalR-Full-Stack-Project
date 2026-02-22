@@ -113,7 +113,6 @@ class Comment extends Component {
           }, () => {
             /* Even a simple problem here,
             will require me a whiteboard and cup of coffee. */
-
             this.setState({
               confessions: data,
               totalObjects,

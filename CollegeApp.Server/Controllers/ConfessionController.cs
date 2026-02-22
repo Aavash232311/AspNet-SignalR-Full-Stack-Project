@@ -123,7 +123,23 @@ namespace CollegeApp.Server.Controllers
         [HttpGet]
         public IActionResult GetCurrentConfession(Guid id)
         {
-            var confession = _context.Confessions.FirstOrDefault(x => x.Id == id);
+            Confession? confession = _context.Confessions
+                 .Include(x => x.ExtendedThreadOfConfession)
+                .FirstOrDefault(x => x.Id == id);
+            /* 
+             To reduce duplicates in the database I have referenced to the table, self-referencing
+            
+            */
+
+            if (confession?.ExtendedThreadOfConfession != null)
+            {
+                var extended = confession.ExtendedThreadOfConfession;
+                confession.Topic = extended.Topic;
+                confession.Description = extended.Description;
+                confession.Added = extended.Added;
+                confession.Comments = extended.Comments;
+            }
+
             if (confession == null) return new JsonResult(NotFound());
             return new JsonResult(Ok(helper.hideDeletedConfession(confession)));
         }
@@ -305,6 +321,7 @@ namespace CollegeApp.Server.Controllers
             // based on what depth the parent is we will allow, to save things in the database
 
             int currentDepth = parentComment.depth;
+            bool HScaleExceeded = false;
             if (HardLimitThreadPerPage.ContainsKey(currentDepth))
             {
                 int maxThreadLimit = HardLimitThreadPerPage[currentDepth];
@@ -313,12 +330,15 @@ namespace CollegeApp.Server.Controllers
                 var childrenCommentCount = _context.Comments.Count(x => x.ParentId == parentComment.Id);
                 if (childrenCommentCount >= maxThreadLimit)
                 {
-                    return new JsonResult(BadRequest(
-                        new
-                        {
-                            message = "Reply thread limit exceeded. Please start a new conversation!."
-                        }
-                   ));
+                    /* 
+                     What I am doing now is, instead of saying "Hey reply thread exceeded" what I will do is
+                    create a new confession with reference to the original confession and then do the whole thing.
+
+                    Duplication are better than wrong abstraction in our case now.
+                    Do that and let the logic flow like a river. ( can't do that here turns out things are little complex)
+                    Don't think about the top order thread cause it won't ever exceed here.
+                     */
+                    HScaleExceeded = true;
                 }
                 // if not max limit exceeded then we need to have that to the database
                 // send push notification whatever.. goes below.
@@ -337,40 +357,21 @@ namespace CollegeApp.Server.Controllers
              What might I, as a jobless engineer, do?
             I would reuse this business logic.
             If any normal person touches the client, it’s going to make them sweat.
-            And as for me, unless I absolutely have to, I won’t touch it.
-            It’s a 9/10 in difficulty absolutely not suitable for an intern!
 
-            The algorithm goes like, 
-            # we don't want data redundancy
-            # It's a poor database design. Keep that in mind!
-
-            In case we are in the hard limit part,
-            -> What we can do is, create a new thread, that is replied to the parent
-            and re-direct people to new page.
-
-            (You don't want people poking the server and we creating a table)
-
-            -> There is one foreign key reference for the parent 
-
-            Okay so the table will be created! good! job! intern! failure me!
-
-            Here I will continue tomorrow!....
+            It's okay to have a duplicate rather than the wrong abstraction so,
+            What I will do is, create a way to reference original table and create a new confession.
 
              */
 
-
+            bool DScaleExceeded = false;
 
             // Now let's limit replying in thread to 6 operations, vertical scaling
             if ((parentComment.depth + 1) > 5) // the new one will be the 6th comment so
             {
-                return new JsonResult(BadRequest(
-                    new
-                    {
-                        message = "Reply depth limit exceeded. Please start a new conversation!."
-                    }
-               ));
+                DScaleExceeded = true;
             }
-            
+
+            Comments newComment = new Comments();
             /*
              And then we need to look at horizontal scaling, let's define things by some hard numbers,
             As per our calculations let's define it, let's make sure the backend is done
@@ -383,18 +384,45 @@ namespace CollegeApp.Server.Controllers
             NameAndProfileColor nameAndProfile = helper.CommonNameAndProfile(previousUserComment);
 
 
-            Comments newComment = new Comments() // creating a reply comment
+            if (DScaleExceeded || HScaleExceeded)
             {
-                comments = replyComment.comment,
-                UserId = userId,
-                Parent = parentComment, // referencing it with parent
-                ParentId = parentComment.Id, // setting the parentId to the parent comment's Id, even though cascade delete logic wont work here,
-                ConfessionId = parentComment.ConfessionId, // setting the confessionId to the parent comment's confessionId
-                Confessions = getConfession, // setting the confession to the current confession,
+                // case where the thread limit on x, and y both exceeded, 
+                // user has a finite monitor, and we have a finite computation 
+                // reference that parent confession and then we can threat is as a separate entity
+                Confession newConfession = new Confession() // this is thread as a separate entity 
+                {
+                    ExtendedThreadOfConfession = getConfession, // I referenced it didn't copied that, if doubt go see SQL table, I we might have lot's of user driven data
+                    referenceId = getConfession.Id // to save memory we just reference it.
+                }; // that's it we will create an interface to send data in proper order if we have extended component 
+
+                // Few simple steps:- Let's not discuss the trade-off of system design here (let's make it clean)
+                // Firstly, the table is referenced, so what we can do is copy that comment
+
+                Comments copiedComment = parentComment; // this need to stick to new confession as a top level comment
+                copiedComment.Confessions = newConfession; 
+                copiedComment.ConfessionId = newConfession.Id; // we tread this as a separate entity 
+                copiedComment.ParentId = null; // top-order for the new one
+                copiedComment.depth = 1; // again making sure it's the top order
+                copiedComment.Id = new Guid(); // pk should be unique
+
+                _context.Confessions.Add(newConfession);
+                _context.Comments.Add(copiedComment);
+
+                await _context.SaveChangesAsync();
+                parentComment = copiedComment; // that thing is going to be the parent comment now
+            }
+
+
+            newComment.comments = replyComment.comment;
+            newComment.UserId = userId;
+            newComment.Parent = parentComment; // referencing it with parent, below if x or y exceeded then we need to set parent as null cause the very leaf node will be the parent
+            newComment.ParentId =  parentComment.Id; // setting the parentId to the parent comment's Id, even though cascade delete logic wont work here,
+            newComment.ConfessionId = parentComment.ConfessionId; // setting the confessionId to the parent comment's confessionId
+            newComment.Confessions = getConfession; // setting the confession to the current confession,
                 // a clever way to use cascade in this sort of like hierarchical structure is to pass in parent reference in the every child comment
-                profileColor = nameAndProfile.ProfileColor, // setting the profile color to a random color,
-                AnonymousName = nameAndProfile.CommonName // setting the anonymous name to a random guid
-            };
+            newComment.profileColor = nameAndProfile.ProfileColor; // setting the profile color to a random color,
+            newComment.AnonymousName = nameAndProfile.CommonName; // setting the anonymous name to a random guid
+            
 
             /* 
                  we want to restrict the number of reply-depth due to performance reason
@@ -460,7 +488,7 @@ namespace CollegeApp.Server.Controllers
 
             /* Now even if someone replies to the comment, send a message to associate user
              * that someone has replied to their message, whoever the owner might be. */
-            return new JsonResult(Ok());
+            return new JsonResult(Ok("Success"));
         }
 
         [Route("getParticularComment")]

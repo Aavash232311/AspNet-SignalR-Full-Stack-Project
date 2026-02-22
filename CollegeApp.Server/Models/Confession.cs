@@ -20,7 +20,7 @@ namespace CollegeApp.Server.Models
         public ICollection<Comments> Comments { get; set; } = new List<Comments>(); // one confession can have many comments, so we can use list here
         /* Rest of the related model like, likes and comments we can keep in different database model */
         public bool deleted { get; set; } = false;
-        public Guid? referenceId { get; set; }
+        public Guid? referenceId { get; set; } // this is the navigational property
         /* This for extending the confession so that the user can continue in next page.
          We will create a new confession referencing the previous confession,
         Okay duplicate is better than the wrong abstraction, but 
@@ -29,6 +29,7 @@ namespace CollegeApp.Server.Models
         create an interface and make it work!.
         Set hard limit at the end
         */
+        [JsonIgnore] // don't need to throw that
         public Confession? ExtendedThreadOfConfession { get; set; }
     }
 }

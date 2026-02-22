@@ -157,7 +157,7 @@ namespace CollegeApp.Server.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteComment(string type, Guid id, Guid recordId, bool status)
         {
-            /* It's not a casade delete or something, from which if one parent is deleted
+            /* It's not a cascade delete or something, from which if one parent is deleted
              * all the other will be deleted. We just want to hide the comment */
 
             // we need to keep the record in the record model itself,
